@@ -1,0 +1,25 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'gateway'
+    static_configs:
+      - targets: ['gateway:3000']
+
+  - job_name: 'orchestrator'
+    static_configs:
+      - targets: ['orchestrator:8000']
+
+  - job_name: 'vision-service'
+    static_configs:
+      - targets: ['vision-service:8001']
+
+  - job_name: 'rag-service'
+    static_configs:
+      - targets: ['rag-service:8002']
+
+  - job_name: 'asr-tts-service'
+    static_configs:
+      - targets: ['asr-tts-service:8003']
+

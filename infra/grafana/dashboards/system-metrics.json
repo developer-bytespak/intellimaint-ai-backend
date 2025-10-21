@@ -1,0 +1,20 @@
+{
+  "dashboard": {
+    "title": "IntelliMaint System Metrics",
+    "panels": [
+      {
+        "title": "CPU Usage",
+        "type": "graph"
+      },
+      {
+        "title": "Memory Usage",
+        "type": "graph"
+      },
+      {
+        "title": "Request Rate",
+        "type": "graph"
+      }
+    ]
+  }
+}
+

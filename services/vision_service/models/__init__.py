@@ -1,0 +1,2 @@
+"""Vision model configurations"""
+
