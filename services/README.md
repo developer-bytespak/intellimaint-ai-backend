@@ -1,55 +1,99 @@
-# IntelliMaint AI Services (FastAPI)
+# IntelliMaint AI Service
 
-Microservices for AI-powered functionality.
+Combined FastAPI service for all AI functionality including vision, RAG, ASR/TTS, and orchestration.
 
-## Services
+## Structure
 
-### Orchestrator (Port 8000)
-Main AI flow controller that coordinates ASR → Vision → RAG → LLM pipeline.
+```
+services/
+├── app/
+│   ├── main.py              # Main FastAPI application
+│   ├── routes/              # API route handlers
+│   │   ├── orchestrator.py
+│   │   ├── vision.py
+│   │   ├── rag.py
+│   │   └── asr_tts.py
+│   ├── services/            # Business logic
+│   │   ├── orchestrator_service.py
+│   │   ├── vision_service.py
+│   │   ├── rag_service.py
+│   │   ├── asr_tts_service.py
+│   │   └── safety.py
+│   └── shared/              # Shared utilities
+│       ├── config.py
+│       ├── constants.py
+│       ├── logger.py
+│       └── schemas/
+├── Dockerfile
+├── requirements.txt
+└── README.md
+```
 
-### Vision Service (Port 8001)
-Computer vision capabilities:
-- Object detection (YOLOv8, SAM)
-- OCR (PaddleOCR/Tesseract)
-- Image explanation (BLIP-2, LLaVA)
+## API Endpoints
 
-### RAG Service (Port 8002)
-Retrieval-Augmented Generation:
-- Document embeddings
-- Semantic search
-- Hybrid search with reranking
+All endpoints run on port 8000:
 
-### ASR/TTS Service (Port 8003)
-Speech processing:
-- Speech-to-text (Whisper)
-- Text-to-speech synthesis
+### Orchestrator
+- `POST /api/v1/orchestrate` - Main orchestration endpoint
+- `GET /api/v1/orchestrate/status/{job_id}` - Get job status
+
+### Vision Service
+- `POST /api/v1/vision/detect` - Detect objects in image
+- `POST /api/v1/vision/ocr` - Extract text from image
+- `POST /api/v1/vision/explain` - Generate image explanation
+
+### RAG Service
+- `POST /api/v1/rag/search` - Search for relevant documents
+- `POST /api/v1/rag/embed` - Generate embeddings for texts
+
+### ASR/TTS Service
+- `POST /api/v1/asr/transcribe` - Transcribe audio file
+- `POST /api/v1/asr/synthesize` - Convert text to speech
+
+### Health Check
+- `GET /` - Root endpoint
+- `GET /health` - Health check
 
 ## Getting Started
 
 ### Install Dependencies
-Each service has its own `requirements.txt`:
+
 ```bash
-cd orchestrator
+cd services
 pip install -r requirements.txt
 ```
 
 ### Run Locally
+
 ```bash
-# From service directory
-uvicorn app:app --reload --port 8000
+uvicorn app.main:app --reload --port 8000
 ```
 
 ### Run with Docker
+
 ```bash
-# From infra directory
-docker-compose up
+# Build image
+docker build -t ai-service ./services
+
+# Run container
+docker run -p 8000:8000 ai-service
 ```
 
-## Shared Components
+## Environment Variables
 
-The `shared/` directory contains:
-- Common schemas (Pydantic models)
-- Constants and configurations
-- Logging utilities
-- Shared helper functions
+```env
+ENVIRONMENT=development
+LOG_LEVEL=INFO
+DATABASE_URL=postgresql://...
+REDIS_URL=redis://...
+```
+
+## Dependencies
+
+- FastAPI - Web framework
+- Uvicorn - ASGI server
+- httpx - HTTP client for API calls
+- Pydantic - Data validation
+- python-multipart - File uploads
+- Pillow - Image handling
 

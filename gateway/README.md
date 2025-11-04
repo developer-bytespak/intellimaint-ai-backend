@@ -44,12 +44,34 @@ npm run test:e2e
 
 ## Environment Variables
 
-Create a `.env` file with:
+Create a `.env` file in the `gateway/` directory with the following variables:
+
+### Required Variables
+```env
+# Application
+PORT=3000
+NODE_ENV=development
+API_PREFIX=/api/v1
+
+# Database (required for Prisma)
+DATABASE_URL=postgresql://user:password@localhost:5432/intellimaint?schema=public
+
+# JWT Authentication (required)
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 ```
-DATABASE_URL=postgresql://user:password@localhost:5432/intellimaint
-JWT_SECRET=your-secret-key
-AWS_ACCESS_KEY_ID=your-key
-AWS_SECRET_ACCESS_KEY=your-secret
-STRIPE_SECRET_KEY=your-stripe-key
+
+### Optional Variables
+```env
+# AWS Configuration (for S3, etc.)
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_REGION=us-east-1
+AWS_S3_BUCKET=
+
+# Stripe Configuration (for billing)
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
 ```
+
+**Note:** The `JWT_SECRET` environment variable is **required** for the application to start. Without it, you'll get an error: `JwtStrategy requires a secret or key`.
 
