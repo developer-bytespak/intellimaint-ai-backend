@@ -21,12 +21,13 @@ See [architecture.md](./architecture.md) for detailed system design.
 │   ├── src/                    # Source code (modules, config, monitoring)
 │   └── test/                   # Unit & e2e tests
 │
-├── services/                   # FastAPI Microservices
-│   ├── orchestrator/           # AI flow orchestration
-│   ├── vision_service/         # Computer vision (YOLO, OCR, BLIP)
-│   ├── rag_service/            # Document retrieval & embeddings
-│   ├── asr_tts_service/        # Speech-to-text & text-to-speech
-│   └── shared/                 # Shared schemas & utilities
+├── services/                   # Combined FastAPI AI Service
+│   ├── app/                    # Main application
+│   │   ├── routes/             # API routes (orchestrator, vision, rag, asr)
+│   │   ├── services/           # Business logic
+│   │   └── shared/             # Shared utilities
+│   ├── Dockerfile              # Container configuration
+│   └── requirements.txt        # Python dependencies
 │
 ├── infra/                      # Infrastructure & DevOps
 │   ├── docker-compose.yml      # Local development
@@ -74,25 +75,18 @@ See [architecture.md](./architecture.md) for detailed system design.
 
 3. **Start AI Services**
    ```bash
-   # Terminal 1 - Orchestrator
-   cd services/orchestrator
+   cd services
    pip install -r requirements.txt
-   uvicorn app:app --reload --port 8000
-
-   # Terminal 2 - Vision Service
-   cd services/vision_service
-   pip install -r requirements.txt
-   uvicorn app:app --reload --port 8001
-
-   # Similar for other services...
+   uvicorn app.main:app --reload --port 8000
    ```
 
 4. **Access Services**
    - Gateway API: http://localhost:3000
-   - Orchestrator: http://localhost:8000
-   - Vision Service: http://localhost:8001
-   - RAG Service: http://localhost:8002
-   - ASR/TTS Service: http://localhost:8003
+   - AI Service: http://localhost:8000
+     - Orchestrator: `/api/v1/orchestrate`
+     - Vision: `/api/v1/vision`
+     - RAG: `/api/v1/rag`
+     - ASR/TTS: `/api/v1/asr`
 
 ### Using Docker Compose (All Services)
 
@@ -115,6 +109,20 @@ npm run test:e2e        # E2E tests
 pytest tests/services/          # Service integration tests
 pytest tests/orchestrator/      # Full pipeline tests
 ```
+
+## Container Structure
+
+The backend is designed for separate Docker containers:
+
+- **Gateway Container** (`gateway/`)
+  - NestJS application
+  - Port: 3000
+  - Self-contained with Prisma, all configs, and dependencies
+
+- **AI Service Container** (`services/`)
+  - Combined FastAPI application
+  - Port: 8000
+  - All AI services (orchestrator, vision, RAG, ASR/TTS) in one container
 
 ## Deployment
 

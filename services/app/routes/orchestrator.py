@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from .pipeline import orchestrate_request
+from ..services.orchestrator_service import orchestrate_request
 
 router = APIRouter()
 
