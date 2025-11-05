@@ -52,7 +52,7 @@ See [architecture.md](./architecture.md) for detailed system design.
 ### Prerequisites
 
 - Node.js 20+
-- Python 3.11+
+- Python 3.11, 3.12, or 3.13 (Python 3.13 is supported)
 - Docker & Docker Compose
 - PostgreSQL 15
 - AWS CLI (for deployment)
@@ -76,8 +76,11 @@ See [architecture.md](./architecture.md) for detailed system design.
 3. **Start AI Services**
    ```bash
    cd services
+   python -m venv venv
+   # Windows: venv\Scripts\activate
+   # macOS/Linux: source venv/bin/activate
    pip install -r requirements.txt
-   uvicorn app.main:app --reload --port 8000
+   python run.py
    ```
 
 4. **Access Services**
