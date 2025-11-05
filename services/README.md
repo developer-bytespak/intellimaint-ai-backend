@@ -26,6 +26,7 @@ services/
 │       └── schemas/
 ├── Dockerfile
 ├── requirements.txt
+├── run.py
 └── README.md
 ```
 
@@ -58,13 +59,32 @@ All endpoints run on port 8000:
 
 ### Install Dependencies
 
+**Important:** This project requires Python 3.11, 3.12, or 3.13.
+
 ```bash
 cd services
+
+# Create and activate virtual environment (recommended)
+python -m venv venv
+
+# Windows
+venv\Scripts\activate
+
+# macOS/Linux
+source venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
 ### Run Locally
 
+**Option 1: Using run.py (simplest)**
+```bash
+python run.py
+```
+
+**Option 2: Using uvicorn directly**
 ```bash
 uvicorn app.main:app --reload --port 8000
 ```
