@@ -9,7 +9,6 @@ import { SettingsModule } from './modules/settings/settings.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { HealthModule } from './modules/health/health.module';
-import { DeepgramModule } from './modules/deepgram/deepgram.module';
 
 @Module({
   imports: [
@@ -22,8 +21,7 @@ import { DeepgramModule } from './modules/deepgram/deepgram.module';
     SettingsModule,
     AuditModule,
     AdminModule,
-    HealthModule,
-    DeepgramModule
+    HealthModule
   ],
 })
 export class AppModule {}
