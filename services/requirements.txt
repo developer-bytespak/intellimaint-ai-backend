@@ -20,6 +20,5 @@ pytest-asyncio>=0.24.0
 # Using v5.x API (code has been updated to match)
 deepgram-sdk>=5.3.0
 
-
 # Environment variables
 python-dotenv>=1.0.0

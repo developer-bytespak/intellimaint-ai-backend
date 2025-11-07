@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speaker Button Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .message {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+
+        .speaker-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background-color: #f0f0f0;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 0;
+            flex-shrink: 0;
+        }
+
+        .speaker-button:hover:not(:disabled) {
+            background-color: #e0e0e0;
+            transform: scale(1.05);
+        }
+
+        .speaker-button:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .speaker-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .speaker-button.loading {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .speaker-button.playing {
+            background-color: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .speaker-button svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .speaker-button.loading svg {
+            animation: spin 1s linear infinite;
+        }
+
+        .console-log {
+            margin-top: 30px;
+            padding: 15px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .console-log h3 {
+            color: #fff;
+            margin-top: 0;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #007acc;
+            padding-left: 10px;
+        }
+
+        .log-entry.error {
+            border-left-color: #f44336;
+            color: #ff6b6b;
+        }
+
+        .log-entry.warn {
+            border-left-color: #ff9800;
+            color: #ffb74d;
+        }
+    </style>
+</head>
+<body>
+    <h1>Speaker Button Example</h1>
+    <p>Click on any speaker button to hear the text. If you click another button while one is playing, the first will stop automatically.</p>
+
+    <div class="message">
+        <div>
+            <strong>Message 1:</strong> Hello, this is the first test message.
+        </div>
+        <button class="speaker-button" data-text="Hello, this is the first test message.">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+            </svg>
+        </button>
+    </div>
+
+    <div class="message">
+        <div>
+            <strong>Message 2:</strong> This is the second message that will stop the first one if it's playing.
+        </div>
+        <button class="speaker-button" data-text="This is the second message that will stop the first one if it's playing.">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+            </svg>
+        </button>
+    </div>
+
+    <div class="message">
+        <div>
+            <strong>Message 3:</strong> And this is the third message for testing multiple speakers.
+        </div>
+        <button class="speaker-button" data-text="And this is the third message for testing multiple speakers.">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+            </svg>
+        </button>
+    </div>
+
+    <div class="console-log">
+        <h3>Console Logs:</h3>
+        <div id="log-container"></div>
+    </div>
+
+    <script>
+        // Override console.log to display in the page
+        const logContainer = document.getElementById('log-container');
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+
+        function addLog(message, type = 'log') {
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addLog(args.join(' '), 'log');
+        };
+
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addLog(args.join(' '), 'error');
+        };
+
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addLog(args.join(' '), 'warn');
+        };
+
+        // Speaker Button Manager
+        class SpeakerButtonManager {
+            constructor(apiUrl = 'http://localhost:8000/api/v1/asr/synthesize') {
+                this.apiUrl = apiUrl;
+                this.currentAudio = null;
+            }
+
+            async playText(text, buttonElement) {
+                // Stop any currently playing audio
+                if (this.currentAudio) {
+                    console.log('[SpeakerButton] Stopping previous audio');
+                    this.currentAudio.pause();
+                    this.currentAudio.currentTime = 0;
+                    this.currentAudio = null;
+                }
+
+                if (!text || text.trim() === '') {
+                    console.warn('[SpeakerButton] No text provided');
+                    return;
+                }
+
+                // Show loader
+                buttonElement.disabled = true;
+                buttonElement.classList.add('loading');
+                buttonElement.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" opacity="0.25" />
+                        <path d="M12 2a10 10 0 0 1 10 10" opacity="0.75" />
+                    </svg>
+                `;
+
+                console.log('[SpeakerButton] Requesting TTS for text:', text);
+
+                try {
+                    const response = await fetch(this.apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ text }),
+                    });
+
+                    console.log('[SpeakerButton] TTS Response status:', response.status);
+                    console.log('[SpeakerButton] TTS Response headers:', Object.fromEntries(response.headers.entries()));
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+                        console.error('[SpeakerButton] TTS Error:', errorData);
+                        throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+                    }
+
+                    const audioBlob = await response.blob();
+                    console.log('[SpeakerButton] Audio blob received, size:', audioBlob.size, 'bytes');
+
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audio = new Audio(audioUrl);
+                    this.currentAudio = audio;
+
+                    audio.onloadstart = () => {
+                        console.log('[SpeakerButton] Audio loading started');
+                        buttonElement.classList.remove('loading');
+                        buttonElement.classList.add('playing');
+                        buttonElement.disabled = false;
+                    };
+
+                    audio.onplay = () => {
+                        console.log('[SpeakerButton] Audio playback started');
+                        buttonElement.classList.remove('loading');
+                        buttonElement.classList.add('playing');
+                        buttonElement.disabled = false;
+                    };
+
+                    audio.onended = () => {
+                        console.log('[SpeakerButton] Audio playback ended');
+                        buttonElement.classList.remove('playing', 'loading');
+                        buttonElement.innerHTML = `
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                            </svg>
+                        `;
+                        URL.revokeObjectURL(audioUrl);
+                        this.currentAudio = null;
+                    };
+
+                    audio.onerror = (error) => {
+                        console.error('[SpeakerButton] Audio playback error:', error);
+                        buttonElement.classList.remove('loading', 'playing');
+                        buttonElement.disabled = false;
+                        buttonElement.innerHTML = `
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                            </svg>
+                        `;
+                        URL.revokeObjectURL(audioUrl);
+                        this.currentAudio = null;
+                    };
+
+                    await audio.play();
+                    console.log('[SpeakerButton] Audio play() called');
+
+                } catch (error) {
+                    console.error('[SpeakerButton] Error fetching or playing audio:', error);
+                    buttonElement.classList.remove('loading', 'playing');
+                    buttonElement.disabled = false;
+                    buttonElement.innerHTML = `
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                        </svg>
+                    `;
+                }
+            }
+        }
+
+        // Initialize
+        const speakerManager = new SpeakerButtonManager();
+        const buttons = document.querySelectorAll('.speaker-button');
+
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                const text = button.getAttribute('data-text');
+                speakerManager.playText(text, button);
+            });
+        });
+    </script>
+</body>
+</html>
+

@@ -1,7 +1,6 @@
-"""ASR/TTS service using Deepgram SDK"""
-
-from deepgram import DeepgramClient, ReadV1Request, SpeakV1Model
+from deepgram import DeepgramClient
 from ..shared.config import get_settings
+import httpx
 import io
 
 settings = get_settings()
@@ -12,87 +11,78 @@ class DeepgramService:
     def __init__(self):
         if not settings.deepgram_api_key:
             raise ValueError("DEEPGRAM_API_KEY environment variable is required")
-        self.client = DeepgramClient(api_key=settings.deepgram_api_key)
+        self.api_key = settings.deepgram_api_key
+        self.client = DeepgramClient(api_key=self.api_key)
+        self.base_url = "https://api.deepgram.com"
     
     async def transcribe_audio(self, audio_data: bytes, mimetype: str = "audio/wav") -> str:
-        """
-        Transcribe audio using Deepgram ASR
-        
-        Args:
-            audio_data: Audio file bytes
-            mimetype: MIME type of the audio file (e.g., 'audio/wav', 'audio/mp3')
-            
-        Returns:
-            Transcribed text string
-        """
         try:
-            # Create request payload for Deepgram SDK v5.x
-            request = ReadV1Request(
-                buffer=audio_data,
-                mimetype=mimetype
-            )
-            
-            # Configure options
-            options = {
-                "model": "nova-2",
+            # Use Deepgram REST API directly for compatibility
+            url = f"{self.base_url}/v1/listen"
+            headers = {
+                "Authorization": f"Token {self.api_key}",
+                "Content-Type": mimetype
+            }
+            params = {
+                "model": "nova-3",
                 "language": "en",
-                "punctuate": True,
+                "punctuate": "true",
+                "smart_format": "true",
+                "remove_disfluencies": "true"
             }
             
-            response = self.client.read.v("1").transcribe_file(request, options)
-            
-            if response.status_code != 200:
-                raise Exception(f"Deepgram API error: {response.status_code}")
-            
-            # Extract transcript from response
-            if (response.response_json and 
-                "results" in response.response_json and
-                "channels" in response.response_json["results"] and
-                len(response.response_json["results"]["channels"]) > 0):
-                
-                transcript = (
-                    response.response_json["results"]["channels"][0]
-                    .get("alternatives", [{}])[0]
-                    .get("transcript", "")
+            async with httpx.AsyncClient(timeout=300.0) as client:
+                response = await client.post(
+                    url,
+                    headers=headers,
+                    params=params,
+                    content=audio_data
                 )
-                return transcript
-            
-            return ""
+                response.raise_for_status()
+                result = response.json()
+
+                print(result)
+                # Extract transcript
+                if "results" in result and "channels" in result["results"]:
+                    channels = result["results"]["channels"]
+                    if len(channels) > 0 and "alternatives" in channels[0]:
+                        alternatives = channels[0]["alternatives"]
+                        if len(alternatives) > 0 and "transcript" in alternatives[0]:
+                            return alternatives[0]["transcript"]
+                
+                return ""
         except Exception as e:
             raise Exception(f"Transcription failed: {str(e)}")
     
     async def synthesize_speech(self, text: str) -> bytes:
-        
         try:
-            # Configure TTS options for Deepgram SDK v5.x
-            options = {
-                "model": SpeakV1Model.AURA_2_THALIA_EN,
+            # Use Deepgram REST API directly for TTS
+            url = f"{self.base_url}/v1/speak"
+            headers = {
+                "Authorization": f"Token {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            params = {
+                "model": "aura-2-thalia-en",
                 "encoding": "linear16",
                 "container": "wav"
             }
+            data = {"text": text}
             
-            request = {
-                "text": text
-            }
-            
-            response = self.client.speak.v("1").stream(request, options)
-            
-            if response.status_code != 200:
-                raise Exception(f"Deepgram TTS API error: {response.status_code}")
-            
-            # Read audio bytes from response
-            audio_bytes = b""
-            if hasattr(response, 'stream'):
-                audio_bytes = response.stream.read()
-            elif hasattr(response, 'content'):
-                audio_bytes = response.content
-            
-            return audio_bytes
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    url,
+                    headers=headers,
+                    params=params,
+                    json=data
+                )
+                response.raise_for_status()
+                return response.content
         except Exception as e:
             raise Exception(f"TTS generation failed: {str(e)}")
 
 
-# Global instance
+# Global instance for DeepgramService
 _deepgram_service = None
 
 def get_deepgram_service() -> DeepgramService:
@@ -103,14 +93,15 @@ def get_deepgram_service() -> DeepgramService:
     return _deepgram_service
 
 
+# Function to transcribe audio using Deepgram
 async def transcribe_audio(audio_data: bytes, mimetype: str = "audio/wav") -> str:
     """Transcribe audio using Deepgram"""
     service = get_deepgram_service()
     return await service.transcribe_audio(audio_data, mimetype)
 
 
+# Function to synthesize speech using Deepgram
 async def synthesize_speech(text: str) -> bytes:
     """Synthesize speech using Deepgram"""
     service = get_deepgram_service()
     return await service.synthesize_speech(text)
-
