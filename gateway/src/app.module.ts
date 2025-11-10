@@ -21,7 +21,7 @@ import { HealthModule } from './modules/health/health.module';
     SettingsModule,
     AuditModule,
     AdminModule,
-    HealthModule,
+    HealthModule
   ],
 })
 export class AppModule {}

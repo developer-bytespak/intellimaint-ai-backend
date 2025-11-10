@@ -1,0 +1,58 @@
+.speaker-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.speaker-button:hover:not(:disabled) {
+  background-color: #e0e0e0;
+  transform: scale(1.05);
+}
+
+.speaker-button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.speaker-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.speaker-button.loading {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.speaker-button.playing {
+  background-color: #c8e6c9;
+  color: #2e7d32;
+}
+
+.loader {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
