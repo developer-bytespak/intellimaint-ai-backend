@@ -44,6 +44,53 @@ class iFixitDeviceDiscoverer:
         self.devices_by_category: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
         self.device_guide_counts: Dict[str, int] = {}
     
+    def _count_devices_in_tree(self, tree: Dict[str, Any], path: str = "") -> int:
+        """Recursively count devices in the nested category tree"""
+        count = 0
+        for key, value in tree.items():
+            current_path = f"{path}/{key}" if path else key
+            if value is None:
+                # This is a device
+                count += 1
+            elif isinstance(value, dict):
+                # This is a category, recurse
+                count += self._count_devices_in_tree(value, current_path)
+        return count
+    
+    def _extract_devices_from_tree(self, tree: Dict[str, Any], path: str = "") -> List[Dict[str, Any]]:
+        """Recursively extract all devices from the nested category tree"""
+        devices = []
+        for key, value in tree.items():
+            current_path = f"{path}/{key}" if path else key
+            if value is None:
+                # This is a device
+                devices.append({
+                    "title": key,
+                    "namespace": current_path,
+                    "path": current_path
+                })
+            elif isinstance(value, dict):
+                # This is a category, recurse
+                devices.extend(self._extract_devices_from_tree(value, current_path))
+        return devices
+    
+    def _extract_categories_from_tree(self, tree: Dict[str, Any], path: str = "") -> List[Dict[str, Any]]:
+        """Recursively extract all categories from the nested tree"""
+        categories = []
+        for key, value in tree.items():
+            current_path = f"{path}/{key}" if path else key
+            if isinstance(value, dict) and value:
+                # This is a category (has children)
+                categories.append({
+                    "title": key,
+                    "namespace": current_path,
+                    "path": current_path,
+                    "device_count": self._count_devices_in_tree(value, current_path)
+                })
+                # Recurse into subcategories
+                categories.extend(self._extract_categories_from_tree(value, current_path))
+        return categories
+    
     def discover_all(self) -> Dict[str, Any]:
         """
         Discover all categories, devices, and estimate guide counts
@@ -53,36 +100,46 @@ class iFixitDeviceDiscoverer:
         """
         logger.info("Starting iFixit device discovery...")
         
-        # Step 1: Fetch all categories (wikis)
+        # Step 1: Fetch all categories (nested tree structure)
         logger.info("Step 1: Fetching all categories...")
-        self.wikis = self.client.get_wikis()
-        logger.info(f"Found {len(self.wikis)} categories")
+        categories_tree = self.client.get_categories()
+        logger.info(f"Fetched category tree structure")
         
-        # Step 2: For each category, fetch devices
-        logger.info("Step 2: Fetching devices for each category...")
-        total_devices = 0
+        # Step 2: Extract all devices from the tree
+        logger.info("Step 2: Extracting devices from category tree...")
+        all_devices = self._extract_devices_from_tree(categories_tree)
+        total_devices = len(all_devices)
+        logger.info(f"Found {total_devices} total devices")
         
-        for i, wiki in enumerate(self.wikis, 1):
-            category = wiki.get("namespace") or wiki.get("title", "")
-            logger.info(f"Processing category {i}/{len(self.wikis)}: {category}")
-            
-            devices = self.client.get_devices(category)
-            if devices:
-                self.devices_by_category[category] = devices
-                total_devices += len(devices)
-                logger.info(f"  Found {len(devices)} devices")
-            
-            # Estimate guide count for first few devices (sample)
-            if i <= 5:  # Sample first 5 categories
-                for device in devices[:3]:  # Sample first 3 devices per category
-                    device_name = device.get("namespace") or device.get("title", "")
-                    guides = self.client.get_guides(device_name=device_name)
-                    guide_count = len(guides)
-                    self.device_guide_counts[device_name] = guide_count
-                    logger.debug(f"    Device '{device_name}': {guide_count} guides")
+        # Step 3: Extract categories with device counts
+        logger.info("Step 3: Extracting categories...")
+        categories_list = self._extract_categories_from_tree(categories_tree)
+        logger.info(f"Found {len(categories_list)} categories")
         
-        # Step 3: Calculate statistics
-        logger.info("Step 3: Calculating statistics...")
+        # Step 4: Group devices by top-level category for reporting
+        for device in all_devices:
+            path_parts = device["path"].split("/")
+            if len(path_parts) > 0:
+                top_category = path_parts[0]
+                if top_category not in self.devices_by_category:
+                    self.devices_by_category[top_category] = []
+                self.devices_by_category[top_category].append(device)
+        
+        # Step 5: Estimate guide count for a sample of devices
+        logger.info("Step 4: Sampling guide counts (this may take a while)...")
+        sample_size = min(20, total_devices)  # Sample up to 20 devices
+        sample_devices = all_devices[:sample_size]
+        
+        for i, device in enumerate(sample_devices, 1):
+            device_name = device.get("namespace") or device.get("title", "")
+            logger.info(f"  Sampling device {i}/{sample_size}: {device_name}")
+            guides = self.client.get_guides(device_name=device_name)
+            guide_count = len(guides)
+            self.device_guide_counts[device_name] = guide_count
+            logger.debug(f"    Found {guide_count} guides")
+        
+        # Step 6: Calculate statistics
+        logger.info("Step 5: Calculating statistics...")
         
         # Calculate average guides per device (from sample)
         avg_guides_per_device = 0
@@ -95,16 +152,17 @@ class iFixitDeviceDiscoverer:
         # Build summary
         summary = {
             "discovery_date": datetime.now().isoformat(),
-            "total_categories": len(self.wikis),
+            "total_categories": len(categories_list),
             "total_devices": total_devices,
             "categories_with_devices": len(self.devices_by_category),
             "average_guides_per_device": round(avg_guides_per_device, 2),
             "estimated_total_guides": estimated_total_guides,
+            "sample_size": len(sample_devices),
             "categories": []
         }
         
-        # Add category details
-        for category, devices in self.devices_by_category.items():
+        # Add category details (top-level categories)
+        for category, devices in sorted(self.devices_by_category.items(), key=lambda x: len(x[1]), reverse=True):
             category_info = {
                 "name": category,
                 "device_count": len(devices),
@@ -112,8 +170,7 @@ class iFixitDeviceDiscoverer:
                 "sample_devices": [
                     {
                         "name": d.get("title") or d.get("namespace", ""),
-                        "description": d.get("description", ""),
-                        "url": d.get("url", "")
+                        "path": d.get("path", ""),
                     }
                     for d in devices[:5]  # First 5 devices as samples
                 ]

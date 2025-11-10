@@ -16,21 +16,27 @@ IFIXIT_API_KEY = os.getenv("IFIXIT_API_KEY", "")  # Optional
 
 # API Endpoints
 ENDPOINTS = {
-    "wikis": f"{IFIXIT_API_BASE_URL}/wikis",
-    "devices": f"{IFIXIT_API_BASE_URL}/wikis/{{category}}/devices",
+    "categories": f"{IFIXIT_API_BASE_URL}/categories",
+    "devices": f"{IFIXIT_API_BASE_URL}/categories/{{category}}/devices",
     "guides": f"{IFIXIT_API_BASE_URL}/guides",
     "guide_detail": f"{IFIXIT_API_BASE_URL}/guides/{{guide_id}}",
 }
 
-# Rate limiting configuration
-RATE_LIMIT_REQUESTS_PER_SECOND = 2  # Conservative default
-RATE_LIMIT_DELAY_SECONDS = 0.5  # Delay between requests in seconds
+# Rate limiting configuration (override via environment)
+RATE_LIMIT_REQUESTS_PER_SECOND = float(os.getenv("IFIXIT_RATE_LIMIT_RPS", "2"))
+RATE_LIMIT_DELAY_SECONDS = (
+    1.0 / RATE_LIMIT_REQUESTS_PER_SECOND if RATE_LIMIT_REQUESTS_PER_SECOND > 0 else 0.5
+)
 
 # Retry configuration
-MAX_RETRIES = 3
-RETRY_BACKOFF_FACTOR = 2  # Exponential backoff multiplier
+MAX_RETRIES = int(os.getenv("IFIXIT_MAX_RETRIES", "3"))
+RETRY_BACKOFF_FACTOR = float(os.getenv("IFIXIT_RETRY_BACKOFF_FACTOR", "2"))  # Exponential backoff multiplier
 RETRY_STATUS_CODES = [429, 500, 502, 503, 504]  # HTTP status codes to retry
 
 # Request timeout
-REQUEST_TIMEOUT = 30  # seconds
+REQUEST_TIMEOUT = int(os.getenv("IFIXIT_REQUEST_TIMEOUT", "30"))  # seconds
+
+# Pagination defaults
+DEFAULT_PAGE_SIZE = int(os.getenv("IFIXIT_DEFAULT_PAGE_SIZE", "100"))
+MAX_PAGE_SIZE = int(os.getenv("IFIXIT_MAX_PAGE_SIZE", "200"))
 
