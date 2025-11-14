@@ -7,6 +7,7 @@ import argparse
 import concurrent.futures
 import json
 import logging
+import signal
 import sys
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -66,6 +67,7 @@ class DeviceResult:
 
 
 class DeviceProcessingError(RuntimeError):
+    """Error during device processing."""
     def __init__(
         self,
         category_path: str,
@@ -73,12 +75,44 @@ class DeviceProcessingError(RuntimeError):
         device_index: int,
         message: str,
         last_guide_id: Optional[str] = None,
+        original_error: Optional[Exception] = None,
     ):
         super().__init__(message)
         self.category_path = category_path
         self.device_path = device_path
         self.device_index = device_index
         self.last_guide_id = last_guide_id
+        self.original_error = original_error
+
+
+class GuideProcessingError(RuntimeError):
+    """Error during guide processing."""
+    def __init__(
+        self,
+        guide_id: Any,
+        device_path: str,
+        message: str,
+        original_error: Optional[Exception] = None,
+    ):
+        super().__init__(message)
+        self.guide_id = guide_id
+        self.device_path = device_path
+        self.original_error = original_error
+
+
+class APIError(RuntimeError):
+    """Error from iFixit API."""
+    def __init__(
+        self,
+        endpoint: str,
+        message: str,
+        status_code: Optional[int] = None,
+        original_error: Optional[Exception] = None,
+    ):
+        super().__init__(message)
+        self.endpoint = endpoint
+        self.status_code = status_code
+        self.original_error = original_error
 
 
 class Collector:
@@ -91,6 +125,7 @@ class Collector:
         ledger: ProgressLedger,
         config: CollectorConfig,
     ):
+        self.shutdown_requested = False
         self.api_client = api_client
         self.db = db_client
         self.ledger = ledger
@@ -225,75 +260,90 @@ class Collector:
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.config.concurrency) as executor:
             future_map: Dict[concurrent.futures.Future[DeviceResult], Tuple[int, Dict[str, Any]]] = {}
             for index, device in tasks:
+                if self.shutdown_requested:
+                    logger.warning("Shutdown requested, cancelling remaining tasks")
+                    break
                 future = executor.submit(self._process_device, family_id, category_path, index, device)
                 future_map[future] = (index, device)
 
-            for future in concurrent.futures.as_completed(future_map):
-                index, device = future_map[future]
-                device_path = device.get("path") or device.get("namespace") or ""
-                try:
-                    result = future.result()
-                    self.metrics.devices_processed += 1
-                    self.metrics.guides_processed += result.guides_processed
-                    self.ledger.record_device_success(
-                        category_path=category_path,
-                        device_path=result.device_path,
-                        device_index=result.device_index,
-                        guides_processed=result.guides_processed,
-                        last_guide_id=result.last_guide_id,
-                    )
-                    logger.info(
-                        "Device completed",
-                        extra={
-                            "event": "device_complete",
-                            "context": {
-                                "category": category_path,
-                                "device_path": result.device_path,
-                                "guides_processed": result.guides_processed,
-                                "last_guide_id": result.last_guide_id,
+            try:
+                for future in concurrent.futures.as_completed(future_map):
+                    if self.shutdown_requested:
+                        logger.warning("Shutdown requested, cancelling remaining futures")
+                        for f in future_map:
+                            f.cancel()
+                        break
+                    index, device = future_map[future]
+                    device_path = device.get("path") or device.get("namespace") or ""
+                    try:
+                        result = future.result()
+                        self.metrics.devices_processed += 1
+                        self.metrics.guides_processed += result.guides_processed
+                        self.ledger.record_device_success(
+                            category_path=category_path,
+                            device_path=result.device_path,
+                            device_index=result.device_index,
+                            guides_processed=result.guides_processed,
+                            last_guide_id=result.last_guide_id,
+                        )
+                        logger.info(
+                            "Device completed",
+                            extra={
+                                "event": "device_complete",
+                                "context": {
+                                    "category": category_path,
+                                    "device_path": result.device_path,
+                                    "guides_processed": result.guides_processed,
+                                    "last_guide_id": result.last_guide_id,
+                                },
                             },
-                        },
-                    )
-                except DeviceProcessingError as exc:
-                    category_had_errors = True
-                    message = f"Device '{exc.device_path}' failed: {exc}"
-                    logger.error(message)
-                    self.metrics.errors.append(message)
-                    self.ledger.record_device_failure(
-                        exc.category_path,
-                        exc.device_path,
-                        exc.device_index,
-                        str(exc),
-                        last_guide_id=exc.last_guide_id,
-                    )
-                    logger.error(
-                        "Device failed",
-                        extra={
-                            "event": "device_failed",
-                            "context": {
-                                "category": exc.category_path,
-                                "device_path": exc.device_path,
-                                "device_index": exc.device_index,
-                                "last_guide_id": exc.last_guide_id,
-                                "error": str(exc),
+                        )
+                    except DeviceProcessingError as exc:
+                        category_had_errors = True
+                        message = f"Device '{exc.device_path}' failed: {exc}"
+                        logger.error(message)
+                        self.metrics.errors.append(message)
+                        self.ledger.record_device_failure(
+                            exc.category_path,
+                            exc.device_path,
+                            exc.device_index,
+                            str(exc),
+                            last_guide_id=exc.last_guide_id,
+                        )
+                        logger.error(
+                            "Device failed",
+                            extra={
+                                "event": "device_failed",
+                                "context": {
+                                    "category": exc.category_path,
+                                    "device_path": exc.device_path,
+                                    "device_index": exc.device_index,
+                                    "last_guide_id": exc.last_guide_id,
+                                    "error": str(exc),
+                                },
                             },
-                        },
-                    )
-                except Exception as exc:  # pylint: disable=broad-except
-                    category_had_errors = True
-                    message = f"Device '{device_path}' failed: {exc}"
-                    logger.exception(message)
-                    self.metrics.errors.append(message)
-                    self.ledger.record_device_failure(
-                        category_path,
-                        device_path,
-                        index,
-                        str(exc),
-                        last_guide_id=None,
-                    )
-                    logger.error(
-                        "Device failed",
-                        extra={
+                        )
+                    except KeyboardInterrupt:
+                        logger.warning("Interrupted by user, shutting down gracefully...")
+                        self.shutdown_requested = True
+                        for f in future_map:
+                            f.cancel()
+                        raise
+                    except Exception as exc:  # pylint: disable=broad-except
+                        category_had_errors = True
+                        message = f"Device '{device_path}' failed: {exc}"
+                        logger.exception(message)
+                        self.metrics.errors.append(message)
+                        self.ledger.record_device_failure(
+                            category_path,
+                            device_path,
+                            index,
+                            str(exc),
+                            last_guide_id=None,
+                        )
+                        logger.error(
+                            "Device failed",
+                            extra={
                             "event": "device_failed",
                             "context": {
                                 "category": category_path,
@@ -364,7 +414,13 @@ class Collector:
                     image_urls=None,  # Explicitly skip image ingestion.
                 )
         except Exception as exc:  # pylint: disable=broad-except
-            raise DeviceProcessingError(category_path, device_path, device_index, f"DB error: {exc}") from exc
+            raise DeviceProcessingError(
+                category_path,
+                device_path,
+                device_index,
+                f"Database error saving device '{device_path}': {exc}",
+                original_error=exc,
+            ) from exc
 
         last_guide_id: Optional[str] = None
         try:
@@ -374,25 +430,40 @@ class Collector:
                 page_size=self.config.page_size,
             )
         except Exception as exc:  # pylint: disable=broad-except
-            raise DeviceProcessingError(category_path, device_path, device_index, f"Guide fetch failed: {exc}") from exc
+            raise DeviceProcessingError(
+                category_path,
+                device_path,
+                device_index,
+                f"Failed to fetch guides for device '{device_path}': {exc}",
+                original_error=exc,
+            ) from exc
 
         if self.config.max_guides_per_device is not None:
             guides = guides[: self.config.max_guides_per_device]
 
         guide_errors: List[str] = []
         guide_count = 0
-        for guide in guides:
+        total_guides = len(guides)
+        logger.info("Processing %d guides for device '%s'", total_guides, device_path)
+        for idx, guide in enumerate(guides, 1):
             guide_id = guide.get("guideid")
             if guide_id is None:
                 logger.debug("Skipping guide without guideid: %s", guide)
                 continue
 
             try:
+                logger.debug("Processing guide %d/%d (ID: %s) for device '%s'", idx, total_guides, guide_id, device_path)
                 self._process_guide(model_id, guide)
                 guide_count += 1
                 last_guide_id = str(guide_id)
+            except GuideProcessingError as exc:
+                error_msg = f"Guide {guide_id} processing error: {exc}"
+                logger.error(error_msg, exc_info=exc.original_error)
+                guide_errors.append(error_msg)
             except Exception as exc:  # pylint: disable=broad-except
-                guide_errors.append(f"{guide_id}: {exc}")
+                error_msg = f"Guide {guide_id} failed: {exc}"
+                logger.error(error_msg, exc_info=True)
+                guide_errors.append(error_msg)
 
         if guide_errors:
             raise DeviceProcessingError(
@@ -410,36 +481,192 @@ class Collector:
             last_guide_id=last_guide_id,
         )
 
+    def _validate_guide_content(self, raw_content: str, title: str, guide_id: Any) -> None:
+        """Validate guide content before database insertion."""
+        if not raw_content or not raw_content.strip():
+            raise ValueError(f"Guide {guide_id} has empty content")
+        
+        if len(raw_content.strip()) < 10:
+            logger.warning(f"Guide {guide_id} has very short content ({len(raw_content)} chars)")
+        
+        if not title or not title.strip():
+            logger.warning(f"Guide {guide_id} has empty or missing title")
+
     def _process_guide(self, model_id: str, guide_summary: Dict[str, Any]) -> None:
         guide_id = guide_summary.get("guideid")
         if guide_id is None:
-            raise ValueError("Guide summary missing guideid.")
+            raise GuideProcessingError(
+                guide_id=None,
+                device_path="unknown",
+                message="Guide summary missing guideid",
+            )
 
-        guide_detail = self.api_client.get_guide_detail(int(guide_id))
-        raw_content = self._render_guide_content(guide_summary, guide_detail)
-        word_count = self._word_count(raw_content)
+        try:
+            guide_detail = self.api_client.get_guide_detail(int(guide_id))
+            if guide_detail is None:
+                raise GuideProcessingError(
+                    guide_id=guide_id,
+                    device_path="unknown",
+                    message=f"Failed to fetch guide detail for guide_id {guide_id}",
+                )
+        except Exception as exc:
+            raise GuideProcessingError(
+                guide_id=guide_id,
+                device_path="unknown",
+                message=f"API error fetching guide detail for guide_id {guide_id}: {exc}",
+                original_error=exc,
+            ) from exc
 
+        try:
+            raw_content = self._render_guide_content(guide_summary, guide_detail)
+            word_count = self._word_count(raw_content)
+            
+            # Validate content before processing
+            title = guide_summary.get("title", f"Guide {guide_id}")
+            self._validate_guide_content(raw_content, title, guide_id)
+        except ValueError as exc:
+            raise GuideProcessingError(
+                guide_id=guide_id,
+                device_path="unknown",
+                message=f"Content validation failed for guide {guide_id}: {exc}",
+                original_error=exc,
+            ) from exc
+
+        # Extract step-level images
+        step_images = []
+        if guide_detail:
+            steps = guide_detail.get("steps", [])
+            for step in steps:
+                step_id = step.get("stepid")
+                media = step.get("media", {})
+                if media and media.get("type") == "image":
+                    images = media.get("data", [])
+                    for img in images:
+                        step_images.append({
+                            "step_id": step_id,
+                            "image_id": img.get("id"),
+                            "guid": img.get("guid"),
+                            "urls": {
+                                "thumbnail": self._normalize_url(img.get("thumbnail")),
+                                "medium": self._normalize_url(img.get("medium")),
+                                "large": self._normalize_url(img.get("large")),
+                                "original": self._normalize_url(img.get("original")),
+                            }
+                        })
+
+        # Normalize and extract all URLs from parts
+        normalized_parts = None
+        if guide_detail and guide_detail.get("parts"):
+            normalized_parts = []
+            for part in guide_detail.get("parts", []):
+                normalized_part = dict(part)
+                if "url" in normalized_part:
+                    normalized_part["url"] = self._normalize_url(normalized_part["url"])
+                    normalized_part["full_url"] = normalized_part["url"]  # Store both original and normalized
+                normalized_parts.append(normalized_part)
+
+        # Extract document URLs
+        document_urls = []
+        featured_document_urls = {}
+        
+        if guide_detail:
+            # Extract featured document URLs
+            featured_doc_embed = guide_detail.get("featured_document_embed_url")
+            featured_doc_thumbnail = guide_detail.get("featured_document_thumbnail_url")
+            featured_doc_id = guide_detail.get("featured_documentid")
+            
+            if featured_doc_embed:
+                featured_document_urls["embed_url"] = self._normalize_url(featured_doc_embed)
+            if featured_doc_thumbnail:
+                featured_document_urls["thumbnail_url"] = self._normalize_url(featured_doc_thumbnail)
+            if featured_doc_id:
+                featured_document_urls["document_id"] = featured_doc_id
+                # Document detail URL can be constructed
+                featured_document_urls["detail_url"] = f"https://www.ifixit.com/api/2.0/documents/{featured_doc_id}"
+            
+            # Extract document URLs from documents array
+            documents = guide_detail.get("documents", [])
+            for doc in documents:
+                doc_info = {}
+                if isinstance(doc, dict):
+                    doc_id = doc.get("id") or doc.get("documentid") or doc.get("guid")
+                    if doc_id:
+                        doc_info["id"] = doc_id
+                        doc_info["detail_url"] = f"https://www.ifixit.com/api/2.0/documents/{doc_id}"
+                    if "url" in doc:
+                        doc_info["url"] = self._normalize_url(doc.get("url"))
+                    if "download_url" in doc:
+                        doc_info["download_url"] = self._normalize_url(doc.get("download_url"))
+                    if "title" in doc:
+                        doc_info["title"] = doc.get("title")
+                    if "filename" in doc:
+                        doc_info["filename"] = doc.get("filename")
+                    # Store full document data
+                    doc_info["raw_data"] = doc
+                else:
+                    # If document is just an ID
+                    doc_info["id"] = doc
+                    doc_info["detail_url"] = f"https://www.ifixit.com/api/2.0/documents/{doc}"
+                
+                if doc_info:
+                    document_urls.append(doc_info)
+
+        # Build comprehensive metadata
         metadata = {
             "ifixit": {
                 "guide_id": guide_id,
-                "url": guide_summary.get("url"),
-                "difficulty": guide_summary.get("difficulty"),
-                "time_required": guide_summary.get("time_required"),
+                "url": self._normalize_url(guide_summary.get("url") or (guide_detail.get("url") if guide_detail else None)),
+                "difficulty": guide_summary.get("difficulty") or (guide_detail.get("difficulty") if guide_detail else None),
+                "time_required": guide_summary.get("time_required") or (guide_detail.get("time_required") if guide_detail else None),
+                "time_required_min": guide_detail.get("time_required_min") if guide_detail else None,
+                "time_required_max": guide_summary.get("time_required_max") or (guide_detail.get("time_required_max") if guide_detail else None),
+                "type": guide_summary.get("type") or (guide_detail.get("type") if guide_detail else None),
+                "subject": guide_summary.get("subject") or (guide_detail.get("subject") if guide_detail else None),
+                "locale": guide_summary.get("locale") or (guide_detail.get("locale") if guide_detail else None),
+                "revisionid": guide_summary.get("revisionid") or (guide_detail.get("revisionid") if guide_detail else None),
+                "modified_date": guide_summary.get("modified_date") or (guide_detail.get("modified_date") if guide_detail else None),
+                # Guide-level tools and parts (with normalized URLs)
                 "tools": guide_detail.get("tools") if guide_detail else None,
-                "parts": guide_detail.get("parts") if guide_detail else None,
-                "summary": guide_summary,
+                "parts": normalized_parts if normalized_parts else None,
+                # Step-level images
+                "step_images": step_images if step_images else None,
+                # Author information (with normalized URLs)
+                "author": self._normalize_author_urls(guide_detail.get("author")) if guide_detail and guide_detail.get("author") else None,
+                # Document URLs and download links
+                "documents": document_urls if document_urls else None,
+                "featured_document": featured_document_urls if featured_document_urls else None,
+                # Additional metadata
+                "flags": guide_detail.get("flags") if guide_detail else None,
+                "prerequisites": guide_detail.get("prerequisites") if guide_detail else None,
+                # Store raw documents array for reference
+                "documents_raw": guide_detail.get("documents") if guide_detail else None,
+                # Store summary for reference
+                "summary_data": guide_summary,
             }
         }
 
         if not self.config.dry_run and self.db:
-            self.db.upsert_knowledge_source(
-                source_id=self._guide_uuid(str(guide_id)),
-                title=guide_summary.get("title", f"Guide {guide_id}"),
-                raw_content=raw_content,
-                model_id=model_id,
-                word_count=word_count,
-                metadata=metadata,
-            )
+            # Final validation before database insertion
+            if not raw_content or len(raw_content.strip()) < 10:
+                logger.warning(f"Skipping guide {guide_id} - content too short or empty")
+                return
+            
+            try:
+                self.db.upsert_knowledge_source(
+                    source_id=self._guide_uuid(str(guide_id)),
+                    title=title,
+                    raw_content=raw_content,
+                    model_id=model_id,
+                    word_count=word_count,
+                    metadata=metadata,
+                )
+            except Exception as exc:
+                raise GuideProcessingError(
+                    guide_id=guide_id,
+                    device_path="unknown",
+                    message=f"Database error saving guide {guide_id}: {exc}",
+                    original_error=exc,
+                ) from exc
 
     # ------------------------------------------------------------------ #
     # Helpers
@@ -483,11 +710,18 @@ class Collector:
 
     @staticmethod
     def _render_guide_content(summary: Dict[str, Any], detail: Optional[Dict[str, Any]]) -> str:
+        """Render guide content to markdown format."""
         lines: List[str] = []
         title = summary.get("title") or "Untitled Guide"
         lines.append(f"# {title}")
 
-        introduction = summary.get("introduction")
+        # Add introduction from detail if available, otherwise from summary
+        introduction = None
+        if detail:
+            introduction = detail.get("introduction_raw") or detail.get("introduction_rendered")
+        if not introduction:
+            introduction = summary.get("introduction") or summary.get("summary")
+        
         if introduction:
             lines.extend(("", introduction))
 
@@ -495,13 +729,45 @@ class Collector:
             steps = detail.get("steps", [])
             for idx, step in enumerate(steps, start=1):
                 step_title = step.get("title") or f"Step {idx}"
-                lines.extend(("", f"## {idx}. {step_title}"))
+                if step_title.strip():
+                    lines.extend(("", f"## {idx}. {step_title}"))
+                else:
+                    lines.extend(("", f"## Step {idx}"))
+                
+                # Process lines in the step
                 for line in step.get("lines", []):
-                    if line.get("type") == "text" and line.get("text"):
-                        lines.append(line["text"])
-                    elif line.get("type") == "bullet" and line.get("text"):
-                        lines.append(f"- {line['text']}")
+                    # iFixit API uses text_raw/text_rendered and bullet field
+                    text = line.get("text_raw") or line.get("text_rendered") or line.get("text")
+                    if not text:
+                        continue
+                    
+                    bullet = line.get("bullet")
+                    level = line.get("level", 0)
+                    
+                    # Handle different bullet types
+                    if bullet == "icon_note" or bullet == "note":
+                        lines.append(f"> **Note:** {text}")
+                    elif bullet == "icon_warning" or bullet == "warning":
+                        lines.append(f"> ⚠️ **Warning:** {text}")
+                    elif bullet == "icon_caution" or bullet == "caution":
+                        lines.append(f"> ⚠️ **Caution:** {text}")
+                    elif bullet == "icon_tip" or bullet == "tip":
+                        lines.append(f"> 💡 **Tip:** {text}")
+                    elif bullet:
+                        # Regular bullet point with indentation based on level
+                        indent = "  " * level
+                        lines.append(f"{indent}- {text}")
+                    else:
+                        # Plain text
+                        indent = "  " * level
+                        lines.append(f"{indent}{text}")
+            
+            # Add conclusion if available
+            conclusion = detail.get("conclusion_raw") or detail.get("conclusion_rendered")
+            if conclusion:
+                lines.extend(("", "## Conclusion", "", conclusion))
         else:
+            # Fallback to summary if no detail available
             summary_text = summary.get("summary")
             if summary_text:
                 lines.extend(("", summary_text))
@@ -509,20 +775,50 @@ class Collector:
         return "\n".join(lines)
 
     @staticmethod
+    def _normalize_url(url: Optional[str]) -> Optional[str]:
+        """Convert relative URLs to absolute iFixit URLs."""
+        if not url:
+            return None
+        if url.startswith("http://") or url.startswith("https://"):
+            return url
+        if url.startswith("/"):
+            return f"https://www.ifixit.com{url}"
+        return url
+
+    @staticmethod
+    def _normalize_author_urls(author: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        """Normalize URLs in author information."""
+        if not author:
+            return None
+        
+        normalized = dict(author)
+        if "url" in normalized:
+            normalized["url"] = Collector._normalize_url(normalized["url"])
+        
+        # Normalize image URLs in author data
+        if "image" in normalized and isinstance(normalized["image"], dict):
+            image = normalized["image"]
+            for key in ["mini", "thumbnail", "medium", "original", "full"]:
+                if key in image and image[key]:
+                    image[key] = Collector._normalize_url(image[key])
+        
+        return normalized
+
+    @staticmethod
     def _word_count(content: str) -> int:
         return len([token for token in content.split() if token.strip()])
 
     @staticmethod
     def _family_uuid(category_path: str) -> str:
-        return str(uuid5(IFIXIT_NAMESPACE, f"family:{category_path}"))
+        return str(uuid5(IFIXIT_NAMESPACE, f"ifixit/family/{category_path}"))
 
     @staticmethod
     def _model_uuid(device_path: str) -> str:
-        return str(uuid5(IFIXIT_NAMESPACE, f"model:{device_path}"))
+        return str(uuid5(IFIXIT_NAMESPACE, f"ifixit/model/{device_path}"))
 
     @staticmethod
     def _guide_uuid(guide_id: str) -> str:
-        return str(uuid5(IFIXIT_NAMESPACE, f"guide:{guide_id}"))
+        return str(uuid5(IFIXIT_NAMESPACE, f"ifixit/guide/{guide_id}"))
 
 
 # ---------------------------------------------------------------------- #
@@ -660,7 +956,18 @@ def write_failure_report(ledger: ProgressLedger, output_dir: Path) -> Path:
     return path
 
 
+def signal_handler(signum, frame):
+    """Handle interrupt signals gracefully."""
+    logger.warning("Received interrupt signal (Ctrl+C), shutting down gracefully...")
+    raise KeyboardInterrupt
+
+
 def main(argv: Optional[Iterable[str]] = None) -> int:
+    # Register signal handlers for graceful shutdown
+    signal.signal(signal.SIGINT, signal_handler)
+    if hasattr(signal, 'SIGTERM'):
+        signal.signal(signal.SIGTERM, signal_handler)
+    
     args = parse_args(argv)
     configure_logging(args.log_level, args.log_format)
 

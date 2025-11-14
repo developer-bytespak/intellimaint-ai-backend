@@ -116,6 +116,7 @@ model EquipmentFamily {
   id          String   @id @default(uuid()) @db.Uuid
   name        String   @db.VarChar(255)
   description String?  @db.Text
+  metadata    Json?    @db.JsonB
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(6)
 
   // Relations
@@ -132,6 +133,7 @@ model EquipmentModel {
   modelName    String?  @map("model_name") @db.VarChar(255)
   description  String?  @db.Text
   imageUrls    Json?    @map("image_urls") @db.JsonB
+  metadata     Json?    @db.JsonB
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp(6)
 
   // Relations
@@ -148,7 +150,7 @@ model EquipmentModel {
 
 model KnowledgeSource {
   id         String   @id @default(uuid()) @db.Uuid
-  title      String   @db.VarChar(255)
+  title      String   @db.Text
   sourceType String   @map("source_type") @db.VarChar(50)
   rawContent String   @map("raw_content") @db.Text
   modelId    String?  @map("model_id") @db.Uuid
