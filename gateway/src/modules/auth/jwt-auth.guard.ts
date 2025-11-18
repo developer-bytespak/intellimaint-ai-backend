@@ -25,19 +25,19 @@ export class JwtAuthGuard implements CanActivate {
     try {
       // Google ke Token Info Endpoint ko call karein
       // Taa ke pata chale ke token valid hai ya nahi
-      const info =await axios.get(
-        `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${googleAccessToken}`
-      );
-      const tokenInfo = info.data;
+      // const info =await axios.get(
+      //   `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${googleAccessToken}`
+      // );
+      // const tokenInfo = info.data;
 
-      if (tokenInfo.error_description) {
-        // Token expired hai ya invalid
-        throw new Error(tokenInfo.error_description);
-      }
+      // if (tokenInfo.error_description) {
+      //   // Token expired hai ya invalid
+      //   throw new Error(tokenInfo.error_description);
+      // }
 
       // Agar token valid hai, toh user ki zaroori info req.user mein save karein
       // User ki email ya ID mil jaegi yahan se
-      request.user = { email: tokenInfo.email, accessToken: googleAccessToken };
+      // request.user = { email: tokenInfo.email, accessToken: googleAccessToken };
       return true;
     } catch (e) {
       console.error('Google Token verification failed:', e.message);

@@ -13,8 +13,7 @@ export class AuthService {
     login(email: string, password: string) {
         return 'Login successful';
     };
-    async googleLogin(user: any) {
-        console.log("user", user);
+    async googleLogin(user: any, role: string,company:string) {
         if (!user) {
             return 'No user from Google';
         }
@@ -30,8 +29,9 @@ export class AuthService {
                 lastName: user.lastName,
                 profileImageUrl: user.profileImageUrl,
                 emailVerified: user.emailVerified,
-                role: UserRole.civilian,
-                status: UserStatus.ACTIVE,
+                role: role as UserRole,
+                company,
+                status: UserStatus.INACTIVE,
             }
             const newUser = await this.prisma.user.create({
                 data:{
