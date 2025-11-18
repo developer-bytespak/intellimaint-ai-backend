@@ -23,6 +23,7 @@
   - `--concurrency 4` set number of concurrent device processing threads (default: 4).
   - `--max-devices-per-category 10` limit devices per category (useful for testing).
   - `--max-guides-per-device 5` limit guides per device (useful for testing).
+  - `--page-size 200` set items per API page (default: 100, max: 200). Larger values = fewer API calls but more data per request.
 
 ### Storage & Progress Tracking
 - Progress ledger: `scripts/ifixit/state/ingest_state.csv` (auto-created). Tracks category status, last device index, last guide id, retry counts, and failed devices.
