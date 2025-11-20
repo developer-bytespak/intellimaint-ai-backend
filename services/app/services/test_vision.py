@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import re
 import sys
 import uuid
 from contextlib import contextmanager
@@ -133,6 +134,131 @@ def create_dummy_attachment(image_path: Path) -> str:
         return attachment_id
 
 
+def parse_detected_components(objects: dict) -> dict:
+    """
+    Parse detected components, extracting JSON from markdown if needed.
+    Returns structured data: {"objects": [...], "notes": "..."}
+    """
+    # If it's already properly structured, return it
+    if "objects" in objects and isinstance(objects.get("objects"), list):
+        return objects
+    
+    # If we have raw_text, try to extract JSON from markdown code blocks
+    if "raw_text" in objects:
+        raw_text = objects["raw_text"]
+        
+        # Try to extract JSON from markdown code blocks (```json ... ```)
+        json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', raw_text, re.DOTALL)
+        if json_match:
+            try:
+                parsed = json.loads(json_match.group(1))
+                if isinstance(parsed, dict) and "objects" in parsed:
+                    return parsed
+            except json.JSONDecodeError:
+                pass
+        
+        # Try direct JSON parsing (in case it's just JSON without markdown)
+        try:
+            parsed = json.loads(raw_text)
+            if isinstance(parsed, dict) and "objects" in parsed:
+                return parsed
+        except json.JSONDecodeError:
+            pass
+        
+        # If all parsing fails, return structured format with raw text
+        return {
+            "raw_text": raw_text,
+            "parsed": False,
+            "objects": [],
+            "notes": "Failed to parse detected components"
+        }
+    
+    # If it's some other format, try to normalize it
+    if "items" in objects:
+        return {"objects": objects["items"], "notes": objects.get("notes", "")}
+    
+    # Fallback: return as-is but ensure structure
+    return {
+        "objects": [],
+        "notes": "",
+        "raw_data": objects
+    }
+
+
+def clean_ocr_text(text: str) -> dict:
+    """
+    Clean and structure OCR text.
+    Returns structured data with text and lines array.
+    """
+    if not text:
+        return {
+            "text": "",
+            "lines": []
+        }
+    
+    # Split by newlines, strip each line, and filter empty lines
+    lines = [line.strip() for line in text.split('\n') if line.strip()]
+    # Rejoin with single newlines for cleaned text
+    cleaned_text = '\n'.join(lines)
+    
+    return {
+        "text": cleaned_text,
+        "lines": lines
+    }
+
+
+def parse_scene_description(description: str) -> dict:
+    """
+    Parse and structure scene description.
+    Extracts main description, components, and context from markdown-formatted description.
+    """
+    if not description:
+        return {
+            "description": "",
+            "components": {},
+            "context": {}
+        }
+    
+    # Initialize result structure
+    result = {
+        "description": description,
+        "components": {},
+        "context": {}
+    }
+    
+    # Extract main description (text before first ###)
+    main_match = re.match(r'^(.*?)(?=\n###|$)', description, re.DOTALL)
+    if main_match:
+        result["summary"] = main_match.group(1).strip()
+    
+    # Extract Components section
+    components_match = re.search(r'###\s*Components:\s*\n(.*?)(?=###|$)', description, re.DOTALL)
+    if components_match:
+        components_text = components_match.group(1)
+        # Extract bullet points with **key:** value format
+        bullets = re.findall(r'[-*]\s*\*\*([^:]+):\*\*\s*\n?\s*(.*?)(?=\n[-*]|$)', components_text, re.DOTALL)
+        for key, value in bullets:
+            key_clean = key.strip().lower().replace(' ', '_')
+            result["components"][key_clean] = value.strip()
+    
+    # Extract Context section
+    context_match = re.search(r'###\s*Context:\s*\n(.*?)(?=###|Overall|$)', description, re.DOTALL)
+    if context_match:
+        context_text = context_match.group(1)
+        # Extract bullet points with **key:** value format
+        bullets = re.findall(r'[-*]\s*\*\*([^:]+):\*\*\s*\n?\s*(.*?)(?=\n[-*]|$)', context_text, re.DOTALL)
+        for key, value in bullets:
+            key_clean = key.strip().lower().replace(' ', '_')
+            result["context"][key_clean] = value.strip()
+    
+    # Extract Overall summary if present
+    overall_match = re.search(r'Overall[^,]*,\s*(.*?)$', description, re.DOTALL)
+    if overall_match:
+        result["overall"] = overall_match.group(1).strip()
+    
+    return result
+
+
 def calculate_token_count(*texts: str) -> int:
     """
     Calculate total token count for given texts using tiktoken.
@@ -175,9 +301,12 @@ async def main() -> None:
         print(f"Created dummy attachment with ID: {attachment_id}")
 
         # Prepare data for database insertion
-        detected_components_json = Json(objects) if isinstance(objects, dict) else Json({"raw_text": str(objects)})
-        ocr_results_json = Json({"text": text})
-        scene_description_json = Json({"description": explanation})
+        detected_components = parse_detected_components(objects)
+        detected_components_json = Json(detected_components)
+        ocr_results = clean_ocr_text(text)
+        ocr_results_json = Json(ocr_results)
+        scene_description = parse_scene_description(explanation)
+        scene_description_json = Json(scene_description)
 
         # Insert ImageAnalysis record
         with db_transaction() as cur:
