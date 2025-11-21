@@ -16,3 +16,6 @@ tenacity==8.2.3
 # Data validation (optional, for type hints)
 pydantic==2.5.0
 
+# Token counting (OpenAI tokenizer)
+tiktoken>=0.5.0
+
