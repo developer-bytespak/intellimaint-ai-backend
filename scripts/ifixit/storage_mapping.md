@@ -8,7 +8,7 @@ This note documents how Phase 2 will persist iFixit data using the existing Pris
 |---------------|--------------------|------------|
 | Category (path/title) | `EquipmentFamily` | `name` ← category title; `description` ← iFixit summary (if available); `metadata` JSON ← raw API payload including slug, url, breadcrumbs. |
 | Device (namespace/title) | `EquipmentModel` | `modelName` ← device title; `modelNumber` ← parse from title if pattern like `Model XYZ`; `manufacturer` ← first token or extracted from metadata; `description` ← iFixit summary; `imageUrls` remains unused (no image ingest); `metadata` JSON ← iFixit identifiers/paths. |
-| Guide | `KnowledgeSource` | `title` ← guide title; `sourceType` = `"ifixit"`; `rawContent` ← rendered markdown/HTML (text only, strip image binaries); `metadata` JSON stores `guideid`, `url`, `difficulty`, `time_required`, etc.; `wordCount` computed from text. |
+| Guide | `KnowledgeSource` | `title` ← guide title; `sourceType` = `"ifixit"`; `rawContent` ← rendered markdown (text only, no image binaries); `metadata` JSON stores comprehensive guide data including `guideid`, `url`, `difficulty`, `time_required`, `tools`, `parts`, `step_images`, `author`, `flags`, `prerequisites`, `documents`, etc.; `wordCount` computed from text. |
 
 ## 2. Stable Identifiers & Upserts
 
@@ -55,25 +55,83 @@ SET title = EXCLUDED.title,
 
 ## 4. Image Handling
 
-- The collector must **skip** downloading and storing images. Only textual content and metadata are persisted.
-- `imageUrls` field on `EquipmentModel` can remain `NULL` or store an empty list (`[]`) for consistency.
-- Guide steps that contain images will keep references in the text (e.g., Markdown image URLs), but no binary download occurs.
-
-## 5. Operational Notes
-
-- All writes occur inside a transaction per device to keep family/model/guide inserts consistent.
-- Retry logic should be idempotent thanks to deterministic IDs.
-- Metadata JSON structure example for a device:
+- The collector **does not download** image binaries. Only textual content and metadata are persisted.
+- `imageUrls` field on `EquipmentModel` remains `NULL` (no image ingestion).
+- Guide step images are stored as URLs in the `metadata.step_images` array with structure:
   ```json
   {
-    "ifixit": {
-      "device_id": 12345,
-      "path": "Phone/iPhone/iPhone 4",
-      "url": "https://www.ifixit.com/Device/iPhone_4",
-      "last_seen": "2025-11-10T23:16:01.876504"
+    "step_id": 1,
+    "image_id": 12345,
+    "guid": "abc123",
+    "urls": {
+      "thumbnail": "https://...",
+      "medium": "https://...",
+      "large": "https://...",
+      "original": "https://..."
     }
   }
   ```
+- Image URLs are preserved in metadata for future reference, but no binary download occurs.
 
-This mapping satisfies Task 1 (`setup-storage`) and guides Phase 2 ingestion logic without schema updates or image collection.
+## 5. Metadata Structure
+
+### Guide Metadata Example
+```json
+{
+  "ifixit": {
+    "guide_id": 12345,
+    "url": "https://www.ifixit.com/Guide/...",
+    "difficulty": "Easy",
+    "time_required": "15 minutes",
+    "time_required_min": 10,
+    "time_required_max": 20,
+    "type": "replacement",
+    "subject": "Keyboard",
+    "locale": "en",
+    "revisionid": 1357831,
+    "modified_date": 1736973864,
+    "tools": [...],
+    "parts": [...],
+    "step_images": [
+      {
+        "step_id": 1,
+        "image_id": 233436,
+        "guid": "H5wkkFSj1tYhJdrg",
+        "urls": {...}
+      }
+    ],
+    "author": {
+      "userid": 1,
+      "username": "iRobot",
+      ...
+    },
+    "flags": [...],
+    "prerequisites": [...],
+    "documents": [...],
+    "summary_data": {...}
+  }
+}
+```
+
+### Device Metadata Example
+```json
+{
+  "ifixit": {
+    "path": "Phone/iPhone/iPhone 4",
+    "title": "iPhone 4",
+    "raw": {...},
+    "processed_at": "2025-11-14T01:30:00.000000"
+  }
+}
+```
+
+## 6. Operational Notes
+
+- All writes occur inside a transaction per device to keep family/model/guide inserts consistent.
+- Retry logic is idempotent thanks to deterministic UUIDs.
+- Content validation ensures minimum content length (10 characters) before insertion.
+- Enhanced error handling provides specific error types: `DeviceProcessingError`, `GuideProcessingError`, `APIError`.
+- Guide content rendering handles all iFixit line types: text, bullets, notes, warnings, cautions, tips with proper markdown formatting.
+
+This mapping reflects the actual implementation and guides ingestion logic without schema updates or image collection.
 

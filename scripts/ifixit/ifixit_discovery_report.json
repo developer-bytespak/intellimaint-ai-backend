@@ -1,10 +1,10 @@
 {
-  "discovery_date": "2025-11-10T23:16:01.876504",
-  "total_categories": 4863,
-  "total_devices": 37564,
+  "discovery_date": "2025-11-14T02:26:02.844586",
+  "total_categories": 4874,
+  "total_devices": 37582,
   "categories_with_devices": 16,
   "average_guides_per_device": 20.0,
-  "estimated_total_guides": 751280,
+  "estimated_total_guides": 751640,
   "sample_size": 20,
   "categories": [
     {
@@ -63,8 +63,8 @@
     },
     {
       "name": "Medical Device",
-      "device_count": 5830,
-      "estimated_guides": 116600,
+      "device_count": 5829,
+      "estimated_guides": 116580,
       "sample_devices": [
         {
           "name": "ECG Machine",
@@ -90,8 +90,8 @@
     },
     {
       "name": "Electronics",
-      "device_count": 4742,
-      "estimated_guides": 94840,
+      "device_count": 4747,
+      "estimated_guides": 94940,
       "sample_devices": [
         {
           "name": "Palm V",
@@ -117,8 +117,8 @@
     },
     {
       "name": "Tool",
-      "device_count": 4343,
-      "estimated_guides": 86860,
+      "device_count": 4347,
+      "estimated_guides": 86940,
       "sample_devices": [
         {
           "name": "iOpener",
@@ -198,8 +198,8 @@
     },
     {
       "name": "Computer Hardware",
-      "device_count": 1157,
-      "estimated_guides": 23140,
+      "device_count": 1164,
+      "estimated_guides": 23280,
       "sample_devices": [
         {
           "name": "Logitech R400 Presenter",
@@ -252,8 +252,8 @@
     },
     {
       "name": "Car and Truck",
-      "device_count": 918,
-      "estimated_guides": 18360,
+      "device_count": 919,
+      "estimated_guides": 18380,
       "sample_devices": [
         {
           "name": "1998-2012 Renault Clio II",
@@ -279,8 +279,8 @@
     },
     {
       "name": "Tablet",
-      "device_count": 847,
-      "estimated_guides": 16940,
+      "device_count": 848,
+      "estimated_guides": 16960,
       "sample_devices": [
         {
           "name": "iPad 2 Smart Cover",
@@ -306,8 +306,8 @@
     },
     {
       "name": "Game Console",
-      "device_count": 393,
-      "estimated_guides": 7860,
+      "device_count": 394,
+      "estimated_guides": 7880,
       "sample_devices": [
         {
           "name": "Microsoft Kinect",
