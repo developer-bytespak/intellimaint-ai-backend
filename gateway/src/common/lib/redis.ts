@@ -6,24 +6,19 @@ if (!appConfig.redisUrl) {
 
 let redis: Redis;
 
-// redis = new Redis({
-//     username: "default",
-//     password: configs.redisPassword,
-//     host: configs.redisUrl.replace('redis://', '').split(':')[0],
-//     port: parseInt(configs.redisPort || "6379", 10),
-// });
+
 redis = new Redis(appConfig.redisUrl, {
+    username: "default",
+    password: appConfig.redisPassword || "",
     retryStrategy: (times) => {
-        // Stop retrying after 3 attempts
         if (times > 3) {
-            console.error('Redis connection failed after 3 attempts. Please check your REDIS_URL configuration.');
-            return null; // Stop retrying
+            console.error('Redis connection failed after 3 attempts.');
+            return null;
         }
-        // Wait 2 seconds before retrying
-        return 2000;
+        return 2000; // retry after 2 seconds
     },
     maxRetriesPerRequest: 1,
-    enableOfflineQueue: false, // Don't queue commands when offline
+    enableOfflineQueue: false,
 });
 
 // Handle connection errors
@@ -52,6 +47,9 @@ export async function safeSet(
     value: string,
     ttlSeconds: number
 ): Promise<{ success: boolean; error?: any }> {
+    console.log("key ==>", key)
+    console.log("value ==>", value)
+    console.log("ttlSeconds ==>", ttlSeconds)
     try {
         await redis.set(key, value, "EX", ttlSeconds);
         return { success: true };
@@ -65,14 +63,19 @@ export async function safeSet(
 
 export async function safeGet(
     key: string
-): Promise<string | null> {
+): Promise<unknown | null> {
     try {
         // console.log("key ==>", key)
         const data = await redis.get(key);
 
         console.log("data ==>", data);
-        // return data ? (JSON.parse(data) as T) : null;
-        return data;
+        if (!data) return null;
+        // Try to parse as JSON, if fails return as string
+        try {
+            return JSON.parse(data) as unknown;
+        } catch {
+            return data;
+        }
     } catch (error) {
         console.log(`Redis Get failed for key: ${key}`, error)
         return null;
