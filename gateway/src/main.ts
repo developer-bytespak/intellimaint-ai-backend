@@ -12,7 +12,7 @@ async function bootstrap() {
   app.setGlobalPrefix(appConfig.apiPrefix);
   app.enableCors(
     {
-      origin: process.env.FRONTEND_URL,
+      origin: ["http://localhost:3001", "http://localhost:5173"],
       credentials: true,
     }
   );

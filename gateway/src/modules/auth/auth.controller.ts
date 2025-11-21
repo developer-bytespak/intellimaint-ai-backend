@@ -26,6 +26,7 @@ import { GoogleAuthGuard } from './google-auth.guard';
 import { RegisterDto } from './dto/login.dto';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
+import { redisDeleteKey } from 'src/common/lib/redis';
 
 // AuthController;
 
@@ -38,14 +39,24 @@ export class AuthController {
   @Get('google')
   // @UseGuards(GoogleAuthGuard)
   googleAuth(@Req() req: Request, @Res() res: Response, @Next() next) {
-    const token = req.cookies?.jwt;
+    const googleToken = req.cookies?.google_access;
+    const localToken = req.cookies?.local_access;
     const role = (req as any).query.role as string;
     const company = (req as any).query.company as string;
-    if (token) {
+    
+    // If user already has a valid token, redirect to chat
+    if (googleToken || localToken) {
       try {
         return res.redirect(`${process.env.FRONTEND_URL}/chat`);
       } catch (e) {
-        return res.clearCookie('jwt', {
+        // Clear cookies if there's an error
+        res.clearCookie('google_access', {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/',
+        });
+        res.clearCookie('local_access', {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',
@@ -67,8 +78,8 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleRedirect(@Req() req, @Res({ passthrough: true }) res: Response) {
     const { role, company } = JSON.parse(req.query.state as string);
-    console.log("role", role);
-    console.log("company", company);
+    // console.log("role", role);
+    // console.log("company", company);
 
     const email = req.user.email;
 
@@ -91,10 +102,21 @@ export class AuthController {
 
     const authResult = await this.authService.googleLogin(req.user, role, company);
     const { accessToken, isNewUser, user } = authResult as { accessToken: string, isNewUser: boolean, user: any };
-    res.cookie('jwt', accessToken, {
+    
+    // Set Google access token cookie
+    res.cookie('google_access', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 2 * 60 * 60 * 1000, // 2 hours
+      sameSite: 'lax',
+      maxAge: 1 * 60 * 60 * 1000, // 1 hours
+    });
+    
+    // Set user email cookie for refresh token logic
+    res.cookie('google_user_email', user.email, {
+      httpOnly: false, // Not httpOnly so guard can read it for refresh
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 1 * 60 * 60 * 1000, // 1 hours
     });
 
     // if (!isNewUser) {
@@ -106,18 +128,12 @@ export class AuthController {
 
   @Post('refresh')
   refreshAccessToken(@Req() req, @Res({ passthrough: true }) res: Response) {
-    const refreshToken = req.cookies.refresh_token;
 
     // Validate refreshToken and generate new access token
-    const newAccessToken = 'NEW_DUMMY_JWT';
 
-    res.cookie('jwt', newAccessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 2 * 60 * 60 * 1000, // 2 hours
-    });
+    return this.authService.refreshAccessToken(res as any);
 
-    return { message: 'Access token refreshed successfully' };
+    
   }
 
   @UseGuards(JwtAuthGuard)
@@ -132,9 +148,19 @@ export class AuthController {
   // Logout
   // This is the endpoint that is called when the user clicks the Logout button
   @Get('logout')
-  logout(@Res({ passthrough: true }) res: Response) {
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     console.log("logout called successfully");
-    res.clearCookie('jwt', { httpOnly: true, sameSite: 'lax', path: '/' });
+    // Clear all auth cookie
+    const userId = (req as any).user?.id;
+    if(!userId){
+      return nestError(400, 'User not found')(res);
+    }
+    await redisDeleteKey(`user_active:${userId}`);
+    
+    res.clearCookie('local_access', { httpOnly: true, sameSite: 'lax', path: '/' });
+    res.clearCookie('google_access', { httpOnly: true, sameSite: 'lax', path: '/' });
+    res.clearCookie('refresh_token', { httpOnly: true, sameSite: 'lax', path: '/' });
+    res.clearCookie('google_user_email', { httpOnly: false, sameSite: 'lax', path: '/' });
     res.redirect(`${process.env.FRONTEND_URL}/login`);
     return { message: 'Logged out successfully' };
   }
@@ -144,6 +170,24 @@ export class AuthController {
   @Post('register')
   async register(@Body() body: any, @Res({ passthrough: true }) res: Response) {
     console.log("register called successfully", body);
+    const email = body.email;
+    const role = body.role;
+    if (email.endsWith('.com')) {
+      if (role !== 'civilian') {
+        return nestError(400,"your email is not fit in your role")(res);
+      }
+    } else if (email.endsWith('.edu')) {
+      if (role !== 'student') {
+        return nestError(400,"your email is not fit in your role")(res);
+      }
+    } else if (email.endsWith('.mil')) {
+      if (role !== 'military') {
+        return nestError(400,"your email is not fit in your role")(res);
+      }
+    } else {
+      return nestError(400,"your email is not fit in your role")(res);
+    }
+
      // Map custom input to RegisterDto
   const registerDto = plainToInstance(RegisterDto, {
     email: body.email,
@@ -191,6 +235,20 @@ export class AuthController {
     console.log("login called successfully", body);
     return  this.authService.login(body, res as any);
     
+  }
+
+  // Forgot Password
+  // This is the endpoint that is called when the user clicks the Forgot Password button
+  @Post('forgot-password')
+  async forgotPassword(@Body() body: any, @Res({ passthrough: true }) res: Response) {
+    return this.authService.forgotPassword(body, res as any);
+  }
+
+  // reset password
+  // This is the endpoint that is called when the user clicks the Reset Password button
+  @Post('reset-password')
+  async resetPassword(@Body() body: any, @Res({ passthrough: true }) res: Response) {
+    return this.authService.resetPassword(body, res as any);
   }
 
 
