@@ -1,5 +1,5 @@
 # Database
-psycopg2-binary==2.9.9
+# psycopg2-binary==2.9.10
 
 # HTTP client for API calls
 requests==2.31.0

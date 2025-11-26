@@ -44,7 +44,7 @@ class CollectorConfig:
     resume: bool = False
     retry_failed: bool = False
     retry_failed_guides: bool = False  # NEW: Retry failed guides (all-guides approach)
-    checkpoint_interval: int = 50
+    checkpoint_interval: int = 500
     ledger_path: Path = DEFAULT_LEDGER_PATH
     checkpoint_dir: Path = DEFAULT_CHECKPOINT_DIR
     log_format: str = "text"
@@ -472,23 +472,20 @@ class Collector:
                 self.metrics.errors.append(error_msg)
                 self._all_guides_progress.mark_failed(guide_id, str(exc))
 
-        # Save final batch to local storage (includes families and devices)
-        if guides_to_write or families_to_write or devices_to_write:
-            self._save_guides_to_local_storage(
-                guides_to_write, applicable_devices_updates, local_storage_path,
-                families=families_to_write, devices=devices_to_write
-            )
-            logger.info("✓ Saved to local storage: %d guides, %d families, %d devices -> %s", 
-                       len(guides_to_write), len(families_to_write), len(devices_to_write), local_storage_path)
-
         # Now load from local storage and write to database
         if not self.config.dry_run and self.db:
-            guides_data = self._load_guides_from_local_storage(local_storage_path)
-            if guides_data:
-                guides_to_write = guides_data.get("guides", [])
-                applicable_devices_updates = guides_data.get("applicable_devices_updates", [])
-                families_to_write = guides_data.get("families", [])
-                devices_to_write = guides_data.get("devices", [])
+            # Only load from local storage if in-memory lists are empty (e.g., resuming from crash)
+            # Otherwise, use the data already in memory - no need to re-parse the huge JSON file!
+            if not guides_to_write and not families_to_write and not devices_to_write:
+                logger.info("Loading data from local storage (resuming from previous state)...")
+                guides_data = self._load_guides_from_local_storage(local_storage_path)
+                if guides_data:
+                    guides_to_write = guides_data.get("guides", [])
+                    applicable_devices_updates = guides_data.get("applicable_devices_updates", [])
+                    families_to_write = guides_data.get("families", [])
+                    devices_to_write = guides_data.get("devices", [])
+            else:
+                logger.info("Using in-memory data (skipping local storage reload)")
             
             # Write families and devices first
             if families_to_write or devices_to_write:
@@ -499,7 +496,7 @@ class Collector:
                 
                 self.db._ensure_connection()
                 
-                # Write families
+                # Write families (UPSERT - safe to re-run)
                 for family_data in families_to_write:
                     try:
                         self.db.upsert_equipment_family(
@@ -511,8 +508,9 @@ class Collector:
                     except Exception as exc:
                         logger.warning("Failed to write family %s: %s", family_data["family_id"][:8], exc)
                 
-                # Write devices
+                # Write devices (UPSERT - safe to re-run, handles duplicates)
                 device_count = 0
+                total_devices = len(devices_to_write)
                 for device_data in devices_to_write:
                     try:
                         self.db.upsert_equipment_model(
@@ -526,20 +524,22 @@ class Collector:
                             image_urls=device_data["image_urls"],
                         )
                         device_count += 1
-                        if device_count % 50 == 0:
+                        if device_count % 100 == 0:
                             self.db._connection.commit()
-                            logger.debug("Wrote %d devices", device_count)
+                            logger.info("📱 Wrote %d/%d devices (%.1f%%)", 
+                                       device_count, total_devices, 
+                                       (device_count / total_devices * 100))
                     except Exception as exc:
                         logger.warning("Failed to write device %s: %s", device_data["model_id"][:8], exc)
                 
-                # Final commit for families/devices
+                # Final commit
                 try:
                     self.db._connection.commit()
                     logger.info("✓ Wrote %d families and %d devices to database", 
                                len(families_to_write), device_count)
                 except Exception as exc:
                     logger.warning("Error committing families/devices: %s", exc)
-            
+
             if guides_to_write:
                 logger.info("=" * 80)
                 logger.info("Writing %d guides to database in batches...", len(guides_to_write))
@@ -585,37 +585,42 @@ class Collector:
                 
                 # Update applicable devices for existing guides
                 if applicable_devices_updates:
-                    logger.info("Updating applicable devices for %d guides...", len(applicable_devices_updates))
-                    update_count = 0
-                    for update in applicable_devices_updates:
-                        try:
-                            update_metadata = {
-                                "ifixit": {
-                                    "applicable_devices": [update["applicable_device_info"]]
-                                }
-                            }
-                            self.db.upsert_knowledge_source(
-                                source_id=update["guide_uuid"],
-                                title="",  # Preserve existing
-                                raw_content="",  # Preserve existing
-                                model_id=None,  # Don't change primary
-                                word_count=None,
-                                metadata=update_metadata,
-                            )
-                            update_count += 1
-                            if update_count % 50 == 0:
-                                self.db._connection.commit()
-                                logger.debug("Updated %d applicable device records", update_count)
-                        except Exception as exc:
-                            logger.warning("Failed to update applicable devices for guide %s: %s", 
-                                         update["guide_uuid"][:8], exc)
+                    # SKIP THIS FOR NOW - too slow with 90k+ updates
+                    # TODO: Batch these updates or pre-aggregate by guide_uuid
+                    logger.warning("⚠️ Skipping %d applicable device updates (too slow - guides already have primary model_id)", 
+                                  len(applicable_devices_updates))
+                    # Comment out the loop below:
+                    # logger.info("Updating applicable devices for %d guides...", len(applicable_devices_updates))
+                    # update_count = 0
+                    # for update in applicable_devices_updates:
+                    #     try:
+                    #         update_metadata = {
+                    #             "ifixit": {
+                    #                 "applicable_devices": [update["applicable_device_info"]]
+                    #             }
+                    #         }
+                    #         self.db.upsert_knowledge_source(
+                    #             source_id=update["guide_uuid"],
+                    #             title="",  # Preserve existing
+                    #             raw_content="",  # Preserve existing
+                    #             model_id=None,  # Don't change primary
+                    #             word_count=None,
+                    #             metadata=update_metadata,
+                    #         )
+                    #         update_count += 1
+                    #         if update_count % 50 == 0:
+                    #             self.db._connection.commit()
+                    #             logger.debug("Updated %d applicable device records", update_count)
+                    #     except Exception as exc:
+                    #         logger.warning("Failed to update applicable devices for guide %s: %s", 
+                    #                      update["guide_uuid"][:8], exc)
                     
-                    # Final commit for applicable devices updates
-                    try:
-                        self.db._connection.commit()
-                        logger.info("✓ Updated applicable devices for %d guides", update_count)
-                    except Exception as exc:
-                        logger.warning("Error committing applicable devices updates: %s", exc)
+                    # # Final commit for applicable devices updates
+                    # try:
+                    #     self.db._connection.commit()
+                    #     logger.info("✓ Updated applicable devices for %d guides", update_count)
+                    # except Exception as exc:
+                    #     logger.warning("Error committing applicable devices updates: %s", exc)
                 
                 # Verify what was written
                 try:
