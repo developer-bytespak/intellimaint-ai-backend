@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import orchestrator, vision, rag, asr_tts
+from .routes import orchestrator, vision, rag, asr_tts , doc_extract
 
 app = FastAPI(
     title="IntelliMaint AI Service",
@@ -42,6 +42,12 @@ app.include_router(
     asr_tts.router,
     prefix="/api/v1/asr",
     tags=["asr-tts"]
+)
+
+app.include_router(
+    doc_extract.router,
+    prefix="/api/v1/doc-extract",
+    tags=["doc-extract"]
 )
 
 @app.get("/")
