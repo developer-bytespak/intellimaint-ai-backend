@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-11-27T16:01:12.648808",
+  "metrics": {
+    "categories_processed": 1,
+    "devices_processed": 419,
+    "guides_processed": 2500,
+    "errors": [],
+    "elapsed_seconds": 1685.101119
+  },
+  "ledger": []
+}
