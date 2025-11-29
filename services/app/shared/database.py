@@ -1,44 +1,41 @@
-import psycopg2
-from dotenv import load_dotenv
+# db.py
 import os
-from urllib.parse import urlparse
+from supabase import create_client, Client
+from dotenv import load_dotenv
 
-# Load environment variables from .env
 load_dotenv()
 
-# Get the DATABASE_URL from environment variable
-database_url = os.getenv("DATABASE_URL")
-if not database_url:
-    raise ValueError("DATABASE_URL not set in environment variables.")
+def create_db_client() -> Client:
+    """Create and return a Supabase client with validation."""
+    url = os.getenv("SUPABASE_URL")
+    key = os.getenv("SUPABASE_KEY")
 
-# Parse DATABASE_URL using urlparse
-result = urlparse(database_url)
-print(f"🔍 Parsed database URL: {result}")
+    if not url or not key:
+        raise ValueError("Supabase URL or KEY missing in .env")
 
-# Configure database connection settings
-DB_CONFIG = {
-    "user": result.username,
-    "password": result.password,
-    "host": result.hostname,
-    "port": result.port,
-    "database": result.path[1:],  # Remove the leading '/'
-}
+    return create_client(url, key)
 
-# Connect to the database
-try:
-    connection = psycopg2.connect(**DB_CONFIG)
-    print("Connection successful!")
+def check_db_connection() -> dict:
+    """Check Supabase connection without touching any user tables."""
+    try:
+        db = create_db_client()
 
-    # Create a cursor and execute a simple query
-    cursor = connection.cursor()
-    cursor.execute("SELECT NOW();")
-    result = cursor.fetchone()
-    print("Current Time:", result)
+        # Call a built-in function to test connection (NO table required)
+        health = db.postgrest.from_('pg_tables').select("tablename").limit(1).execute()
 
-    # Close cursor and connection
-    cursor.close()
-    connection.close()
-    print("Connection closed.")
+        return {
+            "status": "ok",
+            "message": "Supabase connection successful",
+            "details": health.data
+        }
 
-except Exception as e:
-    print(f"Failed to connect: {e}")
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": "Supabase connection failed",
+            "error": str(e)
+        }
+
+def get_db() -> Client:
+    """Get the Supabase client (used throughout the app)."""
+    return create_db_client()

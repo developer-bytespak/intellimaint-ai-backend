@@ -1,100 +1,147 @@
-import fitz  # PyMuPDF
-import pdfplumber
-import shutil
-import uuid
+# import os
+# import uuid
+# import shutil
+# from fastapi import APIRouter, UploadFile, File, HTTPException
+# from fastapi.responses import PlainTextResponse  # IMPORTANT
+
+# from ..services.doc_extract_service import DocumentService
+
+# router = APIRouter()
+
+# UPLOAD_DIR = "uploads"
+# os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+
+# @router.post("/extract/full", response_class=PlainTextResponse)
+# async def extract_text_and_images(file: UploadFile = File(...)):
+#     """Extract text, images, and tables from a PDF with real spacing."""
+
+#     if not file.filename.lower().endswith(".pdf"):
+#         raise HTTPException(status_code=400, detail="Invalid file format. Only PDF files are allowed.")
+
+#     # Save PDF temporarily
+#     temp_name = f"{uuid.uuid4()}.pdf"
+#     file_path = os.path.join(UPLOAD_DIR, temp_name)
+
+#     with open(file_path, "wb") as buffer:
+#         shutil.copyfileobj(file.file, buffer)
+
+#     # Create temp image folder
+#     image_dir = os.path.join(UPLOAD_DIR, f"img_{uuid.uuid4()}")
+#     os.makedirs(image_dir, exist_ok=True)
+
+#     try:
+#         # Extract text + markers
+#         text_with_placeholders, extracted_images = DocumentService.extract_text_with_image_markers(
+#             file_path, image_dir
+#         )
+
+#         # Extract tables
+#         extracted_tables = DocumentService.extract_and_format_tables_from_pdf(file_path)
+
+#         # Upload images
+#         image_urls = DocumentService.upload_images_to_supabase(extracted_images)
+
+#         # Replace markers with real URLs
+#         text_with_urls = DocumentService.replace_placeholders_with_urls(text_with_placeholders, image_urls)
+
+#         # Build final text output (with REAL newlines)
+#         unified_content = DocumentService.create_unified_content(text_with_urls, extracted_tables)
+
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Error processing PDF: {str(e)}")
+
+#     finally:
+#         # Cleanup
+#         if os.path.exists(file_path):
+#             os.remove(file_path)
+#         if os.path.exists(image_dir):
+#             shutil.rmtree(image_dir)
+
+#     # 🔥 RETURN PLAIN TEXT — NOT JSON
+#     return PlainTextResponse(
+#         content=unified_content,
+#         media_type="text/plain"
+#     )
 import os
-import pandas as pd
+import uuid
+import shutil
+
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from typing import List, Dict
+from fastapi.responses import PlainTextResponse
+
+from ..services.doc_extract_service import DocumentService
 
 router = APIRouter()
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-class DocumentService:
-    @staticmethod
-    def extract_text_with_image_markers(file_path: str, output_dir: str):
-        """Extract text from PDF and insert [IMAGE_N] markers where images appear."""
-        pdf = fitz.open(file_path)
-        full_text = ""
-        image_files = []
-        image_counter = 1
-        
-        for page_index, page in enumerate(pdf):
-            page_text = page.get_text("text")
-            image_list = page.get_images(full=True)
-            
-            if image_list:
-                for img_index, img in enumerate(image_list):
-                    xref = img[0]
-                    pix = fitz.Pixmap(pdf, xref)
-                    
-                    if pix.n >= 5:
-                        pix = fitz.Pixmap(fitz.csRGB, pix)
-                    
-                    img_path = os.path.join(output_dir, f"image_{image_counter}.png")
-                    pix.save(img_path)
-                    image_files.append(img_path)
-                    page_text += f"\n[IMAGE_{image_counter}]\n"
-                    image_counter += 1
-            
-            full_text += page_text + "\n"
-        
-        pdf.close()
-        return full_text, image_files
 
-    @staticmethod
-    def extract_and_format_tables_from_pdf(file_path: str) -> List[Dict]:
-        """Extract tables from PDF and convert them into DataFrames for easy processing."""
-        tables_output = []
-        with pdfplumber.open(file_path) as pdf:
-            for page_num, page in enumerate(pdf.pages, start=1):
-                tables = page.extract_tables()
-
-                for tbl_index, table in enumerate(tables, start=1):
-                    if table:
-                        df = pd.DataFrame(table[1:], columns=table[0])
-                        df = df.dropna(how="all", axis=0)
-                        tables_output.append({
-                            "page": page_num,
-                            "table_index": tbl_index,
-                            "dataframe": df.to_dict(orient="records")
-                        })
-        return tables_output
-
-
-@router.post("/extract/full")
+@router.post("/extract/full", response_class=PlainTextResponse)
 async def extract_text_and_images(file: UploadFile = File(...)):
-    """Extract text, images, and tables from a PDF."""
-    if not file.filename.endswith('.pdf'):
+    """Extract text, images, and tables from a PDF with real spacing."""
+
+    if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Invalid file format. Only PDF files are allowed.")
-    
+
+    # Save PDF temporarily
     temp_name = f"{uuid.uuid4()}.pdf"
     file_path = os.path.join(UPLOAD_DIR, temp_name)
 
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    finally:
+        # Make sure upload stream is closed (prevents Windows file locking)
+        try:
+            file.file.close()
+        except Exception:
+            pass
 
+    # Create temp image folder
     image_dir = os.path.join(UPLOAD_DIR, f"img_{uuid.uuid4()}")
     os.makedirs(image_dir, exist_ok=True)
 
     try:
-        # Extract Text with Image Placeholders
-        text_with_placeholders, extracted_images = DocumentService.extract_text_with_image_markers(file_path, image_dir)
-        clean_text = text_with_placeholders.replace("\u0000", "")  # Remove null characters
+        # Extract text + markers
+        text_with_placeholders, extracted_images = DocumentService.extract_text_with_image_markers(
+            file_path, image_dir
+        )
 
-        # Extract Tables and Format Them into DataFrames
+        # Extract tables
         extracted_tables = DocumentService.extract_and_format_tables_from_pdf(file_path)
-    finally:
-        # Clean up the uploaded files
-        os.remove(file_path)
-        shutil.rmtree(image_dir)
 
-    return {
-        "filename": file.filename,
-        "text": clean_text,
-        "total_images": len(extracted_images),
-        "images": extracted_images,
-        "tables": extracted_tables
-    }
+        # Upload images
+        image_urls = DocumentService.upload_images_to_supabase(extracted_images)
+
+        # Replace markers with real URLs
+        text_with_urls = DocumentService.replace_placeholders_with_urls(text_with_placeholders, image_urls)
+
+        # Build final text output
+        unified_content = DocumentService.create_unified_content(text_with_urls, extracted_tables)
+
+    except HTTPException:
+        # let already-raised HTTPExceptions pass through
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing PDF: {str(e)}")
+    finally:
+        # Cleanup – wrap deletes to avoid crashing if file is locked
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except PermissionError:
+                # On rare cases, Windows may still hold a lock; log instead of crashing
+                print(f"Could not delete file {file_path} due to PermissionError.")
+        if os.path.exists(image_dir):
+            try:
+                shutil.rmtree(image_dir)
+            except PermissionError:
+                print(f"Could not delete image dir {image_dir} due to PermissionError.")
+
+    # Return plain text
+    return PlainTextResponse(
+        content=unified_content,
+        media_type="text/plain"
+    )
