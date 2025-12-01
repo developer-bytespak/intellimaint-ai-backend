@@ -136,7 +136,8 @@ async def extract_text_and_images(file: UploadFile = File(...)):
                 print(f"Could not delete file {file_path} due to PermissionError.")
         if os.path.exists(image_dir):
             try:
-                shutil.rmtree(image_dir)
+                print(f"Attempting to delete image dir {image_dir}.")
+                # shutil.rmtree(image_dir)
             except PermissionError:
                 print(f"Could not delete image dir {image_dir} due to PermissionError.")
 

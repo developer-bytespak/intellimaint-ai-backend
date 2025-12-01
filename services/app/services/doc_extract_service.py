@@ -404,6 +404,8 @@ class DocumentService:
         if len(lines) < 4:
             return False
 
+
+
         # Check for common table header words
         table_headers = ['id', 'name', 'value', 'column', 'row', 'data', 'item', 'no', 'number']
         first_lines_lower = [l.lower() for l in lines[:5]]
@@ -433,26 +435,31 @@ class DocumentService:
     # ------------------------------------
     # Extract text with improved table filtering
     # ------------------------------------
+    
     @staticmethod
     def extract_text_with_image_markers(file_path: str, output_dir: str) -> Tuple[str, List[str]]:
         """
         Extract text in reading order, skip table-like blocks,
-        and save images to output_dir with IMAGE:n markers in the text.
+        avoid duplicate text blocks, and save images with markers.
         """
+
         full_text = ""
         image_files: List[str] = []
         image_counter = 1
 
-        # Use context manager so PDF is ALWAYS closed (even on error)
-        with fitz.open(file_path) as pdf:
+        seen_blocks = set()      # Prevent duplicate text blocks
+        image_seen = {}          # Prevent duplicate image extraction
 
+        with fitz.open(file_path) as pdf:
             for page_index, page in enumerate(pdf):
                 blocks = page.get_text("dict")["blocks"]
                 page_num = page_index + 1
 
                 page_output_lines = [f"# Page {page_num}", ""]
 
-                # ---- TEXT BLOCKS ----
+                # -------------------------
+                # TEXT BLOCKS
+                # -------------------------
                 for b in blocks:
                     if "lines" not in b:
                         continue
@@ -485,13 +492,18 @@ class DocumentService:
 
                     block_text = "\n".join(block_line_texts)
 
-                    # Skip table-like blocks and mark with placeholder
+                    # Skip duplicate text blocks
+                    if block_text in seen_blocks:
+                        continue
+                    seen_blocks.add(block_text)
+
+                    # Table detection
                     if DocumentService.is_table_text_block(block_text):
                         page_output_lines.append("[TABLE_PLACEHOLDER]")
                         page_output_lines.append("")
                         continue
 
-                    # Heading detection based on font size
+                    # Heading detection
                     for line_text in block_line_texts:
                         if block_max_font >= 18:
                             page_output_lines.append(f"# {line_text}")
@@ -507,32 +519,47 @@ class DocumentService:
 
                     page_output_lines.append("")
 
-                # ---- IMAGES ----
+                # -------------------------
+                # IMAGE EXTRACTION
+                # -------------------------
                 image_list = page.get_images(full=True)
+
                 for img in image_list:
                     xref = img[0]
 
+                    # If image already extracted → reuse same number
+                    if xref in image_seen:
+                        page_output_lines.append(f"IMAGE:{image_seen[xref]}")
+                        page_output_lines.append("")
+                        continue
+
+                    # Extract new image
                     try:
                         pix = fitz.Pixmap(pdf, xref)
                     except Exception:
                         continue
 
                     try:
-                        # Robust colorspace fix:
-                        # - convert anything that's not Gray/RGB
-                        # - drop alpha channels into RGB
+                        # FIX: Safe handling when pix.colorspace is None
                         if pix.colorspace is None:
-                            pix_converted = fitz.Pixmap(fitz.csRGB, pix)
-                            pix = pix_converted
-                        else:
-                            if pix.colorspace.n not in (1, 3) or pix.alpha:
-                                pix_converted = fitz.Pixmap(fitz.csRGB, pix)
-                                pix = pix_converted
+                            try:
+                                pix = fitz.Pixmap(fitz.csRGB, pix)
+                            except:
+                                continue  # skip images we can't convert
 
+                        # FIX: Convert CMYK, Indexed, Alpha → RGB
+                        elif pix.colorspace and (pix.colorspace.n not in (1, 3) or pix.alpha):
+                            try:
+                                pix = pix.copy(colorspace=fitz.csRGB, alpha=False)
+                            except:
+                                continue
+
+                        # Save image
                         img_path = os.path.join(output_dir, f"image_{image_counter}.png")
                         pix.save(img_path)
 
                         image_files.append(img_path)
+                        image_seen[xref] = image_counter
 
                         page_output_lines.append(f"IMAGE:{image_counter}")
                         page_output_lines.append("")
@@ -540,12 +567,16 @@ class DocumentService:
                         image_counter += 1
 
                     finally:
-                        # Ensure pixmap is freed
                         pix = None
 
+                # -------------------------
+                # SAVE PAGE OUTPUT
+                # -------------------------
                 full_text += "\n".join(page_output_lines) + "\n\n"
 
         return full_text, image_files
+
+
 
     # ------------------------------------
     # Extract Tables
@@ -687,7 +718,9 @@ class DocumentService:
                 final.append(f"columns: {', '.join(str(c) for c in t['columns'])}")
                 final.append("rows:")
                 for row in t["rows"]:
-                    final.append(", ".join(str(x) for x in row))
+                    clean_row = [str(x).strip() if x else "" for x in row]
+                    final.append(", ".join(clean_row))
+
                 final.append("")
 
             final.append("")
