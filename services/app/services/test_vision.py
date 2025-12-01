@@ -5,9 +5,11 @@ import re
 import sys
 import uuid
 from contextlib import contextmanager
+from datetime import datetime
 from pathlib import Path
 
 import psycopg2
+import pytz
 import tiktoken
 from dotenv import load_dotenv
 from psycopg2.extras import Json
@@ -49,6 +51,16 @@ def get_db_connection():
     return psycopg2.connect(database_url)
 
 
+def get_pkt_now():
+    """Get current datetime in Pakistan Time (PKT, UTC+5) as timezone-naive."""
+    # Get current UTC time
+    utc_now = datetime.utcnow()
+    # Add 5 hours for PKT (UTC+5)
+    from datetime import timedelta
+    pkt_now = utc_now + timedelta(hours=5)
+    return pkt_now
+
+
 @contextmanager
 def db_transaction():
     """Context manager for database transactions."""
@@ -85,9 +97,9 @@ def create_dummy_attachment(image_path: Path) -> str:
             cur.execute(
                 """
                 INSERT INTO users (id, email, email_verified, role, status, created_at, updated_at)
-                VALUES (%s, %s, %s, %s, %s, NOW(), NOW())
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """,
-                (user_id, dummy_user_email, False, "civilian", "ACTIVE"),
+                (user_id, dummy_user_email, False, "civilian", "ACTIVE", get_pkt_now(), get_pkt_now()),
             )
         
         # Check if chat session exists for this user, create if not
@@ -104,9 +116,9 @@ def create_dummy_attachment(image_path: Path) -> str:
             cur.execute(
                 """
                 INSERT INTO chat_sessions (id, user_id, status, created_at, updated_at)
-                VALUES (%s, %s, %s, NOW(), NOW())
+                VALUES (%s, %s, %s, %s, %s)
                 """,
-                (session_id, user_id, "active"),
+                (session_id, user_id, "active", get_pkt_now(), get_pkt_now()),
             )
         
         # Create new ChatMessage in the session
@@ -114,9 +126,9 @@ def create_dummy_attachment(image_path: Path) -> str:
         cur.execute(
             """
             INSERT INTO chat_messages (id, session_id, role, created_at)
-            VALUES (%s, %s, %s, NOW())
+            VALUES (%s, %s, %s, %s)
             """,
-            (message_id, session_id, "user"),
+            (message_id, session_id, "user", get_pkt_now()),
         )
         
         # Create new MessageAttachment for the message
@@ -126,9 +138,9 @@ def create_dummy_attachment(image_path: Path) -> str:
         cur.execute(
             """
             INSERT INTO message_attachments (id, message_id, attachment_type, file_url, file_name, created_at)
-            VALUES (%s, %s, %s, %s, %s, NOW())
+            VALUES (%s, %s, %s, %s, %s, %s)
             """,
-            (attachment_id, message_id, "image", file_url, file_name),
+            (attachment_id, message_id, "image", file_url, file_name, get_pkt_now()),
         )
         
         return attachment_id
@@ -137,11 +149,14 @@ def create_dummy_attachment(image_path: Path) -> str:
 def parse_detected_components(objects: dict) -> dict:
     """
     Parse detected components, extracting JSON from markdown if needed.
-    Returns structured data: {"objects": [...], "notes": "..."}
+    Returns structured data: {"objects": [...]}
     """
-    # If it's already properly structured, return it
+    # If it's already properly structured, return it (but remove notes if present)
     if "objects" in objects and isinstance(objects.get("objects"), list):
-        return objects
+        result = {"objects": objects["objects"]}
+        if "raw_text" in objects:
+            result["raw_text"] = objects["raw_text"]
+        return result
     
     # If we have raw_text, try to extract JSON from markdown code blocks
     if "raw_text" in objects:
@@ -153,7 +168,10 @@ def parse_detected_components(objects: dict) -> dict:
             try:
                 parsed = json.loads(json_match.group(1))
                 if isinstance(parsed, dict) and "objects" in parsed:
-                    return parsed
+                    result = {"objects": parsed["objects"]}
+                    if "raw_text" in parsed:
+                        result["raw_text"] = parsed["raw_text"]
+                    return result
             except json.JSONDecodeError:
                 pass
         
@@ -161,7 +179,10 @@ def parse_detected_components(objects: dict) -> dict:
         try:
             parsed = json.loads(raw_text)
             if isinstance(parsed, dict) and "objects" in parsed:
-                return parsed
+                result = {"objects": parsed["objects"]}
+                if "raw_text" in parsed:
+                    result["raw_text"] = parsed["raw_text"]
+                return result
         except json.JSONDecodeError:
             pass
         
@@ -169,31 +190,30 @@ def parse_detected_components(objects: dict) -> dict:
         return {
             "raw_text": raw_text,
             "parsed": False,
-            "objects": [],
-            "notes": "Failed to parse detected components"
+            "objects": []
         }
     
     # If it's some other format, try to normalize it
     if "items" in objects:
-        return {"objects": objects["items"], "notes": objects.get("notes", "")}
+        return {"objects": objects["items"]}
     
     # Fallback: return as-is but ensure structure
-    return {
-        "objects": [],
-        "notes": "",
-        "raw_data": objects
+    result = {
+        "objects": []
     }
+    if "raw_data" in objects:
+        result["raw_data"] = objects["raw_data"]
+    return result
 
 
 def clean_ocr_text(text: str) -> dict:
     """
     Clean and structure OCR text.
-    Returns structured data with text and lines array.
+    Returns structured data with text only.
     """
     if not text:
         return {
-            "text": "",
-            "lines": []
+            "text": ""
         }
     
     # Split by newlines, strip each line, and filter empty lines
@@ -202,34 +222,38 @@ def clean_ocr_text(text: str) -> dict:
     cleaned_text = '\n'.join(lines)
     
     return {
-        "text": cleaned_text,
-        "lines": lines
+        "text": cleaned_text
     }
 
 
 def parse_scene_description(description: str) -> dict:
     """
     Parse and structure scene description.
-    Extracts main description, components, and context from markdown-formatted description.
+    Extracts summary and components from markdown-formatted description.
     """
     if not description:
         return {
-            "description": "",
-            "components": {},
-            "context": {}
+            "summary": "",
         }
     
     # Initialize result structure
     result = {
-        "description": description,
-        "components": {},
-        "context": {}
+        "components": {}
     }
     
-    # Extract main description (text before first ###)
+    # Extract main description (text before first ###) for summary
     main_match = re.match(r'^(.*?)(?=\n###|$)', description, re.DOTALL)
     if main_match:
-        result["summary"] = main_match.group(1).strip()
+        summary_text = main_match.group(1).strip()
+        # Only add summary if it's different from the full description (i.e., there are sections after it)
+        if len(summary_text) < len(description.strip()) and '###' in description:
+            result["summary"] = summary_text
+        else:
+            # If no sections, use the full description as summary
+            result["summary"] = description.strip()
+    else:
+        # Fallback: use full description as summary
+        result["summary"] = description.strip()
     
     # Extract Components section
     components_match = re.search(r'###\s*Components:\s*\n(.*?)(?=###|$)', description, re.DOTALL)
@@ -240,21 +264,6 @@ def parse_scene_description(description: str) -> dict:
         for key, value in bullets:
             key_clean = key.strip().lower().replace(' ', '_')
             result["components"][key_clean] = value.strip()
-    
-    # Extract Context section
-    context_match = re.search(r'###\s*Context:\s*\n(.*?)(?=###|Overall|$)', description, re.DOTALL)
-    if context_match:
-        context_text = context_match.group(1)
-        # Extract bullet points with **key:** value format
-        bullets = re.findall(r'[-*]\s*\*\*([^:]+):\*\*\s*\n?\s*(.*?)(?=\n[-*]|$)', context_text, re.DOTALL)
-        for key, value in bullets:
-            key_clean = key.strip().lower().replace(' ', '_')
-            result["context"][key_clean] = value.strip()
-    
-    # Extract Overall summary if present
-    overall_match = re.search(r'Overall[^,]*,\s*(.*?)$', description, re.DOTALL)
-    if overall_match:
-        result["overall"] = overall_match.group(1).strip()
     
     return result
 
@@ -317,7 +326,7 @@ async def main() -> None:
                     id, attachment_id, detected_components, ocr_results, 
                     scene_description, token_count, created_at
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, NOW())
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """,
                 (
                     analysis_id,
@@ -326,6 +335,7 @@ async def main() -> None:
                     ocr_results_json,
                     scene_description_json,
                     token_count,
+                    get_pkt_now(),
                 ),
             )
             print(f"\n✓ Successfully stored image analysis in database!")
