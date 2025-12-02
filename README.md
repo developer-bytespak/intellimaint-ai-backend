@@ -214,3 +214,19 @@ REDIS_URL=redis://localhost:6379
 For issues and questions:
 - GitHub Issues: [Create an issue](https://github.com/intellimaint/backend/issues)
 - Email: support@intellimaint.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
