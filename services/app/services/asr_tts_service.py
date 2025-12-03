@@ -17,12 +17,20 @@ class DeepgramService:
     
     async def transcribe_audio(self, audio_data: bytes, mimetype: str = "audio/wav") -> str:
         try:
+            # Audio buffer validation
+            if not audio_data or len(audio_data) < 100:
+                raise ValueError(f"Audio buffer too small: {len(audio_data)} bytes")
+            
+            print(f"[Deepgram] Sending audio: {len(audio_data)} bytes, mimetype: {mimetype}")
+            
             # Use Deepgram REST API directly for compatibility
             url = f"{self.base_url}/v1/listen"
             headers = {
                 "Authorization": f"Token {self.api_key}",
                 "Content-Type": mimetype
             }
+            
+            # Params ko flexible banate hain - encoding auto-detect ke liye
             params = {
                 "model": "nova-3",
                 "language": "en",
@@ -31,6 +39,12 @@ class DeepgramService:
                 "remove_disfluencies": "true"
             }
             
+            # Agar mimetype raw hai, to encoding specify karo
+            if mimetype in ["audio/raw", "audio/pcm"]:
+                params["encoding"] = "linear16"
+                params["sample_rate"] = 16000
+                params["channels"] = 1
+            
             async with httpx.AsyncClient(timeout=300.0) as client:
                 response = await client.post(
                     url,
@@ -38,10 +52,24 @@ class DeepgramService:
                     params=params,
                     content=audio_data
                 )
-                response.raise_for_status()
+                
+                # Detailed error handling
+                if response.status_code != 200:
+                    error_detail = f"Status: {response.status_code}"
+                    try:
+                        error_json = response.json()
+                        error_detail += f", Response: {error_json}"
+                        print(f"[Deepgram Error] {error_detail}")
+                    except:
+                        error_text = response.text[:500]  # First 500 chars
+                        error_detail += f", Response: {error_text}"
+                        print(f"[Deepgram Error] {error_detail}")
+                    
+                    raise Exception(f"Transcription failed: {error_detail}")
+                
                 result = response.json()
 
-                print(result)
+                print(f"[Deepgram Response] {result}")
                 # Extract transcript
                 if "results" in result and "channels" in result["results"]:
                     channels = result["results"]["channels"]
@@ -51,8 +79,15 @@ class DeepgramService:
                             return alternatives[0]["transcript"]
                 
                 return ""
+        except httpx.HTTPStatusError as e:
+            # HTTP error details capture karo
+            error_msg = f"HTTP {e.response.status_code}: {e.response.text[:500] if hasattr(e.response, 'text') else str(e)}"
+            print(f"[Deepgram HTTP Error] {error_msg}")
+            raise Exception(f"Transcription failed: {error_msg}")
         except Exception as e:
-            raise Exception(f"Transcription failed: {str(e)}")
+            error_msg = f"Transcription failed: {str(e)}"
+            print(f"[Deepgram Exception] {error_msg}")
+            raise Exception(error_msg)
     
     async def synthesize_speech(self, text: str) -> bytes:
         try:

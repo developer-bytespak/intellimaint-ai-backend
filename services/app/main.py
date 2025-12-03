@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import orchestrator, vision, rag, asr_tts , doc_extract , voice_agent
+from .routes import orchestrator, vision, rag, asr_tts , doc_extract, stream
 from .shared.database import get_db, check_db_connection
 app = FastAPI(
     title="IntelliMaint AI Service",
@@ -10,15 +10,13 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Configure CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins - change to specific origins in production
-    allow_credentials=False,  # Cannot be True when allow_origins=["*"]
+    allow_origins=["*"],  # Change "*" to your frontend URL in production
+    allow_credentials=True,
     allow_methods=["*"],  # Allow all methods (GET, POST, PUT, DELETE, etc.)
     allow_headers=["*"],  # Allow all headers
 )
-
 # Include all routers with appropriate prefixes
 app.include_router(
     orchestrator.router,
@@ -49,10 +47,15 @@ app.include_router(
     prefix="/api/v1/extract",
     tags=["doc_extract"]
 )
+# app.include_router(
+#     voice_agent.router,
+#     prefix="/api/v1/upload_audio",
+#     tags=["voice_agent"]
+# )
 app.include_router(
-    voice_agent.router,
-    prefix="/api/v1/upload_audio",
-    tags=["voice_agent"]
+    stream.router,
+    prefix="/api/v1",
+    tags=["stream"]
 )
 
 @app.get("/")
