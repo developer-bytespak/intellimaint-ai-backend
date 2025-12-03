@@ -17,7 +17,9 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { GoogleStrategy } from './google.strategy'; 
-import { PrismaService } from 'prisma/prisma.service'; 
+import { PrismaService } from 'prisma/prisma.service';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { TokenRefreshCronService } from './token-refresh-cron.service';
 console.log("googleStrategyEnabled");
 
 const googleStrategyEnabled =
@@ -31,6 +33,8 @@ const googleStrategyEnabled =
   providers: [
     AuthService,
     PrismaService,
+    JwtAuthGuard,
+    TokenRefreshCronService,
     ...(googleStrategyEnabled ? [GoogleStrategy] : []),
   ],
 })
