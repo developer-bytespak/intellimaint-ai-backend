@@ -3,6 +3,14 @@ from ..shared.config import get_settings
 import httpx
 import io
 
+# Optional import for audio conversion
+try:
+    from pydub import AudioSegment
+    PYDUB_AVAILABLE = True
+except ImportError:
+    PYDUB_AVAILABLE = False
+    print("[Warning] pydub not available. Audio conversion will be disabled. Install pydub and ffmpeg for WebM support.")
+
 settings = get_settings()
 
 class DeepgramService:
@@ -15,11 +23,48 @@ class DeepgramService:
         self.client = DeepgramClient(api_key=self.api_key)
         self.base_url = "https://api.deepgram.com"
     
-    async def transcribe_audio(self, audio_data: bytes, mimetype: str = "audio/wav") -> str:
+    def convert_audio_to_wav(self, audio_data: bytes, input_format: str) -> bytes:
+        """Convert audio from various formats to WAV format"""
+        if not PYDUB_AVAILABLE:
+            raise ImportError("pydub is not available. Please install pydub and ffmpeg for audio conversion.")
+        
+        try:
+            print(f"[Audio Conversion] Converting {input_format} to WAV...")
+            
+            # Create AudioSegment from bytes
+            audio_segment = AudioSegment.from_file(
+                io.BytesIO(audio_data),
+                format=input_format.replace("audio/", "")
+            )
+            
+            # Export to WAV format
+            wav_buffer = io.BytesIO()
+            audio_segment.export(wav_buffer, format="wav")
+            wav_data = wav_buffer.getvalue()
+            
+            print(f"[Audio Conversion] Converted {len(audio_data)} bytes to {len(wav_data)} bytes WAV")
+            return wav_data
+        except Exception as e:
+            print(f"[Audio Conversion] Error converting audio: {e}")
+            raise Exception(f"Audio conversion failed: {str(e)}")
+    
+    async def transcribe_audio(self, audio_data: bytes, mimetype: str = "audio/wav", sample_rate: int = None) -> str:
         try:
             # Audio buffer validation
             if not audio_data or len(audio_data) < 100:
                 raise ValueError(f"Audio buffer too small: {len(audio_data)} bytes")
+            
+            # Convert WebM/Opus to WAV for better Deepgram compatibility
+            # WebM chunks may not form a valid file when concatenated
+            formats_to_convert = ["audio/webm", "audio/opus"]
+            if mimetype in formats_to_convert:
+                try:
+                    print(f"[Deepgram] Converting {mimetype} to WAV for better compatibility...")
+                    audio_data = self.convert_audio_to_wav(audio_data, mimetype)
+                    mimetype = "audio/wav"
+                except Exception as conv_error:
+                    print(f"[Deepgram] Conversion failed, trying original format: {conv_error}")
+                    # Continue with original format if conversion fails
             
             print(f"[Deepgram] Sending audio: {len(audio_data)} bytes, mimetype: {mimetype}")
             
@@ -42,7 +87,7 @@ class DeepgramService:
             # Agar mimetype raw hai, to encoding specify karo
             if mimetype in ["audio/raw", "audio/pcm"]:
                 params["encoding"] = "linear16"
-                params["sample_rate"] = 16000
+                params["sample_rate"] = sample_rate if sample_rate else 16000  # Use provided or default
                 params["channels"] = 1
             
             async with httpx.AsyncClient(timeout=300.0) as client:
@@ -69,7 +114,7 @@ class DeepgramService:
                 
                 result = response.json()
 
-                print(f"[Deepgram Response] {result}")
+                # print(f"[Deepgram Response] {result}")
                 # Extract transcript
                 if "results" in result and "channels" in result["results"]:
                     channels = result["results"]["channels"]
@@ -129,10 +174,10 @@ def get_deepgram_service() -> DeepgramService:
 
 
 # Function to transcribe audio using Deepgram
-async def transcribe_audio(audio_data: bytes, mimetype: str = "audio/wav") -> str:
+async def transcribe_audio(audio_data: bytes, mimetype: str = "audio/wav", sample_rate: int = None) -> str:
     """Transcribe audio using Deepgram"""
     service = get_deepgram_service()
-    return await service.transcribe_audio(audio_data, mimetype)
+    return await service.transcribe_audio(audio_data, mimetype, sample_rate)
 
 
 # Function to synthesize speech using Deepgram

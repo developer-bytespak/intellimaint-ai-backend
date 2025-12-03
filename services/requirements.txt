@@ -22,3 +22,6 @@ deepgram-sdk>=5.3.0
 
 # Environment variables
 python-dotenv>=1.0.0
+
+# Audio processing for format conversion
+pydub>=0.25.1
