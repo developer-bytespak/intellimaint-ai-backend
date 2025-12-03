@@ -147,6 +147,7 @@ export class AuthController {
 
   // Logout
   // This is the endpoint that is called when the user clicks the Logout button
+  @UseGuards(JwtAuthGuard)
   @Get('logout')
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     console.log("logout called successfully");
