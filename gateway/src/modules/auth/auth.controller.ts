@@ -100,14 +100,16 @@ export class AuthController {
     }
 
 
-    const authResult = await this.authService.googleLogin(req.user, role, company);
-    const { accessToken, isNewUser, user } = authResult as { accessToken: string, isNewUser: boolean, user: any };
-    
-    // Set Google access token cookie
+    try {
+      const authResult = await this.authService.googleLogin(req.user, role, company);
+      const { accessToken, isNewUser, user } = authResult as { accessToken: string, isNewUser: boolean, user: any };
+      
+      // Set Google access token cookie
     res.cookie('google_access', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
+      path: '/',
       maxAge: 1 * 60 * 60 * 1000, // 1 hours
     });
     
@@ -116,6 +118,7 @@ export class AuthController {
       httpOnly: false, // Not httpOnly so guard can read it for refresh
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
+      path: '/',
       maxAge: 1 * 60 * 60 * 1000, // 1 hours
     });
 
@@ -124,6 +127,12 @@ export class AuthController {
     // }
     // return nestResponse(200, 'Login successful', user)(res);
     return res.redirect(`${process.env.FRONTEND_URL}/chat`)
+    } catch (error) {
+      if (error.status === 400) {
+        return res.redirect(`${process.env.FRONTEND_URL}/callback?error=${encodeURIComponent(error.message || 'Account has been deleted')}`);
+      }
+      return res.redirect(`${process.env.FRONTEND_URL}/callback?error=${encodeURIComponent('Authentication failed')}`);
+    }
   }
 
   @Post('refresh')

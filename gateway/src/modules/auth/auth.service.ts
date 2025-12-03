@@ -40,7 +40,7 @@ export class AuthService {
                 emailVerified: user.emailVerified,
                 role: role as UserRole,
                 company,
-                status: UserStatus.INACTIVE,
+                status: UserStatus.ACTIVE,
             }
             const newUser = await this.prisma.user.create({
                 data: {
@@ -99,6 +99,7 @@ export class AuthService {
         }
 
         if (existingUser) {
+            // If user exists and is emailVerified, they already have an account
             if (existingUser.emailVerified) {
                 return nestError(400, 'User with this email already exists')(res);
             }
@@ -240,6 +241,7 @@ export class AuthService {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
+            path: '/',
             maxAge: 60 * 60 * 1000, // 1 hour
         });
         
