@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import orchestrator, vision, rag, asr_tts , doc_extract, stream
+from .routes import orchestrator, vision, rag, asr_tts , doc_extract
 from .shared.database import get_db, check_db_connection
 app = FastAPI(
     title="IntelliMaint AI Service",
@@ -52,11 +52,11 @@ app.include_router(
 #     prefix="/api/v1/upload_audio",
 #     tags=["voice_agent"]
 # )
-app.include_router(
-    stream.router,
-    prefix="/api/v1",
-    tags=["stream"]
-)
+# app.include_router(
+#     stream.router,
+#     prefix="/api/v1",
+#     tags=["stream"]
+# )
 
 @app.get("/")
 async def test_db():

@@ -2,7 +2,7 @@ import { Controller, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/co
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as multer from 'multer';
 import * as path from 'path';
-import { put } from '@vercel/blob';  // Import Vercel Blob package
+import { put } from '@vercel/blob';  // Import Vercel Blob 
 import { appConfig } from 'src/config/app.config';
 import { nestError, nestResponse } from 'src/common/helpers/responseHelpers';
 @Controller('upload')
@@ -46,4 +46,6 @@ export class UploadController {
       return nestError(500, 'Error uploading file', error.message)(res as any);
     }
   }
+
+  
 }
