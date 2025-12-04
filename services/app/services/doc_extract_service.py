@@ -1,4 +1,5 @@
 import os
+import re
 from typing import List, Dict, Tuple
 
 import fitz  # PyMuPDF
@@ -68,7 +69,11 @@ class DocumentService:
     def extract_text_with_image_markers(file_path: str, output_dir: str) -> Tuple[str, List[str]]:
         """
         Extract text in reading order, skip table-like blocks,
-        avoid duplicate text blocks, and save images with markers.
+        avoid duplicate text blocks, and save images with compact markers.
+
+        Returns:
+            full_text: normalized text containing headings, paragraphs and markers like [IMAGE:1] and [TABLE_PLACEHOLDER]
+            image_files: list of local image paths extracted (same order as markers)
         """
 
         full_text = ""
@@ -157,7 +162,7 @@ class DocumentService:
 
                     # If image already extracted → reuse same number
                     if xref in image_seen:
-                        page_output_lines.append(f"IMAGE:{image_seen[xref]}")
+                        page_output_lines.append(f"[IMAGE:{image_seen[xref]}]")
                         page_output_lines.append("")
                         continue
 
@@ -168,14 +173,14 @@ class DocumentService:
                         continue
 
                     try:
-                        # FIX: Safe handling when pix.colorspace is None
+                        # Safe handling when pix.colorspace is None
                         if pix.colorspace is None:
                             try:
                                 pix = fitz.Pixmap(fitz.csRGB, pix)
                             except:
                                 continue  # skip images we can't convert
 
-                        # FIX: Convert CMYK, Indexed, Alpha → RGB
+                        # Convert CMYK, Indexed, Alpha → RGB
                         elif pix.colorspace and (pix.colorspace.n not in (1, 3) or pix.alpha):
                             try:
                                 pix = pix.copy(colorspace=fitz.csRGB, alpha=False)
@@ -189,7 +194,8 @@ class DocumentService:
                         image_files.append(img_path)
                         image_seen[xref] = image_counter
 
-                        page_output_lines.append(f"IMAGE:{image_counter}")
+                        # Use compact marker form
+                        page_output_lines.append(f"[IMAGE:{image_counter}]")
                         page_output_lines.append("")
 
                         image_counter += 1
@@ -198,9 +204,11 @@ class DocumentService:
                         pix = None
 
                 # -------------------------
-                # SAVE PAGE OUTPUT
+                # NORMALIZE PAGE OUTPUT
                 # -------------------------
-                full_text += "\n".join(page_output_lines) + "\n\n"
+                normalized_lines = DocumentService.normalize_page_lines(page_output_lines)
+                # join normalized lines with newlines and add to full_text
+                full_text += "\n".join(normalized_lines) + "\n\n"
 
         return full_text, image_files
 
@@ -286,11 +294,19 @@ class DocumentService:
     # ------------------------------------
     @staticmethod
     def replace_placeholders_with_urls(text: str, images: List[Dict]) -> str:
-        """Replace IMAGE:n markers with formatted image references."""
+        """
+        Replace IMAGE:n and [IMAGE:n] markers with a readable block including URL.
+        Accepts both formats to remain backward compatible.
+        """
+        # Replace both 'IMAGE:3' and '[IMAGE:3]' tokens
         for img in images:
-            marker = f"IMAGE:{img['image_number']}"
+            # accept either format when searching
+            marker_plain = f"IMAGE:{img['image_number']}"
+            marker_bracket = f"[IMAGE:{img['image_number']}]"
             replacement = f"\nimage: {img['image_number']}\nurl: {img['url']}\n"
-            text = text.replace(marker, replacement)
+            # Prefer replacing bracketed first, then plain
+            text = text.replace(marker_bracket, replacement)
+            text = text.replace(marker_plain, replacement)
         return text
 
     # ------------------------------------
