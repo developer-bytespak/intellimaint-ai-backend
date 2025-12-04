@@ -1,0 +1,91 @@
+{
+  "file": "C:\\Users\\ac\\Desktop\\All\\IntelliMaint\\intellimaint-ai-backend\\scripts\\chunking\\pdf_samples\\sample1.md",
+  "reports": {
+    "custom": {
+      "source": "pdf_extracted",
+      "file": "sample1.md",
+      "num_chunks": 28,
+      "token_stats": {
+        "min": 6,
+        "max": 1064,
+        "avg": 266.75
+      },
+      "chunks_with_headings": 28,
+      "first_chunks_preview": [
+        {
+          "index": 0,
+          "tokens": 110,
+          "heading": "STORAGE, COMMISSIONING",
+          "preview": "# Extracted PDF Content    English – Original Instructions                                                     10-2009                                                                      0908-0101-00 (Issue 2)   # STORAGE, COMMISSIONING   # and MAINTENANCE    # Lead Acid Batteries    [IMAGE] [IMAGE]    [IMAGE] [IMAGE]    [IMAGE] [IMAGE]     [IMAGE] [IMAGE]    Storage, Commissioning and Maintenanc"
+        },
+        {
+          "index": 1,
+          "tokens": 457,
+          "heading": "CONTENTS",
+          "preview": "## CONTENTS   Section Title Page  1 Safety Precautions .......................................................................................................................... 1-1 1.1 General Precautions ................................................................................................................... 1-1 1.2 Fire Hazard..........................................................."
+        },
+        {
+          "index": 2,
+          "tokens": 90,
+          "heading": "SECTION 1 - SAFETY PRECAUTIONS",
+          "preview": "# SECTION 1 - SAFETY PRECAUTIONS    # 1   # Safety Precautions   The handling and proper use of lead-acid batteries is not hazardous providing the correct precautions are observed and personnel are trained in their use.   ## 1.1   ## General Precautions   Never lay tools or metal objects across the top of the battery.  Keep batteries upright.  Use tools with insulated handles.   ## 1.2 "
+        },
+        {
+          "index": 3,
+          "tokens": 159,
+          "heading": "Fire Hazard",
+          "preview": "## Fire Hazard   During the charging of a battery, explosive gases are given off. Keep the battery well ventilated and away from naked flames and sparks. NO SMOKING.  Before disconnecting a battery, always remove power from the mains powered battery charger (where fitted) BEFORE disconnecting the charger leads.  When putting a battery into service on a generator set, connect the earth lead LAST ; "
+        },
+        {
+          "index": 4,
+          "tokens": 94,
+          "heading": "Fluid Hazard",
+          "preview": "## Fluid Hazard   Take care when filling batteries with electrolyte and always wear personal protective equipment  WARNING: NEVER ADD UNDILUTED SULPHURIC ACID TO A BATTERY.  [TABLE_PLACEHOLDER]   [IMAGE] [IMAGE]    Page 1-2 Section 1 – Safety Precautions   [IMAGE] [IMAGE]    Section 2 – Introduction Page 2-1   # SECTION 2 - INTRODUCTION    # 2 "
+        }
+      ]
+    },
+    "langchain": {
+      "source": "pdf_extracted",
+      "file": "sample1.md",
+      "num_chunks": 14,
+      "token_stats": {
+        "min": 133,
+        "max": 1171,
+        "avg": 577.7857142857143
+      },
+      "chunks_with_headings": 2,
+      "first_chunks_preview": [
+        {
+          "index": 0,
+          "tokens": 271,
+          "heading": "Extracted PDF Content",
+          "preview": "# Extracted PDF Content    English – Original Instructions                                                     10-2009                                                                      0908-0101-00 (Issue 2)  # STORAGE, COMMISSIONING  # and MAINTENANCE   # Lead Acid Batteries    [IMAGE] [IMAGE]    [IMAGE] [IMAGE]    [IMAGE] [IMAGE]     [IMAGE] [IMAGE]    Storage, Commissioning and Maintenance P"
+        },
+        {
+          "index": 1,
+          "tokens": 294,
+          "heading": null,
+          "preview": "5 Maintenance..................................................................................................................................... 5-1 5.1 General........................................................................................................................................ 5-1 5.2 Cleaning Batteries..........................................................................."
+        },
+        {
+          "index": 2,
+          "tokens": 569,
+          "heading": null,
+          "preview": "[IMAGE] [IMAGE]    Publication 0908-0101-00 Storage, Commissioning and Maintenance Issue 2 – 10-2009 of Lead Acid Batteries  Page ii Contents  ### THIS IS A BLANK PAGE    [IMAGE] [IMAGE]    Section 1 – Safety Precautions Page 1-1  # SECTION 1 - SAFETY PRECAUTIONS   # 1  # Safety Precautions   The handling and proper use of lead-acid batteries is not hazardous providing the correct precautions are "
+        },
+        {
+          "index": 3,
+          "tokens": 566,
+          "heading": null,
+          "preview": "[IMAGE] [IMAGE]    Page 2-2 Section 2 – Introduction   [IMAGE] [IMAGE]    Section 3 – Storage Page 3-1  # SECTION 3 - STORAGE   # 3  # Storage   Dry-charged batteries should be stored in a cool, dry place, upright and with the vent caps securely in place.  Filled and charged batteries must be stored in a cool, dry, well ventilated place. Ensure that the vent caps are securely screwed down, or push"
+        },
+        {
+          "index": 4,
+          "tokens": 515,
+          "heading": "4.3",
+          "preview": "## 4.3  ## Charging   1. Charge the battery at the current rating given in Table 8-1 for a minimum of four hours in order to ensure that the acid is sufficiently mixed within the battery. The charging period may need to be extended if the battery has been in storage.  2. At the end of the charging process, the electrolyte levels must be checked and restored if necessary by the addition of electrol"
+        }
+      ]
+    }
+  }
+}
