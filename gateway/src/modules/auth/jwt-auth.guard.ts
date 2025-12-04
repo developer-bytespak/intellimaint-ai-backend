@@ -54,6 +54,7 @@ export class JwtAuthGuard implements CanActivate {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
+            path: '/',
             maxAge: 60 * 60 * 1000, // 1 hour
           });
           
@@ -156,6 +157,7 @@ export class JwtAuthGuard implements CanActivate {
             httpOnly: true,
             sameSite: "lax",
             secure: process.env.NODE_ENV === "production",
+            path: "/",
             maxAge: 2 * 60 * 60 * 1000,
           });
 
