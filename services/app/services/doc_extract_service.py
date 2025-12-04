@@ -398,3 +398,90 @@ class DocumentService:
             "deleted": deleted,
             "failed": failed,
         }
+
+    # ------------------------------------
+    # Normalize page lines
+    # ------------------------------------
+    @staticmethod
+    def normalize_page_lines(lines: List[str]) -> List[str]:
+        """
+        Normalize page output lines:
+        - Remove '# Page N' lines
+        - Collapse sequences of short lines into a single paragraph
+        - Preserve heading lines (starting with '#')
+        - Normalize image markers to '[IMAGE:n]'
+        - Preserve '[TABLE_PLACEHOLDER]'
+        """
+        out: List[str] = []
+        buffer: List[str] = []
+
+        def flush_buffer():
+            nonlocal buffer
+            if buffer:
+                joined = " ".join(l for l in buffer if l)
+                if joined.strip():
+                    out.append(joined.strip())
+                buffer = []
+
+        for raw in lines:
+            line = raw.strip()
+
+            # Skip page markers
+            if re.match(r'^#\s*Page\s+\d+', line, re.IGNORECASE):
+                flush_buffer()
+                continue
+
+            # Heading lines: flush buffer, keep heading as a line
+            if line.startswith("#"):
+                flush_buffer()
+                out.append(line)
+                continue
+
+            # Table placeholder: flush and keep
+            if line.startswith("[TABLE_PLACEHOLDER]"):
+                flush_buffer()
+                out.append("[TABLE_PLACEHOLDER]")
+                continue
+
+            # Normalize image markers (either "IMAGE:1" or "[IMAGE:1]" -> "[IMAGE:1]")
+            m = re.match(r'^\[?IMAGE:?\s*([0-9]+)\]?$', line, re.IGNORECASE)
+            if m:
+                flush_buffer()
+                out.append(f"[IMAGE:{int(m.group(1))}]")
+                continue
+
+            # Blank line: flush buffer and preserve a single blank
+            if line == "":
+                flush_buffer()
+                out.append("")
+                continue
+
+            # Short-line accumulation heuristic
+            words = line.split()
+            if len(words) <= 6:
+                # accumulate short lines; likely soft-wrapped
+                buffer.append(line)
+            else:
+                # longer lines: attach to buffer if any, otherwise emit directly
+                if buffer:
+                    buffer.append(line)
+                    flush_buffer()
+                else:
+                    out.append(line)
+
+        # flush remaining
+        flush_buffer()
+
+        # Collapse multiple blank lines into single blank
+        final: List[str] = []
+        prev_blank = False
+        for l in out:
+            if l == "":
+                if not prev_blank:
+                    final.append("")
+                    prev_blank = True
+            else:
+                final.append(l)
+                prev_blank = False
+
+        return final
