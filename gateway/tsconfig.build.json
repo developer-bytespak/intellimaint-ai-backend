@@ -1,8 +1,9 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist",       // relative to gateway/
-    "rootDir": "src"
+    "outDir": "./dist",
+    "rootDir": "."
   },
-  "exclude": ["node_modules", "test", "**/*.spec.ts"]
+  "include": ["src/**/*", "prisma/**/*"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
 }
