@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { RepositoryService } from '../services/repository.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
-import { UploadUrlsRequestDto } from '../dto/upload-urls.dto';
 import { CreateDocumentsRequestDto } from '../dto/create-document.dto';
 import { ListDocumentsQueryDto } from '../dto/list-documents.dto';
 import { nestResponse, nestError } from 'src/common/helpers/responseHelpers';
@@ -24,38 +23,6 @@ import type { Response } from 'express';
 @UseGuards(JwtAuthGuard)
 export class RepositoryController {
   constructor(private readonly repositoryService: RepositoryService) {}
-
-  @Post('upload-urls')
-  async generateUploadUrls(
-    @Req() req: any,
-    @Body() body: any,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    try {
-      const userId = req.user.id;
-      const uploadDto = plainToInstance(UploadUrlsRequestDto, body);
-      const errors = await validate(uploadDto);
-
-      if (errors.length > 0) {
-        const messages = errors.map((err) => Object.values(err.constraints || {})).flat();
-        return nestError(400, 'Validation failed', messages)(res);
-      }
-
-      const uploadUrls = await this.repositoryService.generateUploadUrls(
-        userId,
-        uploadDto.files,
-      );
-
-      return nestResponse(200, 'Upload URLs generated successfully', { uploadUrls })(res);
-    } catch (error) {
-      console.error('Error generating upload URLs:', error);
-      return nestError(
-        500,
-        'Failed to generate upload URLs',
-        error.message || 'Internal server error',
-      )(res);
-    }
-  }
 
   @Post('documents')
   async createDocuments(

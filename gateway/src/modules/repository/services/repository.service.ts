@@ -1,8 +1,6 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
-import { put, del } from '@vercel/blob';
-import { randomUUID } from 'crypto';
-import { FileMetadataDto } from '../dto/upload-urls.dto';
+import { del } from '@vercel/blob';
 import { DocumentMetadataDto } from '../dto/create-document.dto';
 import { ListDocumentsQueryDto } from '../dto/list-documents.dto';
 import { RepositoryStatus } from '@prisma/client';
@@ -10,27 +8,6 @@ import { RepositoryStatus } from '@prisma/client';
 @Injectable()
 export class RepositoryService {
   constructor(private prisma: PrismaService) {}
-
-  async generateUploadUrls(userId: string, files: FileMetadataDto[]) {
-    // Generate blob paths for client-side upload
-    // Client will use Vercel Blob client SDK to upload directly
-    const uploadUrls = files.map((file) => {
-      const fileId = randomUUID();
-      const timestamp = Date.now();
-      const randomString = Math.random().toString(36).substring(2, 15);
-      const fileExtension = file.fileName.split('.').pop() || 'bin';
-      const blobPath = `repositories/${userId}/${timestamp}-${randomString}.${fileExtension}`;
-
-      return {
-        fileId,
-        blobPath,
-        fileName: file.fileName,
-        contentType: file.contentType,
-      };
-    });
-
-    return uploadUrls;
-  }
 
   async createDocuments(userId: string, documents: DocumentMetadataDto[]) {
     const createdDocuments = await Promise.all(
@@ -53,7 +30,7 @@ export class RepositoryService {
   async listDocuments(userId: string, query: ListDocumentsQueryDto) {
     // Ensure page and limit are numbers (query params come as strings)
     const page = Number(query.page) || 1;
-    const limit = Number(query.limit) || 20;
+    const limit = Number(query.limit) || 10;
     const skip = (page - 1) * limit;
 
     const where: any = {
