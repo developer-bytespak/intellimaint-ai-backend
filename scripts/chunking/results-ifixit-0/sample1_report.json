@@ -6,17 +6,17 @@
       "file": "sample1.md",
       "num_chunks": 26,
       "token_stats": {
-        "min": 158,
-        "max": 550,
-        "avg": 369.4230769230769
+        "min": 167,
+        "max": 582,
+        "avg": 375.7307692307692
       },
       "chunks_with_headings": 26,
       "first_chunks_preview": [
         {
           "index": 0,
           "tokens": 223,
-          "heading": "1. Power off your Meta Quest 2",
-          "preview": "# Meta Quest 2 Battery Disconnect Prereq  Steps to disconnect the battery for the Meta Quest 2. Prereq guide.   ## 1. Power off your Meta Quest 2 - Hold the power button for three seconds to fully turn off your headset. > **Note:** You'll hear a power down chime, and the LED next to the power button will turn off. ![Step 1 Image 3189987](https://guide-images.cdn.ifixit.com/igi/SqbHLQOA2SemeF4D.ful"
+          "heading": "Meta Quest 2 Battery Disconnect Prereq",
+          "preview": "# Meta Quest 2 Battery Disconnect Prereq  Steps to disconnect the battery for the Meta Quest 2. Prereq guide.  ## 1. Power off your Meta Quest 2 - Hold the power button for three seconds to fully turn off your headset. > **Note:** You'll hear a power down chime, and the LED next to the power button will turn off. ![Step 1 Image 3189987](https://guide-images.cdn.ifixit.com/igi/SqbHLQOA2SemeF4D.full"
         },
         {
           "index": 1,
@@ -41,49 +41,6 @@
           "tokens": 487,
           "heading": "5. Unclip the side straps",
           "preview": "## 5. Unclip the side straps - Use your fingers to grasp the right strap near the headset. - Peel the right strap away from the headset arm to unclip it. ![Step 5 Image 3205694](https://guide-images.cdn.ifixit.com/igi/URh1oymFaf6RLYSM.full) <!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/URh1oymFaf6RLYSM.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/URh1oymFaf6RLYSM."
-        }
-      ]
-    },
-    "langchain": {
-      "source": "ifixit",
-      "file": "sample1.md",
-      "num_chunks": 17,
-      "token_stats": {
-        "min": 350,
-        "max": 829,
-        "avg": 565.0
-      },
-      "chunks_with_headings": 17,
-      "first_chunks_preview": [
-        {
-          "index": 0,
-          "tokens": 529,
-          "heading": "Meta Quest 2 Battery Disconnect Prereq",
-          "preview": "# Meta Quest 2 Battery Disconnect Prereq  Steps to disconnect the battery for the Meta Quest 2. Prereq guide.  ## 1. Power off your Meta Quest 2 - Hold the power button for three seconds to fully turn off your headset. > **Note:** You'll hear a power down chime, and the LED next to the power button will turn off. ![Step 1 Image 3189987](https://guide-images.cdn.ifixit.com/igi/SqbHLQOA2SemeF4D.full"
-        },
-        {
-          "index": 1,
-          "tokens": 504,
-          "heading": "3. Step 3",
-          "preview": "## 3. Step 3 - Grasp and pull on the top section of the facial interface to unclip it from the headset. ![Step 3 Image 3189882](https://guide-images.cdn.ifixit.com/igi/Be2J2NaNLeqZuRhi.full) <!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/Be2J2NaNLeqZuRhi.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/Be2J2NaNLeqZuRhi.medium, large=https://guide-images.cdn.ifixit.com/"
-        },
-        {
-          "index": 2,
-          "tokens": 814,
-          "heading": "5. Unclip the side straps",
-          "preview": "## 5. Unclip the side straps - Use your fingers to grasp the right strap near the headset. - Peel the right strap away from the headset arm to unclip it. ![Step 5 Image 3205694](https://guide-images.cdn.ifixit.com/igi/URh1oymFaf6RLYSM.full) <!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/URh1oymFaf6RLYSM.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/URh1oymFaf6RLYSM."
-        },
-        {
-          "index": 3,
-          "tokens": 613,
-          "heading": "7. Remove the top strap",
-          "preview": "## 7. Remove the top strap - Separate the hook and loop strip on the top strap. ![Step 7 Image 3205701](https://guide-images.cdn.ifixit.com/igi/hSyfJboRQGTssgOk.full) <!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/hSyfJboRQGTssgOk.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/hSyfJboRQGTssgOk.medium, large=https://guide-images.cdn.ifixit.com/igi/hSyfJboRQGTssgOk.lar"
-        },
-        {
-          "index": 4,
-          "tokens": 654,
-          "heading": "9. Remove the eyepiece trim screws",
-          "preview": "## 9. Remove the eyepiece trim screws - Use a Torx T2 driver to remove the six 3.5 mm‑long screws securing the eyepiece trim. ![Step 9 Image 3190041](https://guide-images.cdn.ifixit.com/igi/yPeQSMKFUNr1DPW5.full) <!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/yPeQSMKFUNr1DPW5.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/yPeQSMKFUNr1DPW5.medium, large=https://guide-"
         }
       ]
     }

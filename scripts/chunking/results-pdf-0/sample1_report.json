@@ -1,0 +1,48 @@
+{
+  "file": "C:\\Users\\BYTES PAK\\Desktop\\intellimaint-ai-backend\\scripts\\chunking\\pdf_samples\\sample1.md",
+  "reports": {
+    "custom": {
+      "source": "pdf_extracted",
+      "file": "sample1.md",
+      "num_chunks": 90,
+      "token_stats": {
+        "min": 17,
+        "max": 807,
+        "avg": 447.2
+      },
+      "chunks_with_headings": 90,
+      "first_chunks_preview": [
+        {
+          "index": 0,
+          "tokens": 17,
+          "heading": "Extracted PDF Content",
+          "preview": "# Extracted PDF Content  # Page # Warranty Statement  # Global Commercial Warranty Statement"
+        },
+        {
+          "index": 1,
+          "tokens": 491,
+          "heading": "Generator Set",
+          "preview": "# Generator Set English Original Instructions 7-2017 A028U870 (Issue 5) Effective Date: 18 - July -201 7 Page 1 of 2 A028U870 Issue 5 Limited Warranty Commercial Generating Set This limited warranty applies to all Cummins Power Generation  branded commercial generating sets and associated accessories (hereinafter referred to as \"Product\"). This warranty covers any failures of the Product, under n"
+        },
+        {
+          "index": 2,
+          "tokens": 516,
+          "heading": "Generator Set",
+          "preview": "The permissible average power output over 24 hours of operation shall not exceed 70% of the EPA-SE. Data Center Continuous (DCC) is defined as the maximum power which the generator is capable of delivering continuously to a constant or varying electrical load for unlimited hours in a data center application. † Warranty start date for designated rental and oil and gas model Products is determined t"
+        },
+        {
+          "index": 3,
+          "tokens": 365,
+          "heading": "Generator Set",
+          "preview": "\u0001 Lack of maintenance or unauthorized repair. \u0001 Noncompliance with any Cummins Power Generation  published guideline or policy. \u0001 Use of improper or contaminated fuels, coolants or lubricants. \u0001 Improper storage before and after commissioning. \u0001 Owner’s delay in making Product available after notification of potential Product problem. \u0001 Replacement parts and accessories not authorized by Cummins "
+        },
+        {
+          "index": 4,
+          "tokens": 403,
+          "heading": "Generator Set",
+          "preview": "www.power. cummins. com This limited warranty shall be enforced to the maximum extent permitted by applicable law. This limited warranty gives the owner specific rights that may vary from state to state or from jurisdiction to jurisdiction. Product Model Number:_______________________ Product Serial Number:________________________ Date in Service:______________________________ [IMAGE] :تاريخ السري"
+        }
+      ]
+    }
+  }
+}

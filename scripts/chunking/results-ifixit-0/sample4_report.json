@@ -4,56 +4,13 @@
     "custom": {
       "source": "ifixit",
       "file": "sample4.md",
-      "num_chunks": 18,
+      "num_chunks": 20,
       "token_stats": {
-        "min": 158,
-        "max": 757,
-        "avg": 332.55555555555554
+        "min": 153,
+        "max": 518,
+        "avg": 306.7
       },
-      "chunks_with_headings": 18,
-      "first_chunks_preview": [
-        {
-          "index": 0,
-          "tokens": 757,
-          "heading": "1. Determine the unloader assembly",
-          "preview": "# MiTM Pressure Washers CA2703HDHB1 2017 Pump Assembly Replacement  This guide shows how to remove and replace the entire pump assembly as a whole unit for the Mi-T-M gas pressure washer.  You have to remove the output assembly from the pump in order to replace the pump assembly. This requires removing many tight pipe fittings.  You will need something that is 3” tall to place underneath the pump "
-        },
-        {
-          "index": 1,
-          "tokens": 348,
-          "heading": "2. Step 2",
-          "preview": "## 2. Step 2 > **Note:** Before you begin, be sure that the engine is powered off and is cool to the touch. - Grab the plastic housing at the end of the spark plug wire. - Pull firmly to disconnect the wire from the spark plug. ![Step 2 Image 2073211](https://guide-images.cdn.ifixit.com/igi/5UE5GC1VGEKYaSiO.full) <!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/5UE5GC1VGEKYaSiO.t"
-        },
-        {
-          "index": 2,
-          "tokens": 345,
-          "heading": "3. Loosen the hose clamp",
-          "preview": "## 3. Loosen the hose clamp - Use a 1/4\" socket or a large flathead screwdriver to loosen the hose clamp near the inlet filter. - Slide the hose clamp away from the end of the hose. ![Step 3 Image 1889939](https://guide-images.cdn.ifixit.com/igi/HEE6UDW61KHAGI4T.full) <!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/HEE6UDW61KHAGI4T.thumbnail, medium=https://guide-images.cdn.ifix"
-        },
-        {
-          "index": 3,
-          "tokens": 329,
-          "heading": "4. Disconnect the return hose",
-          "preview": "## 4. Disconnect the return hose - Wiggle the hose and pull it off of the brass nipple. ![Step 4 Image 1889550](https://guide-images.cdn.ifixit.com/igi/oS4QS3JgMcLL3rXN.full) <!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/oS4QS3JgMcLL3rXN.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/oS4QS3JgMcLL3rXN.medium, large=https://guide-images.cdn.ifixit.com/igi/oS4QS3JgMcLL"
-        },
-        {
-          "index": 4,
-          "tokens": 175,
-          "heading": "5. Position the support block",
-          "preview": "## 5. Position the support block - Slide a 3\" tall block underneath the pump assembly to help support the pump. ![Step 5 Image 1889660](https://guide-images.cdn.ifixit.com/igi/2wLy3GTCgGrMqenn.full) <!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/2wLy3GTCgGrMqenn.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/2wLy3GTCgGrMqenn.medium, large=https://guide-images.cdn.ifi"
-        }
-      ]
-    },
-    "langchain": {
-      "source": "ifixit",
-      "file": "sample4.md",
-      "num_chunks": 11,
-      "token_stats": {
-        "min": 163,
-        "max": 722,
-        "avg": 548.7272727272727
-      },
-      "chunks_with_headings": 10,
+      "chunks_with_headings": 20,
       "first_chunks_preview": [
         {
           "index": 0,
@@ -63,27 +20,27 @@
         },
         {
           "index": 1,
-          "tokens": 644,
-          "heading": null,
-          "preview": "The following tools are optional, but can help with disassembly:  * 1/4” socket * 11/16” wrench * 3/4” wrench * 15/16” wrench * 1” wrench  ## 1. Determine the unloader assembly - '''There are two versions of the unloader assembly: '''   - First image—earlier pressure washers feature an all-in-one assembly (part 8-0631) that’s easy to replace, but gave users the ability to break the pump.   - Secon"
+          "tokens": 153,
+          "heading": "1. Determine the unloader assembly",
+          "preview": "## 1. Determine the unloader assembly - '''There are two versions of the unloader assembly: '''   - First image—earlier pressure washers feature an all-in-one assembly (part 8-0631) that’s easy to replace, but gave users the ability to break the pump. - Second image—later models use a tamper-proof, harder to remove unloader (part 8-0656), connected by a series of pipe fittings. > **Note:** This gu"
         },
         {
           "index": 2,
-          "tokens": 693,
+          "tokens": 479,
+          "heading": "1. Determine the unloader assembly",
+          "preview": "- If you need to remove an all-in-one style unloader, use a large adjustable wrench to unscrew the two large Banjo bolts. This will disconnect the unloader from the pump assembly. ![Step 1 Image 1889932](https://guide-images.cdn.ifixit.com/igi/OZIOd4IdAOsdFZqc.full) <!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/OZIOd4IdAOsdFZqc.thumbnail, medium=https://guide-images.cdn.ifixit"
+        },
+        {
+          "index": 3,
+          "tokens": 348,
           "heading": "2. Step 2",
           "preview": "## 2. Step 2 > **Note:** Before you begin, be sure that the engine is powered off and is cool to the touch. - Grab the plastic housing at the end of the spark plug wire. - Pull firmly to disconnect the wire from the spark plug. ![Step 2 Image 2073211](https://guide-images.cdn.ifixit.com/igi/5UE5GC1VGEKYaSiO.full) <!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/5UE5GC1VGEKYaSiO.t"
         },
         {
-          "index": 3,
-          "tokens": 504,
-          "heading": "4. Disconnect the return hose",
-          "preview": "## 4. Disconnect the return hose - Wiggle the hose and pull it off of the brass nipple. ![Step 4 Image 1889550](https://guide-images.cdn.ifixit.com/igi/oS4QS3JgMcLL3rXN.full) <!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/oS4QS3JgMcLL3rXN.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/oS4QS3JgMcLL3rXN.medium, large=https://guide-images.cdn.ifixit.com/igi/oS4QS3JgMcLL"
-        },
-        {
           "index": 4,
-          "tokens": 680,
-          "heading": "6. Re-position the return elbow",
-          "preview": "## 6. Re-position the return elbow - Use a 1/2\" or adjustable wrench to loosen and twist the return elbow '''half a turn''', so that it faces the opposite direction. > **Note:** This will allow the fitting to clear the pump edge without being removed. ![Step 6 Image 1889547](https://guide-images.cdn.ifixit.com/igi/mMvBQwNRbNyBkS4D.full) <!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.co"
+          "tokens": 345,
+          "heading": "3. Loosen the hose clamp",
+          "preview": "## 3. Loosen the hose clamp - Use a 1/4\" socket or a large flathead screwdriver to loosen the hose clamp near the inlet filter. - Slide the hose clamp away from the end of the hose. ![Step 3 Image 1889939](https://guide-images.cdn.ifixit.com/igi/HEE6UDW61KHAGI4T.full) <!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/HEE6UDW61KHAGI4T.thumbnail, medium=https://guide-images.cdn.ifix"
         }
       ]
     }

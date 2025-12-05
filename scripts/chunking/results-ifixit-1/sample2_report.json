@@ -4,86 +4,43 @@
     "custom": {
       "source": "ifixit",
       "file": "sample2.md",
-      "num_chunks": 20,
+      "num_chunks": 19,
       "token_stats": {
-        "min": 133,
-        "max": 652,
-        "avg": 320.95
+        "min": 215,
+        "max": 513,
+        "avg": 339.63157894736844
       },
-      "chunks_with_headings": 20,
+      "chunks_with_headings": 19,
       "first_chunks_preview": [
         {
           "index": 0,
-          "tokens": 652,
-          "heading": "1. Prepare your Steam Deck for disassembly",
-          "preview": "# Steam Deck Left Button Board Replacement  Use this guide to replace the left button daughterboard on your Steam Deck LCD.  Remember: follow general [link|https://www.ifixit.com/News/4883/esd-is-not-a-venereal-disease|electrostatic discharge (ESD) safety procedures] while repairing your device.  These steps only describe how to physically remove and replace your console’s button board. ***You may"
-        },
-        {
-          "index": 1,
-          "tokens": 249,
-          "heading": "2. Remove the back cover screws",
-          "preview": "## 2. Remove the back cover screws - Use a Phillips driver to remove the eight screws securing the back cover:   - Four coarse thread 9.5 mm-long screws   - Four fine thread 5.8 mm-long screws > **Note:** Despite the standards, Phillips screwdrivers can vary in size and shape—two drivers labeled as the same size may fit differently in the same screw.  Use the size that fits the snuggest into the s"
-        },
-        {
-          "index": 2,
-          "tokens": 296,
-          "heading": "3. Unclip the back cover",
-          "preview": "## 3. Unclip the back cover - Insert an opening pick into the thin gap between the back cover and the front shell, along the edge of the right grip. > **Note:** If you're having trouble inserting your pick at the grip seam, try starting at either the top or bottom long edges first, then slide the pick towards the grip. - Pry up on the back cover to release it from the locking clips. ![Step 3 Image"
-        },
-        {
-          "index": 3,
-          "tokens": 364,
-          "heading": "4. Remove the back cover",
-          "preview": "## 4. Remove the back cover > **Note:** Once the clips are disconnected from one edge, the rest disconnect easily. - Grip the back cover at the opening you just created and pull it up and away from the device to unclip the long edges. - Remove the back cover. ![Step 4 Image 2617668](https://guide-images.cdn.ifixit.com/igi/6IvIWWqEXPTqW1XB.full) <!-- Image URLs: thumbnail=https://guide-images.cdn.i"
-        },
-        {
-          "index": 4,
-          "tokens": 330,
-          "heading": "5. Uncover the hidden shield screw",
-          "preview": "## 5. Uncover the hidden shield screw > **Note:** If you have a [link|https://guide-images.cdn.ifixit.com/igi/l2ABGc6CMQFIytZB.full|refreshed Steam Deck version|new_window=true] with the black motherboard cover, skip this step. - Use a pair of [product|IF145-020|tweezers] to remove the piece of foil tape covering the hidden screw on the board shield. > **Note:** If possible, try not to rip or tear"
-        }
-      ]
-    },
-    "langchain": {
-      "source": "ifixit",
-      "file": "sample2.md",
-      "num_chunks": 15,
-      "token_stats": {
-        "min": 128,
-        "max": 592,
-        "avg": 431.6
-      },
-      "chunks_with_headings": 15,
-      "first_chunks_preview": [
-        {
-          "index": 0,
-          "tokens": 128,
+          "tokens": 352,
           "heading": "Steam Deck Left Button Board Replacement",
           "preview": "# Steam Deck Left Button Board Replacement  Use this guide to replace the left button daughterboard on your Steam Deck LCD.  Remember: follow general [link|https://www.ifixit.com/News/4883/esd-is-not-a-venereal-disease|electrostatic discharge (ESD) safety procedures] while repairing your device.  These steps only describe how to physically remove and replace your console’s button board. ***You may"
         },
         {
           "index": 1,
-          "tokens": 577,
+          "tokens": 337,
           "heading": "1. Prepare your Steam Deck for disassembly",
-          "preview": "These steps only describe how to physically remove and replace your console’s button board. ***You may need additional software tools and calibration procedures*** to get a replacement board to function as intended.  ## 1. Prepare your Steam Deck for disassembly > ⚠️ **Caution:** Turn on your Steam Deck and allow the battery to discharge below 25% before starting your repairs, as a charged lithium"
+          "preview": "> **Note:** During your repair, it can be helpful at times to lay the Steam Deck face-down into its case to protect the thumbsticks and prevent wobble. ![Step 1 Image 2859003](https://guide-images.cdn.ifixit.com/igi/vQyR3PAE4HOMSLAZ.full) <!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/vQyR3PAE4HOMSLAZ.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/vQyR3PAE4HOMSLAZ.me"
         },
         {
           "index": 2,
-          "tokens": 545,
+          "tokens": 248,
           "heading": "2. Remove the back cover screws",
           "preview": "## 2. Remove the back cover screws - Use a Phillips driver to remove the eight screws securing the back cover:   - Four coarse thread 9.5 mm-long screws   - Four fine thread 5.8 mm-long screws > **Note:** Despite the standards, Phillips screwdrivers can vary in size and shape—two drivers labeled as the same size may fit differently in the same screw.  Use the size that fits the snuggest into the s"
         },
         {
           "index": 3,
-          "tokens": 364,
-          "heading": "4. Remove the back cover",
-          "preview": "## 4. Remove the back cover > **Note:** Once the clips are disconnected from one edge, the rest disconnect easily. - Grip the back cover at the opening you just created and pull it up and away from the device to unclip the long edges. - Remove the back cover. ![Step 4 Image 2617668](https://guide-images.cdn.ifixit.com/igi/6IvIWWqEXPTqW1XB.full) <!-- Image URLs: thumbnail=https://guide-images.cdn.i"
+          "tokens": 295,
+          "heading": "3. Unclip the back cover",
+          "preview": "## 3. Unclip the back cover - Insert an opening pick into the thin gap between the back cover and the front shell, along the edge of the right grip. > **Note:** If you're having trouble inserting your pick at the grip seam, try starting at either the top or bottom long edges first, then slide the pick towards the grip. - Pry up on the back cover to release it from the locking clips. ![Step 3 Image"
         },
         {
           "index": 4,
-          "tokens": 592,
-          "heading": "5. Uncover the hidden shield screw",
-          "preview": "## 5. Uncover the hidden shield screw > **Note:** If you have a [link|https://guide-images.cdn.ifixit.com/igi/l2ABGc6CMQFIytZB.full|refreshed Steam Deck version|new_window=true] with the black motherboard cover, skip this step. - Use a pair of [product|IF145-020|tweezers] to remove the piece of foil tape covering the hidden screw on the board shield. > **Note:** If possible, try not to rip or tear"
+          "tokens": 364,
+          "heading": "4. Remove the back cover",
+          "preview": "## 4. Remove the back cover > **Note:** Once the clips are disconnected from one edge, the rest disconnect easily. - Grip the back cover at the opening you just created and pull it up and away from the device to unclip the long edges. - Remove the back cover. ![Step 4 Image 2617668](https://guide-images.cdn.ifixit.com/igi/6IvIWWqEXPTqW1XB.full) <!-- Image URLs: thumbnail=https://guide-images.cdn.i"
         }
       ]
     }

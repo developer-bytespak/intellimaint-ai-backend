@@ -1,48 +1,48 @@
 {
-  "file": "pdf_samples\\sample2.md",
-  "num_chunks": 151,
-  "token_stats": {
-    "min": 1,
-    "max": 1120,
-    "avg": 302.158940397351
-  },
-  "chunks_with_headings": 151,
-  "sample_previews": [
-    {
-      "index": 0,
-      "tokens": 61,
-      "heading": "Page English Original Instructions Effective: 14 December",
-      "preview": "# Extracted PDF Content   # Page English Original Instructions Effective: 14 December   2015  A040W374 (Issue 15)   # Warranty   # Warranty Manual   # Manual   # Distributors   # Dealers      i A040W374 (Issue 15) Copyright © 2015 Cummins Inc. "
-    },
-    {
-      "index": 1,
-      "tokens": 506,
-      "heading": "Table of Contents",
-      "preview": "# Table of Contents  1. INTRODUCTION ...................................................................................................................... 1 1.1 Warranty Definition............................................................................................................ 1 1.2 Warr"
-    },
-    {
-      "index": 2,
-      "tokens": 955,
-      "heading": "Table of Contents",
-      "preview": "20 3.6.6 Failed from Stock Parts ........................................................................................ 20 3.7 Travel............................................................................................................................... 20 3.7.1 General Travel Reimbursed .."
-    },
-    {
-      "index": 3,
-      "tokens": 907,
-      "heading": "Table of Contents",
-      "preview": " 4. PRODUCT COVERAGES ...................................................................................................... 35 4.1 Determining Start Dates.................................................................................................. 35 4.2 Resources ............................."
-    },
-    {
-      "index": 4,
-      "tokens": 992,
-      "heading": "Table of Contents",
-      "preview": "41 5.1.1 Description............................................................................................................ 41 5.2 New Parts and Accessories Warranty (62) ..................................................................... 41 5.2.1 Description.................................."
-    },
-    {
-      "index": 5,
-      "tokens": 916,
-      "heading": "Table of Contents",
-      "preview": "   iv A040W374 (Issue 15) Copyright © 2015 Cummins Inc.  7. CLAIM AUDITS....................................................................................................................... 65 7.1 Introduction........................................................................................."
+  "file": "C:\\Users\\BYTES PAK\\Desktop\\intellimaint-ai-backend\\scripts\\chunking\\pdf_samples\\sample2.md",
+  "reports": {
+    "custom": {
+      "source": "pdf_extracted",
+      "file": "sample2.md",
+      "num_chunks": 128,
+      "token_stats": {
+        "min": 41,
+        "max": 558,
+        "avg": 345.65625
+      },
+      "chunks_with_headings": 128,
+      "first_chunks_preview": [
+        {
+          "index": 0,
+          "tokens": 41,
+          "heading": "Extracted PDF Content",
+          "preview": "# Extracted PDF Content  # Page English Original Instructions Effective: 14 December 2015 A040W374 (Issue 15)  # Warranty  # Warranty Manual  # Manual  # Distributors"
+        },
+        {
+          "index": 1,
+          "tokens": 491,
+          "heading": "Dealers",
+          "preview": "# Dealers i A040W374 (Issue 15) Copyright © 2015 Cummins Inc. ii A040W374 (Issue 15) Copyright © 2015 Cummins Inc. 3.5.7 Standard Repair Time Review (Challenge).......................................................... 18 3.6 Parts ................................................................................................................................ 18 3.6.1 Distributor Reimbursement....."
+        },
+        {
+          "index": 2,
+          "tokens": 491,
+          "heading": "Dealers",
+          "preview": "21 3.8.1 CCC Section......................................................................................................... 21 3.9 Other Claimables............................................................................................................. 24 3.9.1 Freight................................................................................................................... 24 3.9.2 "
+        },
+        {
+          "index": 3,
+          "tokens": 499,
+          "heading": "Dealers",
+          "preview": "27 3.10.1 Damages ............................................................................................................ 27 3.10.2 North America Shipping Damage Recovery....................................................... 27 3.10.3 Shipment Shortages........................................................................................... 29 3.11 Material Return.........................."
+        },
+        {
+          "index": 4,
+          "tokens": 496,
+          "heading": "Dealers",
+          "preview": "36 4.6 Extended Coverage......................................................................................................... 36 4.6.1 Parts Only Extended Coverage............................................................................ 36 4.6.2 Parts+Labor (P+L) Extended Coverage ............................................................... 37 4.6.3 Parts+Labor+Travel (P+L+T) Extended Co"
+        }
+      ]
     }
-  ]
+  }
 }

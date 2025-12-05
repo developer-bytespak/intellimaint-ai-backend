@@ -1,48 +1,48 @@
 {
-  "file": "pdf_samples\\sample4.md",
-  "num_chunks": 25,
-  "token_stats": {
-    "min": 5,
-    "max": 1262,
-    "avg": 660.08
-  },
-  "chunks_with_headings": 25,
-  "sample_previews": [
-    {
-      "index": 0,
-      "tokens": 112,
-      "heading": "Page # Parts Manual",
-      "preview": "# Extracted PDF Content   # Page # Parts Manual    # Generator Set   # QSK23−G3 Engine with PowerCommand  3.3 or 3.3   # MLD Control   # C750 D6   # C750 D6 (Spec F−G)   # C800 D6   # C800 D6 (Spec F−G)   # C825 D5   # C825 D5 (Spec F−G)   # C900 D5   # C900 D5 (Spec F−G)  English Original Instruct"
-    },
-    {
-      "index": 1,
-      "tokens": 983,
-      "heading": "Table of Contents",
-      "preview": "# Table of Contents  ### Description  ### Page  Safety Precautions 2 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  About This Manual 3 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . "
-    },
-    {
-      "index": 2,
-      "tokens": 1017,
-      "heading": "Table of Contents",
-      "preview": " Control − PCC3300 56 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  Control Heater 62 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
-    },
-    {
-      "index": 3,
-      "tokens": 310,
-      "heading": "Table of Contents",
-      "preview": "gloves, masks and protective clothing!  Service and repair of Cummins equipment must be performed by trained, experienced personnel only. Improper service, repair or replacement of parts may result in damage to equipment & property, severe personal injury or death. Do not use this catalog as a guide"
-    },
-    {
-      "index": 4,
-      "tokens": 5,
-      "heading": "Safety Precautions",
-      "preview": "## Safety Precautions "
-    },
-    {
-      "index": 5,
-      "tokens": 690,
-      "heading": "Product Safety Precautions",
-      "preview": "## Product Safety Precautions   image: 1 url: https://csbahcwtjhxfqpvlqzqn.supabase.co/storage/v1/object/public/pics/image_1_2006e7fc.png     Page 3 Copyright  2020  Cummins Inc.  ### About This Manual  This manual applies to the generator models C750 D6 − C900 D5. Parts illustrations are arranged "
+  "file": "C:\\Users\\BYTES PAK\\Desktop\\intellimaint-ai-backend\\scripts\\chunking\\pdf_samples\\sample4.md",
+  "reports": {
+    "custom": {
+      "source": "pdf_extracted",
+      "file": "sample4.md",
+      "num_chunks": 31,
+      "token_stats": {
+        "min": 153,
+        "max": 754,
+        "avg": 390.8709677419355
+      },
+      "chunks_with_headings": 31,
+      "first_chunks_preview": [
+        {
+          "index": 0,
+          "tokens": 358,
+          "heading": "Extracted PDF Content",
+          "preview": "# Extracted PDF Content  # Page # Parts Manual  # Generator Set  # QSK23−G3 Engine with PowerCommand  3.3 or 3.3  # MLD Control  # C750 D6  # C750 D6 (Spec F−G)  # C800 D6  # C800 D6 (Spec F−G)  # C825 D5  # C825 D5 (Spec F−G)  # C900 D5  # C900 D5 (Spec F−G) English Original Instructions 6-2020 A050F726 (Issue 5) Publication A050F726 Parts Manual Issue 5 − 6-2020 Model: C750 D6 − C900 D5 Page 1 "
+        },
+        {
+          "index": 1,
+          "tokens": 268,
+          "heading": "C900 D5 (Spec F−G)",
+          "preview": ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . Labels 8 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . Engine 10 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+        },
+        {
+          "index": 2,
+          "tokens": 266,
+          "heading": "C900 D5 (Spec F−G)",
+          "preview": ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . Coolant Heater Kit 21 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . Radiator 24 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . "
+        },
+        {
+          "index": 3,
+          "tokens": 263,
+          "heading": "C900 D5 (Spec F−G)",
+          "preview": ". . . . . . . . . . . . Terminal Box 43 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . Skid 48 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . Oil Pump 50 . . . . . . . . "
+        },
+        {
+          "index": 4,
+          "tokens": 266,
+          "heading": "C900 D5 (Spec F−G)",
+          "preview": ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . Control Heater 62 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . Current Transformer 64 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+        }
+      ]
     }
-  ]
+  }
 }
