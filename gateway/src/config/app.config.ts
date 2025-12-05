@@ -8,5 +8,7 @@ export const appConfig = {
   redisPassword: process.env.REDIS_PASSWORD || "",
   portalEmail: process.env.PORTAL_EMAIL,
   portalPassword: process.env.PORTAL_PASSWORD,
+  token:process.env.BLOB_READ_WRITE_TOKEN,
+
 };
 
