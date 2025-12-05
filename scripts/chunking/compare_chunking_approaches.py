@@ -119,22 +119,22 @@ class CustomChunking:
         for s in sentences:
             s_tokens = self.count_tokens(s)
             if s_tokens > self.chunk_size_max:
+                # Sentence too large: split it into smaller subpieces by words
                 words = s.split()
-                piece = []
-                piece_tokens = 0
+                subpiece: List[str] = []
                 for w in words:
-                    w_tok = self.count_tokens(w + " ")
-                    if piece_tokens + w_tok > self.chunk_size_max and piece:
-                        current_sentences.append(" ".join(piece))
-                        flush_chunk()
-                        piece = [w]
-                        piece_tokens = w_tok
-                    else:
-                        piece.append(w)
-                        piece_tokens += w_tok
-                if piece:
-                    current_sentences.append(" ".join(piece))
-                    current_tokens += piece_tokens
+                    subpiece.append(w)
+                    sub_text = " ".join(subpiece)
+                    sub_tokens = self.count_tokens(sub_text)
+                    if sub_tokens >= self.chunk_size_max:
+                        # emit subpiece as its own chunk (will be subject to flush logic)
+                        chunks.append((heading, sub_text.strip()))
+                        subpiece = []
+                if subpiece:
+                    # remaining tail
+                    tail_text = " ".join(subpiece).strip()
+                    if tail_text:
+                        chunks.append((heading, tail_text))
             else:
                 if current_tokens + s_tokens > self.chunk_size_max and current_sentences:
                     flush_chunk()
@@ -166,6 +166,17 @@ class CustomChunking:
         for heading, content in sections:
             tok = self.count_tokens(content)
             is_marker_only = re.fullmatch(r'^\s*(?:\[IMAGE[:\d]*\]|\[TABLE_PLACEHOLDER\]|\[_IMAGE\]|\[TABLE\])\s*$', content, re.IGNORECASE) is not None
+            is_very_small = tok < max(40, int(self.chunk_size_min * 0.5))
+            # If marker-only or very small, attach to previous merged chunk when possible
+            if is_marker_only or is_very_small:
+                if merged:
+                    prev_h, prev_c = merged[-1]
+                    merged[-1] = (prev_h if prev_h else heading, prev_c + "\n\n" + content)
+                    continue
+                elif carry_texts:
+                    carry_texts[-1] = carry_texts[-1] + "\n\n" + content
+                    carry_tokens += tok
+                    continue
             if carry_tokens == 0:
                 carry_heading = heading
                 carry_texts = [content]
