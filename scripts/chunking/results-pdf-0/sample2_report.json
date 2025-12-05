@@ -4,13 +4,13 @@
     "custom": {
       "source": "pdf_extracted",
       "file": "sample2.md",
-      "num_chunks": 118,
+      "num_chunks": 99,
       "token_stats": {
         "min": 42,
-        "max": 585,
-        "avg": 324.771186440678
+        "max": 746,
+        "avg": 386.8888888888889
       },
-      "chunks_with_headings": 118,
+      "chunks_with_headings": 99,
       "first_chunks_preview": [
         {
           "index": 0,
@@ -38,7 +38,7 @@
         },
         {
           "index": 4,
-          "tokens": 390,
+          "tokens": 405,
           "heading": "Dealers",
           "preview": "65 7.2.1 Audit Procedure.................................................................................................... 65 7.2.2 Audit Report.......................................................................................................... 65 7.2.3 Response to Audit Report .................................................................................... 66 7.2.4 Follow-Up Audits .."
         }

@@ -4,13 +4,13 @@
     "custom": {
       "source": "pdf_extracted",
       "file": "sample1.md",
-      "num_chunks": 52,
+      "num_chunks": 54,
       "token_stats": {
         "min": 23,
-        "max": 1023,
-        "avg": 480.4230769230769
+        "max": 574,
+        "avg": 464.537037037037
       },
-      "chunks_with_headings": 52,
+      "chunks_with_headings": 54,
       "first_chunks_preview": [
         {
           "index": 0,

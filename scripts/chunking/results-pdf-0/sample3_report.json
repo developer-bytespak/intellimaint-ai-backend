@@ -7,8 +7,8 @@
       "num_chunks": 49,
       "token_stats": {
         "min": 101,
-        "max": 728,
-        "avg": 425.7551020408163
+        "max": 575,
+        "avg": 424.6938775510204
       },
       "chunks_with_headings": 49,
       "first_chunks_preview": [

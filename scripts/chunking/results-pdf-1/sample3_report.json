@@ -6,9 +6,9 @@
       "file": "sample3.md",
       "num_chunks": 31,
       "token_stats": {
-        "min": 153,
-        "max": 754,
-        "avg": 390.8709677419355
+        "min": 172,
+        "max": 667,
+        "avg": 389.0
       },
       "chunks_with_headings": 31,
       "first_chunks_preview": [
