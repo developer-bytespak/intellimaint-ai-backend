@@ -18,11 +18,12 @@ export class SettingsController {
       const userId = req.user.id;
       const settings = await this.settingsService.getSettings(userId);
       return nestResponse(200, 'Settings retrieved successfully', settings)(res);
-    } catch (error) {
-      if (error.status === 404) {
-        return nestError(404, error.message)(res);
+    } catch (error: unknown) {
+      const err = error as { status?: number; message?: string };
+      if (err.status === 404) {
+        return nestError(404, err.message || 'Not found')(res);
       }
-      return nestError(500, 'Failed to retrieve settings', error.message)(res);
+      return nestError(500, 'Failed to retrieve settings', err.message || 'Internal server error')(res);
     }
   }
 
@@ -44,11 +45,12 @@ export class SettingsController {
 
       const settings = await this.settingsService.updateSettings(userId, settingsDto);
       return nestResponse(200, 'Settings updated successfully', settings)(res);
-    } catch (error) {
-      if (error.status === 404) {
-        return nestError(404, error.message)(res);
+    } catch (error: unknown) {
+      const err = error as { status?: number; message?: string };
+      if (err.status === 404) {
+        return nestError(404, err.message || 'Not found')(res);
       }
-      return nestError(500, 'Failed to update settings', error.message)(res);
+      return nestError(500, 'Failed to update settings', err.message || 'Internal server error')(res);
     }
   }
 }

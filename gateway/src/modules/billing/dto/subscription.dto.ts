@@ -2,9 +2,9 @@ import { IsString } from 'class-validator';
 
 export class SubscriptionDto {
   @IsString()
-  priceId: string;
+  priceId!: string;
 
   @IsString()
-  userId: string;
+  userId!: string;
 }
 

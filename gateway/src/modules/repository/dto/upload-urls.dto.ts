@@ -4,21 +4,21 @@ import { Type } from 'class-transformer';
 export class FileMetadataDto {
   @IsString()
   @IsNotEmpty()
-  fileName: string;
+  fileName!: string;
 
   @IsNumber()
   @Min(1)
-  fileSize: number;
+  fileSize!: number;
 
   @IsString()
   @IsNotEmpty()
-  contentType: string;
+  contentType!: string;
 }
 
 export class UploadUrlsRequestDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => FileMetadataDto)
-  files: FileMetadataDto[];
+  files!: FileMetadataDto[];
 }
 

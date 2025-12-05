@@ -4,9 +4,10 @@ const asyncHandler = (fn: Function) => {
   return async (req: any, res: any) => {
     try {
       await fn(req, res);  
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error:', error); 
-      return nestError(500, 'Something went wrong', error.message)(res);  
+      const err = error as { message?: string };
+      return nestError(500, 'Something went wrong', err.message || 'Internal server error')(res);  
     }
   };
 };

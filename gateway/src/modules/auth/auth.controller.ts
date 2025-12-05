@@ -38,7 +38,7 @@ export class AuthController {
   // This is the first endpoint that is called when the user clicks the Google Login button
   @Get('google')
   // @UseGuards(GoogleAuthGuard)
-  googleAuth(@Req() req: Request, @Res() res: Response, @Next() next) {
+  googleAuth(@Req() req: Request, @Res() res: Response, @Next() next: any) {
     const googleToken = req.cookies?.google_access;
     const localToken = req.cookies?.local_access;
     const role = (req as any).query.role as string;
@@ -76,7 +76,7 @@ export class AuthController {
 
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
-  async googleRedirect(@Req() req, @Res({ passthrough: true }) res: Response) {
+  async googleRedirect(@Req() req: any, @Res({ passthrough: true }) res: Response) {
     const { role, company } = JSON.parse(req.query.state as string);
     // console.log("role", role);
     // console.log("company", company);
@@ -127,16 +127,17 @@ export class AuthController {
     // }
     // return nestResponse(200, 'Login successful', user)(res);
     return res.redirect(`${process.env.FRONTEND_URL}/chat`)
-    } catch (error) {
-      if (error.status === 400) {
-        return res.redirect(`${process.env.FRONTEND_URL}/callback?error=${encodeURIComponent(error.message || 'Account has been deleted')}`);
+    } catch (error: unknown) {
+      const err = error as { status?: number; message?: string };
+      if (err.status === 400) {
+        return res.redirect(`${process.env.FRONTEND_URL}/callback?error=${encodeURIComponent(err.message || 'Account has been deleted')}`);
       }
       return res.redirect(`${process.env.FRONTEND_URL}/callback?error=${encodeURIComponent('Authentication failed')}`);
     }
   }
 
   @Post('refresh')
-  refreshAccessToken(@Req() req, @Res({ passthrough: true }) res: Response) {
+  refreshAccessToken(@Req() req: any, @Res({ passthrough: true }) res: Response) {
 
     // Validate refreshToken and generate new access token
 
@@ -147,7 +148,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Req() req) {
+  getProfile(@Req() req: any) {
     return {
       message: 'User authenticated!',
       user: req.user,

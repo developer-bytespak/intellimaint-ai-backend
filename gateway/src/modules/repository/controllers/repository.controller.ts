@@ -47,12 +47,13 @@ export class RepositoryController {
       );
 
       return nestResponse(200, 'Upload URLs generated successfully', { uploadUrls })(res);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error generating upload URLs:', error);
+      const err = error as { message?: string };
       return nestError(
         500,
         'Failed to generate upload URLs',
-        error.message || 'Internal server error',
+        err.message || 'Internal server error',
       )(res);
     }
   }
@@ -76,9 +77,10 @@ export class RepositoryController {
       const documents = await this.repositoryService.createDocuments(userId, createDto.documents);
 
       return nestResponse(200, 'Documents created successfully', { documents })(res);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error creating documents:', error);
-      return nestError(500, 'Failed to create documents', error.message || 'Internal server error')(
+      const err = error as { message?: string };
+      return nestError(500, 'Failed to create documents', err.message || 'Internal server error')(
         res,
       );
     }
@@ -95,9 +97,10 @@ export class RepositoryController {
       const result = await this.repositoryService.listDocuments(userId, query);
 
       return nestResponse(200, 'Documents retrieved successfully', result)(res);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error listing documents:', error);
-      return nestError(500, 'Failed to retrieve documents', error.message || 'Internal server error')(
+      const err = error as { message?: string };
+      return nestError(500, 'Failed to retrieve documents', err.message || 'Internal server error')(
         res,
       );
     }
@@ -114,15 +117,16 @@ export class RepositoryController {
       const document = await this.repositoryService.getDocumentById(userId, id);
 
       return nestResponse(200, 'Document retrieved successfully', document)(res);
-    } catch (error) {
-      if (error.status === 404) {
-        return nestError(404, error.message)(res);
+    } catch (error: unknown) {
+      const err = error as { status?: number; message?: string };
+      if (err.status === 404) {
+        return nestError(404, err.message || 'Not found')(res);
       }
-      if (error.status === 403) {
-        return nestError(403, error.message)(res);
+      if (err.status === 403) {
+        return nestError(403, err.message || 'Forbidden')(res);
       }
       console.error('Error retrieving document:', error);
-      return nestError(500, 'Failed to retrieve document', error.message || 'Internal server error')(
+      return nestError(500, 'Failed to retrieve document', err.message || 'Internal server error')(
         res,
       );
     }
@@ -139,15 +143,16 @@ export class RepositoryController {
       const result = await this.repositoryService.deleteDocument(userId, id);
 
       return nestResponse(200, result.message, result)(res);
-    } catch (error) {
-      if (error.status === 404) {
-        return nestError(404, error.message)(res);
+    } catch (error: unknown) {
+      const err = error as { status?: number; message?: string };
+      if (err.status === 404) {
+        return nestError(404, err.message || 'Not found')(res);
       }
-      if (error.status === 403) {
-        return nestError(403, error.message)(res);
+      if (err.status === 403) {
+        return nestError(403, err.message || 'Forbidden')(res);
       }
       console.error('Error deleting document:', error);
-      return nestError(500, 'Failed to delete document', error.message || 'Internal server error')(
+      return nestError(500, 'Failed to delete document', err.message || 'Internal server error')(
         res,
       );
     }

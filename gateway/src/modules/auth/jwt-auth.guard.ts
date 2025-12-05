@@ -183,8 +183,9 @@ export class JwtAuthGuard implements CanActivate {
 
           req.user = user;
           return true;
-        } catch (refreshErr) {
-          console.log("Google refresh failed:", refreshErr.message);
+        } catch (refreshErr: unknown) {
+          const err = refreshErr as { message?: string };
+          console.log("Google refresh failed:", err.message || 'Unknown error');
 
           // clear cookies
           res.clearCookie("google_access");

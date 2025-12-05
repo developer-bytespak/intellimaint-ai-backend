@@ -26,11 +26,12 @@ export class UsersController {
       const userId = req.user.id;
       const user = await this.usersService.getProfile(userId);
       return nestResponse(200, 'Profile retrieved successfully', user)(res);
-    } catch (error) {
-      if (error.status === 404) {
-        return nestError(404, error.message)(res);
+    } catch (error: unknown) {
+      const err = error as { status?: number; message?: string };
+      if (err.status === 404) {
+        return nestError(404, err.message || 'Not found')(res);
       }
-      return nestError(500, 'Failed to retrieve profile', error.message)(res);
+      return nestError(500, 'Failed to retrieve profile', err.message || 'Internal server error')(res);
     }
   }
 
@@ -52,11 +53,12 @@ export class UsersController {
 
       const updatedUser = await this.usersService.updateProfile(userId, updateDto);
       return nestResponse(200, 'Profile updated successfully', updatedUser)(res);
-    } catch (error) {
-      if (error.status === 400 || error.status === 404) {
-        return nestError(error.status, error.message)(res);
+    } catch (error: unknown) {
+      const err = error as { status?: number; message?: string };
+      if (err.status === 400 || err.status === 404) {
+        return nestError(err.status, err.message || 'Bad request')(res);
       }
-      return nestError(500, 'Failed to update profile', error.message)(res);
+      return nestError(500, 'Failed to update profile', err.message || 'Internal server error')(res);
     }
   }
 
@@ -78,11 +80,12 @@ export class UsersController {
 
       const result = await this.usersService.changePassword(userId, changePasswordDto);
       return nestResponse(200, result.message, null)(res);
-    } catch (error) {
-      if (error.status === 400 || error.status === 404) {
-        return nestError(error.status, error.message)(res);
+    } catch (error: unknown) {
+      const err = error as { status?: number; message?: string };
+      if (err.status === 400 || err.status === 404) {
+        return nestError(err.status, err.message || 'Bad request')(res);
       }
-      return nestError(500, 'Failed to change password', error.message)(res);
+      return nestError(500, 'Failed to change password', err.message || 'Internal server error')(res);
     }
   }
 
@@ -95,11 +98,12 @@ export class UsersController {
       const userId = req.user.id;
       const result = await this.usersService.sendDeleteAccountOtp(userId);
       return nestResponse(200, result.message, null)(res);
-    } catch (error) {
-      if (error.status === 400 || error.status === 404) {
-        return nestError(error.status, error.message)(res);
+    } catch (error: unknown) {
+      const err = error as { status?: number; message?: string };
+      if (err.status === 400 || err.status === 404) {
+        return nestError(err.status, err.message || 'Bad request')(res);
       }
-      return nestError(500, 'Failed to send OTP', error.message)(res);
+      return nestError(500, 'Failed to send OTP', err.message || 'Internal server error')(res);
     }
   }
 
@@ -131,11 +135,12 @@ export class UsersController {
       await redisDeleteKey(`user_active:${userId}`);
       
       return nestResponse(200, result.message, null)(res);
-    } catch (error) {
-      if (error.status === 400 || error.status === 404) {
-        return nestError(error.status, error.message)(res);
+    } catch (error: unknown) {
+      const err = error as { status?: number; message?: string };
+      if (err.status === 400 || err.status === 404) {
+        return nestError(err.status, err.message || 'Bad request')(res);
       }
-      return nestError(500, 'Failed to delete account', error.message)(res);
+      return nestError(500, 'Failed to delete account', err.message || 'Internal server error')(res);
     }
   }
 
@@ -145,11 +150,12 @@ export class UsersController {
       const userId = req.user.id;
       const settings = await this.settingsService.getSettings(userId);
       return nestResponse(200, 'Settings retrieved successfully', settings)(res);
-    } catch (error) {
-      if (error.status === 404) {
-        return nestError(404, error.message)(res);
+    } catch (error: unknown) {
+      const err = error as { status?: number; message?: string };
+      if (err.status === 404) {
+        return nestError(404, err.message || 'Not found')(res);
       }
-      return nestError(500, 'Failed to retrieve settings', error.message)(res);
+      return nestError(500, 'Failed to retrieve settings', err.message || 'Internal server error')(res);
     }
   }
 
@@ -171,11 +177,12 @@ export class UsersController {
 
       const settings = await this.settingsService.updateSettings(userId, settingsDto);
       return nestResponse(200, 'Settings updated successfully', settings)(res);
-    } catch (error) {
-      if (error.status === 404) {
-        return nestError(404, error.message)(res);
+    } catch (error: unknown) {
+      const err = error as { status?: number; message?: string };
+      if (err.status === 404) {
+        return nestError(404, err.message || 'Not found')(res);
       }
-      return nestError(500, 'Failed to update settings', error.message)(res);
+      return nestError(500, 'Failed to update settings', err.message || 'Internal server error')(res);
     }
   }
 }

@@ -4,29 +4,29 @@ import { Type } from 'class-transformer';
 export class DocumentMetadataDto {
   @IsString()
   @IsNotEmpty()
-  fileId: string;
+  fileId!: string;
 
   @IsString()
   @IsNotEmpty()
-  fileName: string;
+  fileName!: string;
 
   @IsString()
   @IsNotEmpty()
-  fileUrl: string;
+  fileUrl!: string;
 
   @IsNumber()
   @Min(1)
-  fileSize: number;
+  fileSize!: number;
 
   @IsString()
   @IsNotEmpty()
-  blobPath: string;
+  blobPath!: string;
 }
 
 export class CreateDocumentsRequestDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => DocumentMetadataDto)
-  documents: DocumentMetadataDto[];
+  documents!: DocumentMetadataDto[];
 }
 

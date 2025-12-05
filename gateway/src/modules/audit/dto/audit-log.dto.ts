@@ -2,10 +2,10 @@ import { IsString, IsOptional, IsObject } from 'class-validator';
 
 export class AuditLogDto {
   @IsString()
-  userId: string;
+  userId!: string;
 
   @IsString()
-  action: string;
+  action!: string;
 
   @IsObject()
   @IsOptional()
