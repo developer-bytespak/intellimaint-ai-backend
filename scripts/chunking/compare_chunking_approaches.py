@@ -15,17 +15,7 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-try:
-    from langchain_text_splitters import RecursiveCharacterTextSplitter
-    LANGCHAIN_AVAILABLE = True
-except ImportError:
-    try:
-        from langchain.text_splitter import RecursiveCharacterTextSplitter
-        LANGCHAIN_AVAILABLE = True
-    except ImportError:
-        LANGCHAIN_AVAILABLE = False
-        print("⚠️  LangChain not installed. Install with: pip install langchain langchain-text-splitters")
-        print("   Will only test custom approach.\n")
+# LangChain removed: this script now only contains the custom chunker implementation
 
 
 @dataclass
@@ -37,182 +27,196 @@ class Chunk:
     token_count: int
     char_count: int
     word_count: int
-    approach: str  # "custom" or "langchain"
+    approach: str  # e.g. "custom"
 
 
 class CustomChunking:
-    """Our custom chunking approach - heading-aware"""
-    
+    """Heading-aware chunker tuned for ifixit + normalized PDF markdown."""
+
     def __init__(self):
         self.tokenizer = tiktoken.get_encoding("cl100k_base")
-        self.chunk_size_target = 600
-        self.chunk_size_min = 200
-        self.chunk_size_max = 1000
-        self.chunk_overlap = 75
-        
+        # Tuned defaults
+        self.chunk_target = 300         # target tokens (used for sentence-based splitting)
+        self.chunk_size_max = 500       # hard cap tokens for a single chunk
+        self.chunk_size_min = 150       # merge until >= this
+        self.chunk_overlap = 50         # tokens to overlap between adjacent chunks
+
     def count_tokens(self, text: str) -> int:
-        return len(self.tokenizer.encode(text))
-    
+        return len(self.tokenizer.encode(text)) if text else 0
+
     def detect_markdown_headings(self, text: str) -> List[Tuple[int, str, int]]:
         headings = []
-        lines = text.split('\n')
-        
+        lines = text.splitlines()
         for i, line in enumerate(lines):
-            h2_match = re.match(r'^##\s+(.+)$', line.strip())
+            s = line.strip()
+            h2_match = re.match(r'^##\s+(.+)$', s)
             if h2_match:
                 headings.append((i, h2_match.group(1), 2))
             else:
-                h1_match = re.match(r'^#\s+(.+)$', line.strip())
+                h1_match = re.match(r'^#\s+(.+)$', s)
                 if h1_match:
                     headings.append((i, h1_match.group(1), 1))
-        
         return headings
-    
+
     def split_by_headings(self, text: str) -> List[Tuple[Optional[str], str]]:
         headings = self.detect_markdown_headings(text)
-        lines = text.split('\n')
-        sections = []
-        
+        lines = text.splitlines()
+        sections: List[Tuple[Optional[str], str]] = []
+
         if not headings:
             return [(None, text)]
-        
-        # Handle content before first heading
+
+        # content before first heading
         if headings[0][0] > 0:
-            pre_content = '\n'.join(lines[:headings[0][0]])
-            if pre_content.strip():
-                sections.append((None, pre_content))
-        
+            pre = "\n".join(lines[:headings[0][0]]).strip()
+            if pre:
+                sections.append((None, pre))
+
         for i, (line_num, heading_text, level) in enumerate(headings):
-            start_line = line_num
-            if i + 1 < len(headings):
-                end_line = headings[i + 1][0]
-            else:
-                end_line = len(lines)
-            
-            section_lines = lines[start_line:end_line]
-            section_content = '\n'.join(section_lines)
-            sections.append((heading_text, section_content))
-        
+            start = line_num
+            end = headings[i + 1][0] if i + 1 < len(headings) else len(lines)
+            section_text = "\n".join(lines[start:end]).strip()
+            sections.append((heading_text, section_text))
         return sections
-    
+
+    def _split_into_sentences(self, text: str) -> List[str]:
+        # Naive sentence splitter (keeps punctuation). Good enough for chunking.
+        parts = re.split(r'(?<=[\.\?\!])\s+', text)
+        if len(parts) == 1:
+            parts = text.splitlines()
+        return [p.strip() for p in parts if p and p.strip()]
+
     def split_large_section(self, content: str, heading: Optional[str]) -> List[Tuple[Optional[str], str]]:
-        token_count = self.count_tokens(content)
-        
-        if token_count <= self.chunk_size_max:
+        total_tokens = self.count_tokens(content)
+        if total_tokens <= self.chunk_size_max:
             return [(heading, content)]
-        
-        chunks = []
-        lines = content.split('\n')
-        current_chunk_lines = []
+
+        sentences = self._split_into_sentences(content)
+        chunks: List[Tuple[Optional[str], str]] = []
+        current_sentences: List[str] = []
         current_tokens = 0
-        
-        i = 0
-        while i < len(lines):
-            line = lines[i]
-            line_tokens = self.count_tokens(line)
-            
-            if current_tokens + line_tokens > self.chunk_size_max and current_chunk_lines:
-                chunk_content = '\n'.join(current_chunk_lines)
-                chunks.append((heading, chunk_content))
-                
-                overlap_lines = []
+
+        def flush_chunk():
+            nonlocal current_sentences, current_tokens
+            if current_sentences:
+                chunk_text = " ".join(current_sentences).strip()
+                chunks.append((heading, chunk_text))
+                overlap_sentences: List[str] = []
                 overlap_tokens = 0
-                for j in range(len(current_chunk_lines) - 1, -1, -1):
-                    line_tok = self.count_tokens(current_chunk_lines[j])
-                    if overlap_tokens + line_tok <= self.chunk_overlap:
-                        overlap_lines.insert(0, current_chunk_lines[j])
-                        overlap_tokens += line_tok
+                for s in reversed(current_sentences):
+                    tok = self.count_tokens(s)
+                    if overlap_tokens + tok <= self.chunk_overlap:
+                        overlap_sentences.insert(0, s)
+                        overlap_tokens += tok
                     else:
                         break
-                
-                current_chunk_lines = overlap_lines
+                current_sentences = overlap_sentences
                 current_tokens = overlap_tokens
             else:
-                current_chunk_lines.append(line)
-                current_tokens += line_tokens
-                i += 1
-        
-        if current_chunk_lines:
-            chunk_content = '\n'.join(current_chunk_lines)
-            chunks.append((heading, chunk_content))
-        
+                current_sentences = []
+                current_tokens = 0
+
+        for s in sentences:
+            s_tokens = self.count_tokens(s)
+            if s_tokens > self.chunk_size_max:
+                words = s.split()
+                piece = []
+                piece_tokens = 0
+                for w in words:
+                    w_tok = self.count_tokens(w + " ")
+                    if piece_tokens + w_tok > self.chunk_size_max and piece:
+                        current_sentences.append(" ".join(piece))
+                        flush_chunk()
+                        piece = [w]
+                        piece_tokens = w_tok
+                    else:
+                        piece.append(w)
+                        piece_tokens += w_tok
+                if piece:
+                    current_sentences.append(" ".join(piece))
+                    current_tokens += piece_tokens
+            else:
+                if current_tokens + s_tokens > self.chunk_size_max and current_sentences:
+                    flush_chunk()
+                current_sentences.append(s)
+                current_tokens += s_tokens
+
+        if current_sentences:
+            chunk_text = " ".join(current_sentences).strip()
+            chunks.append((heading, chunk_text))
         return chunks
-    
+
     def combine_small_sections(self, sections: List[Tuple[Optional[str], str]]) -> List[Tuple[Optional[str], str]]:
         if not sections:
             return []
-        
-        if len(sections) == 1:
-            return sections
-        
-        first_heading, first_content = sections[0]
-        first_tokens = self.count_tokens(first_content)
-        
-        if first_tokens < self.chunk_size_min and len(sections) > 1:
-            second_heading, second_content = sections[1]
-            combined_content = '\n\n'.join([first_content, second_content])
-            combined_heading = second_heading if second_heading else first_heading
-            remaining_sections = [(combined_heading, combined_content)] + sections[2:]
-        else:
-            remaining_sections = sections
-        
-        if len(remaining_sections) > 1:
-            last_heading, last_content = remaining_sections[-1]
-            last_tokens = self.count_tokens(last_content)
-            
-            if last_tokens < self.chunk_size_min:
-                prev_heading, prev_content = remaining_sections[-2]
-                combined_content = '\n\n'.join([prev_content, last_content])
-                combined_heading = prev_heading if prev_heading else last_heading
-                remaining_sections = remaining_sections[:-2] + [(combined_heading, combined_content)]
-        
-        combined = []
-        current_heading = None
-        current_content = []
-        current_tokens = 0
-        
-        for heading, content in remaining_sections:
-            content_tokens = self.count_tokens(content)
-            
-            if current_tokens + content_tokens < self.chunk_size_min:
-                if current_heading is None:
-                    current_heading = heading
-                current_content.append(content)
-                current_tokens += content_tokens
+        merged: List[Tuple[Optional[str], str]] = []
+        carry_heading: Optional[str] = None
+        carry_texts: List[str] = []
+        carry_tokens = 0
+
+        def emit_carry():
+            nonlocal carry_heading, carry_texts, carry_tokens
+            if carry_texts:
+                combined_text = "\n\n".join(carry_texts).strip()
+                merged.append((carry_heading, combined_text))
+            carry_heading = None
+            carry_texts = []
+            carry_tokens = 0
+
+        for heading, content in sections:
+            tok = self.count_tokens(content)
+            is_marker_only = re.fullmatch(r'^\s*(?:\[IMAGE[:\d]*\]|\[TABLE_PLACEHOLDER\]|\[_IMAGE\]|\[TABLE\])\s*$', content, re.IGNORECASE) is not None
+            if carry_tokens == 0:
+                carry_heading = heading
+                carry_texts = [content]
+                carry_tokens = tok
+                if carry_tokens >= self.chunk_size_min and not is_marker_only:
+                    emit_carry()
+                continue
             else:
-                if current_content:
-                    combined.append((current_heading, '\n\n'.join(current_content)))
-                
-                if content_tokens < self.chunk_size_min:
-                    current_heading = heading
-                    current_content = [content]
-                    current_tokens = content_tokens
+                if carry_tokens + tok <= self.chunk_size_max:
+                    carry_texts.append(content)
+                    carry_tokens += tok
+                    if carry_tokens >= self.chunk_size_min and not is_marker_only:
+                        emit_carry()
+                    else:
+                        continue
                 else:
-                    combined.append((heading, content))
-                    current_heading = None
-                    current_content = []
-                    current_tokens = 0
-        
-        if current_content:
-            combined.append((current_heading, '\n\n'.join(current_content)))
-        
-        return combined
-    
+                    emit_carry()
+                    carry_heading = heading
+                    carry_texts = [content]
+                    carry_tokens = tok
+                    if carry_tokens >= self.chunk_size_min and not is_marker_only:
+                        emit_carry()
+                    continue
+
+        emit_carry()
+
+        final: List[Tuple[Optional[str], str]] = []
+        for h, c in merged:
+            if final and self.count_tokens(c) < self.chunk_size_min:
+                prev_h, prev_c = final[-1]
+                combined = prev_c + "\n\n" + c
+                final[-1] = (prev_h if prev_h else h, combined)
+            else:
+                final.append((h, c))
+        return final
+
     def chunk_text(self, text: str) -> List[Chunk]:
         sections = self.split_by_headings(text)
-        
-        processed_sections = []
+        processed: List[Tuple[Optional[str], str]] = []
+
         for heading, content in sections:
-            token_count = self.count_tokens(content)
-            if token_count > self.chunk_size_max:
-                split_sections = self.split_large_section(content, heading)
-                processed_sections.extend(split_sections)
+            tok = self.count_tokens(content)
+            if tok > self.chunk_size_max:
+                splits = self.split_large_section(content, heading)
+                processed.extend(splits)
             else:
-                processed_sections.append((heading, content))
-        
-        final_sections = self.combine_small_sections(processed_sections)
-        
-        chunks = []
+                processed.append((heading, content))
+
+        final_sections = self.combine_small_sections(processed)
+
+        chunks: List[Chunk] = []
         for idx, (heading, content) in enumerate(final_sections):
             token_count = self.count_tokens(content)
             chunks.append(Chunk(
@@ -224,61 +228,10 @@ class CustomChunking:
                 word_count=len(content.split()),
                 approach="custom"
             ))
-        
         return chunks
 
 
-class LangChainChunking:
-    """LangChain's RecursiveCharacterTextSplitter approach"""
-    
-    def __init__(self):
-        if not LANGCHAIN_AVAILABLE:
-            raise ImportError("LangChain not installed")
-        
-        self.tokenizer = tiktoken.get_encoding("cl100k_base")
-        # LangChain uses character count, but we'll configure it to approximate tokens
-        # ~4 characters per token on average
-        self.splitter = RecursiveCharacterTextSplitter(
-            chunk_size=2400,  # ~600 tokens * 4 chars
-            chunk_overlap=300,  # ~75 tokens * 4 chars
-            separators=["\n\n", "\n", ". ", " ", ""],
-            length_function=len,
-        )
-        
-    def count_tokens(self, text: str) -> int:
-        return len(self.tokenizer.encode(text))
-    
-    def chunk_text(self, text: str) -> List[Chunk]:
-        # LangChain doesn't preserve headings, so we'll try to detect them after
-        text_chunks = self.splitter.split_text(text)
-        
-        chunks = []
-        for idx, chunk_text in enumerate(text_chunks):
-            # Try to extract heading from chunk (first ## or # line)
-            heading = None
-            lines = chunk_text.split('\n')
-            for line in lines[:5]:  # Check first 5 lines
-                h2_match = re.match(r'^##\s+(.+)$', line.strip())
-                if h2_match:
-                    heading = h2_match.group(1)
-                    break
-                h1_match = re.match(r'^#\s+(.+)$', line.strip())
-                if h1_match:
-                    heading = h1_match.group(1)
-                    break
-            
-            token_count = self.count_tokens(chunk_text)
-            chunks.append(Chunk(
-                chunk_index=idx,
-                content=chunk_text,
-                heading=heading,
-                token_count=token_count,
-                char_count=len(chunk_text),
-                word_count=len(chunk_text.split()),
-                approach="langchain"
-            ))
-        
-        return chunks
+# LangChain code removed to keep repository lightweight and deterministic.
 
 
 def fetch_test_guides() -> List[Dict[str, Any]]:
@@ -322,94 +275,43 @@ def fetch_test_guides() -> List[Dict[str, Any]]:
         conn.close()
 
 
-def print_comparison(guide: Dict[str, Any], custom_chunks: List[Chunk], langchain_chunks: List[Chunk]):
-    """Print side-by-side comparison"""
+def print_custom_summary(guide: Dict[str, Any], custom_chunks: List[Chunk]):
+    """Print summary statistics for the custom chunker."""
     tokenizer = tiktoken.get_encoding("cl100k_base")
     original_tokens = len(tokenizer.encode(guide['raw_content']))
-    
+
     print("\n" + "="*100)
-    print(f"GUIDE: {guide['title']} ({guide['size_label']})")
+    print(f"GUIDE: {guide['title']} ({guide['size_label']}) - CUSTOM APPROACH ONLY")
     print(f"Original: {guide['word_count']} words, {original_tokens} tokens")
     print("="*100)
-    
-    tokenizer = tiktoken.get_encoding("cl100k_base")
-    original_tokens = len(tokenizer.encode(guide['raw_content']))
-    
-    print(f"\n{'CUSTOM APPROACH':<50} | {'LANGCHAIN APPROACH':<50}")
-    print("-" * 100)
-    print(f"Chunks: {len(custom_chunks):<49} | Chunks: {len(langchain_chunks)}")
-    
-    # Token statistics
+
+    print(f"Chunks: {len(custom_chunks)}")
     custom_tokens = [c.token_count for c in custom_chunks]
-    langchain_tokens = [c.token_count for c in langchain_chunks]
-    
-    print(f"Avg tokens: {sum(custom_tokens)/len(custom_tokens):.0f}{'':<42} | Avg tokens: {sum(langchain_tokens)/len(langchain_tokens):.0f}")
-    print(f"Min tokens: {min(custom_tokens):<49} | Min tokens: {min(langchain_tokens)}")
-    print(f"Max tokens: {max(custom_tokens):<49} | Max tokens: {max(langchain_tokens)}")
-    
-    # Chunks with headings
-    custom_with_headings = sum(1 for c in custom_chunks if c.heading)
-    langchain_with_headings = sum(1 for c in langchain_chunks if c.heading)
-    
-    print(f"Chunks with headings: {custom_with_headings}/{len(custom_chunks)}{'':<35} | Chunks with headings: {langchain_with_headings}/{len(langchain_chunks)}")
-    
-    # Show first 3 chunks from each
-    print(f"\n{'FIRST 3 CHUNKS - CUSTOM':<50} | {'FIRST 3 CHUNKS - LANGCHAIN':<50}")
-    print("-" * 100)
-    
-    max_show = min(3, len(custom_chunks), len(langchain_chunks))
-    for i in range(max_show):
-        custom = custom_chunks[i]
-        langchain = langchain_chunks[i] if i < len(langchain_chunks) else None
-        
-        custom_preview = f"#{i+1} [{custom.token_count}t] {custom.heading or 'No heading'}"
-        if langchain:
-            langchain_preview = f"#{i+1} [{langchain.token_count}t] {langchain.heading or 'No heading'}"
-        else:
-            langchain_preview = "N/A"
-        
-        print(f"{custom_preview:<50} | {langchain_preview:<50}")
-        print(f"  {custom.content[:80].replace(chr(10), ' ')}...")
-        if langchain:
-            print(f"  {langchain.content[:80].replace(chr(10), ' ')}...")
+    print(f"Avg tokens: {sum(custom_tokens)/len(custom_tokens):.0f}")
+    print(f"Min tokens: {min(custom_tokens)}")
+    print(f"Max tokens: {max(custom_tokens)}")
+    print(f"Chunks with headings: {sum(1 for c in custom_chunks if c.heading)}/{len(custom_chunks)}")
+
+    print(f"\nFIRST 3 CHUNKS - CUSTOM")
+    print("-" * 80)
+    for i in range(min(3, len(custom_chunks))):
+        c = custom_chunks[i]
+        print(f"#{i+1} [{c.token_count}t] {c.heading or 'No heading'}")
+        print(f"  {c.content[:200].replace(chr(10), ' ')}...")
         print()
-    
+
     print("="*100 + "\n")
 
 
 def main():
     """Compare approaches"""
     print("🔍 Comparing Chunking Approaches\n")
-    
-    if not LANGCHAIN_AVAILABLE:
-        print("⚠️  LangChain not available. Install with: pip install langchain")
-        print("   Will only show custom approach results.\n")
-    
     guides = fetch_test_guides()
     custom_chunker = CustomChunking()
-    
-    if LANGCHAIN_AVAILABLE:
-        langchain_chunker = LangChainChunking()
-    else:
-        langchain_chunker = None
-    
+
     for guide in guides:
         custom_chunks = custom_chunker.chunk_text(guide['raw_content'])
-        
-        if langchain_chunker:
-            langchain_chunks = langchain_chunker.chunk_text(guide['raw_content'])
-            print_comparison(guide, custom_chunks, langchain_chunks)
-        else:
-            tokenizer = tiktoken.get_encoding("cl100k_base")
-            original_tokens = len(tokenizer.encode(guide['raw_content']))
-            
-            print(f"\n{'='*100}")
-            print(f"GUIDE: {guide['title']} ({guide['size_label']}) - CUSTOM APPROACH ONLY")
-            print(f"Original: {guide['word_count']} words, {original_tokens} tokens")
-            print(f"Chunks: {len(custom_chunks)}")
-            print(f"Avg tokens: {sum(c.token_count for c in custom_chunks)/len(custom_chunks):.0f}")
-            print(f"Chunks with headings: {sum(1 for c in custom_chunks if c.heading)}/{len(custom_chunks)}")
-            print("="*100 + "\n")
+        print_custom_summary(guide, custom_chunks)
 
 
 if __name__ == "__main__":

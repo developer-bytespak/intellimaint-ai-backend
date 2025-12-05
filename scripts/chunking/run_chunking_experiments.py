@@ -16,7 +16,7 @@ import types
 from pathlib import Path
 
 # Import chunkers from existing script
-from compare_chunking_approaches import CustomChunking, LangChainChunking, LANGCHAIN_AVAILABLE
+from compare_chunking_approaches import CustomChunking
 import tiktoken
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -55,66 +55,90 @@ def count_tokens_cached(tokenizer, text: str) -> int:
 
 # Simple PDF-specific normalization (kept same as before, minor performance-minded code)
 def normalize_pdf_markdown(text: str) -> str:
+    """
+    Normalize PDF-extracted markdown for chunking.
+    - Merge short broken lines into paragraphs.
+    - Remove repeated headers/footers heuristically.
+    - Detect and remove Table of Contents blocks (DO NOT parse or store TOC).
+    - Normalize image/table markers: append inline marker to previous paragraph when possible.
+    Returns normalized_text (TOC is intentionally discarded).
+    """
     lines = text.splitlines()
-    out_lines = []
-    buffer_para = []
-    short_line_accum_threshold = 3  # collapse short lines into paragraph if many in a row
-    short_seq = 0
+    out_lines: List[str] = []
+    buffer_para: List[str] = []
+    # We intentionally do not collect or return TOC entries; TOC lines are skipped.
+    short_line_counts = {}
+    for l in lines:
+        s = l.strip()
+        if len(s) <= 60:
+            short_line_counts[s] = short_line_counts.get(s, 0) + 1
 
     def flush_buffer():
         nonlocal buffer_para
         if buffer_para:
-            out_lines.append(" ".join(l.strip() for l in buffer_para if l.strip()))
+            combined = " ".join(p.strip() for p in buffer_para if p.strip())
+            out_lines.append(combined)
             buffer_para = []
 
-    for line in lines:
-        s = line.rstrip()
-        # Remove explicit page headers
-        if re.match(r'^\s*#\s*Page\s+\d+', s, re.IGNORECASE):
+    toc_line_re = re.compile(r'^\s*[\w\W]{1,200}\.\.{2,}\s*\d+\s*$')
+    page_number_re = re.compile(r'^\s*page\s+\d+\s*$', re.IGNORECASE)
+
+    i = 0
+    while i < len(lines):
+        raw = lines[i]
+        s = raw.rstrip()
+        if re.search(r'\btable of contents\b', s, flags=re.IGNORECASE):
             flush_buffer()
+            i += 1
+            while i < len(lines):
+                candidate = lines[i].strip()
+                if not candidate:
+                    i += 1
+                    continue
+                # Skip TOC-style lines (do not parse or store them)
+                if toc_line_re.match(candidate) or re.search(r'\d+\s*$', candidate):
+                    i += 1
+                    continue
+                break
             continue
-        # Collapse image/url blocks into a single token
-        if s.lower().startswith("image:") or s.lower().startswith("url:") or s.strip().startswith("[TABLE_PLACEHOLDER]") or s.strip().startswith("[IMAGE:"):
+
+        if page_number_re.match(s) or (len(s) < 40 and short_line_counts.get(s, 0) > 3):
             flush_buffer()
-            # add a single marker line
+            i += 1
+            continue
+
+        if s.lower().startswith("image:") or s.lower().startswith("url:") or s.strip().startswith("[TABLE_PLACEHOLDER]") or s.strip().startswith("[IMAGE:"):
+            marker = "[IMAGE]"
             if s.strip().startswith("[TABLE_PLACEHOLDER]"):
-                out_lines.append("[TABLE_PLACEHOLDER]")
-            elif s.strip().startswith("[IMAGE:"):
-                # Preserve [IMAGE:n] markers if present
+                marker = "[TABLE_PLACEHOLDER]"
+            else:
                 m = re.match(r'^\[?IMAGE:?\s*([0-9]+)\]?$', s.strip(), re.IGNORECASE)
                 if m:
-                    out_lines.append(f"[IMAGE:{int(m.group(1))}]")
-                else:
-                    out_lines.append("[IMAGE]")
+                    marker = f"[IMAGE:{int(m.group(1))}]"
+            if out_lines:
+                out_lines[-1] = out_lines[-1].rstrip() + " " + marker
             else:
-                out_lines.append("[IMAGE]")
-            short_seq = 0
+                out_lines.append(marker)
+            i += 1
             continue
-        # If line looks like a very short table/row (few words), accumulate and then join
-        if len(s.strip().split()) <= 6 and s.strip():
-            buffer_para.append(s.strip())
-            short_seq += 1
-            if short_seq >= short_line_accum_threshold:
-                flush_buffer()
-                short_seq = 0
-            continue
-        # Heading lines keep as-is
+
         if re.match(r'^\s*#{1,6}\s+', s):
             flush_buffer()
-            out_lines.append(s)
-            short_seq = 0
+            out_lines.append(s.strip())
+            i += 1
             continue
-        # Normal paragraph line -> accumulate into buffer for paragraphs
+
         if s.strip() == "":
             flush_buffer()
-            out_lines.append("")
-            short_seq = 0
+            i += 1
             continue
+
         buffer_para.append(s.strip())
-        short_seq = 0
+        i += 1
 
     flush_buffer()
-    return "\n".join(out_lines)
+    normalized = "\n".join(out_lines)
+    return normalized
 
 
 def bind_cached_counter_to_chunker(chunker, tokenizer):
@@ -135,6 +159,7 @@ def run_on_file(path: Path, chunkers: dict, tokenizer):
     raw = path.read_text(encoding="utf-8")
     # Decide normalization: if file contains "# Page" or "[TABLE_PLACEHOLDER]" treat as PDF output
     if re.search(r'^\s*#\s*Page\s+\d+', raw, re.IGNORECASE) or "[TABLE_PLACEHOLDER]" in raw or "image:" in raw or "[IMAGE:" in raw:
+        # PDF-extracted content: normalize and discard any TOC-like regions
         text = normalize_pdf_markdown(raw)
         source_type = "pdf_extracted"
     else:
@@ -179,12 +204,7 @@ def main():
 
     custom = CustomChunking()
     chunkers = {"custom": custom}
-    if LANGCHAIN_AVAILABLE:
-        try:
-            lang = LangChainChunking()
-            chunkers["langchain"] = lang
-        except Exception:
-            pass
+    # LangChain removed from default experiment pipeline.
 
     # Bind cached counter into chunkers (so chunkers use cached token counting)
     for c in chunkers.values():
