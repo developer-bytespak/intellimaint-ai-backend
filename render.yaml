@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: intellimaint-gateway
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd gateway && npm install && npm run build
+    startCommand: cd gateway && npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
