@@ -19,10 +19,19 @@ dotenv.config();
 export class AuthService {
     constructor(private prisma: PrismaService) { }
 
+    async checkUserEmail(email: string) {
+        const user = await this.prisma.user.findUnique({
+            where: {
+                email: email
+            }
+        });
+        return user;
+    }
+
     // Google Login
     // This is the function that is called when the user clicks the Google Login button
 
-    async googleLogin(user: any, role: string, company: string) {
+    async googleLogin(user: any, role: string, company: string, res: any) {
         if (!user) {
             return 'No user from Google';
         }
@@ -59,8 +68,18 @@ export class AuthService {
             if (newUser) {
                 return { user: newUser, accessToken: user.accessToken, isNewUser: false };
             }
-            return nestResponse(500, 'Failed to create user', null);
+            return nestError(500, 'Failed to create user', null)(res);
         }
+        await this.prisma.oAuthProvider.updateMany({
+            where: {
+                provider: OAuthProviderType.google,
+                userId: existingUser.id,
+            },
+            data: {
+                refreshToken: user.refreshToken,
+                tokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 60), // 60 days expiry
+            }
+        });
 
         return { user: existingUser, accessToken: user.accessToken, isNewUser: true };
 
