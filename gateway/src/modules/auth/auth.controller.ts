@@ -77,65 +77,66 @@ export class AuthController {
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
   async googleRedirect(@Req() req: any, @Res({ passthrough: true }) res: Response) {
-    const { role, company } = JSON.parse(req.query.state as string);
-    // console.log("role", role);
-    // console.log("company", company);
+    try {
+      let { role, company } = JSON.parse(req.query.state as string);
+      // console.log("role", role);
+      // console.log("company", company);
 
-    const email = req.user.email;
+      const email = req.user.email;
 
-    if(role === ""){
-      const existingUser = await this.authService.checkUserEmail(email);
-      if(!existingUser){
-        return res.redirect(`${process.env.FRONTEND_URL}/callback?error=No user found with this email`);
-      }
-  
-      role = existingUser.role;
-    }
-    console.log("role", role);
-
-    if (email.endsWith('.com')) {
-      if (role !== 'civilian') {
-        return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
-      }
-    } else if (email.endsWith('.edu')) {
-      if (role !== 'student') {
-        return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
-      }
-    } else if (email.endsWith('.mil')) {
-      if (role !== 'military') {
-        return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
-      }
-    } else {
-      return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
-    }
-
-
-    const authResult = await this.authService.googleLogin(req.user, role, company, res as any);
-    const { accessToken, isNewUser, user } = authResult as { accessToken: string, isNewUser: boolean, user: any };
+      if(role === ""){
+        const existingUser = await this.authService.checkUserEmail(email);
+        if(!existingUser){
+          return res.redirect(`${process.env.FRONTEND_URL}/callback?error=No user found with this email`);
+        }
     
-    // Set Google access token cookie
-    res.cookie('google_access', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 1 * 60 * 60 * 1000, // 1 hours
-    });
-    
-    // Set user email cookie for refresh token logic
-    res.cookie('google_user_email', user.email, {
-      httpOnly: false, // Not httpOnly so guard can read it for refresh
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 1 * 60 * 60 * 1000, // 1 hours
-    });
+        role = existingUser.role;
+      }
+      console.log("role", role);
 
-    // if (!isNewUser) {
-    //   return nestResponse(201, 'User created successfully', user)(res);
-    // }
-    // return nestResponse(200, 'Login successful', user)(res);
-    return res.redirect(`${process.env.FRONTEND_URL}/chat`)
+      if (email.endsWith('.com')) {
+        if (role !== 'civilian') {
+          return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
+        }
+      } else if (email.endsWith('.edu')) {
+        if (role !== 'student') {
+          return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
+        }
+      } else if (email.endsWith('.mil')) {
+        if (role !== 'military') {
+          return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
+        }
+      } else {
+        return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
+      }
+
+
+      const authResult = await this.authService.googleLogin(req.user, role, company, res as any);
+      const { accessToken, isNewUser, user } = authResult as { accessToken: string, isNewUser: boolean, user: any };
+      
+      // Set Google access token cookie
+      res.cookie('google_access', accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        path: '/',
+        maxAge: 1 * 60 * 60 * 1000, // 1 hours
+      });
+      
+      // Set user email cookie for refresh token logic
+      res.cookie('google_user_email', user.email, {
+        httpOnly: false, // Not httpOnly so guard can read it for refresh
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        path: '/',
+        maxAge: 1 * 60 * 60 * 1000, // 1 hours
+      });
+
+      // if (!isNewUser) {
+      //   return nestResponse(201, 'User created successfully', user)(res);
+      // }
+      // return nestResponse(200, 'Login successful', user)(res);
+      return res.redirect(`${process.env.FRONTEND_URL}/chat`)
     } catch (error: unknown) {
       const err = error as { status?: number; message?: string };
       if (err.status === 400) {
