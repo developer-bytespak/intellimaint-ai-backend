@@ -45,12 +45,14 @@ async def extract_text_and_images(file: UploadFile = File(...)):
         text_with_placeholders, extracted_images = DocumentService.extract_text_with_image_markers(
             file_path, image_dir
         )
+        # print(f"Text with placeholders: {text_with_placeholders}")
 
         # Extract tables
         extracted_tables = DocumentService.extract_and_format_tables_from_pdf(file_path)
 
         # Upload images
         image_urls = DocumentService.upload_images_to_supabase(extracted_images)
+        print(f"Image URLs: {image_urls}")
 
         # Replace markers with real URLs
         text_with_urls = DocumentService.replace_placeholders_with_urls(text_with_placeholders, image_urls)
@@ -62,6 +64,7 @@ async def extract_text_and_images(file: UploadFile = File(...)):
         # let already-raised HTTPExceptions pass through
         raise
     except Exception as e:
+        print(f"Error processing PDF: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error processing PDF: {str(e)}")
     finally:
         # Cleanup – wrap deletes to avoid crashing if file is locked
@@ -74,7 +77,7 @@ async def extract_text_and_images(file: UploadFile = File(...)):
         if os.path.exists(image_dir):
             try:
                 print(f"Attempting to delete image dir {image_dir}.")
-                shutil.rmtree(image_dir)
+                # shutil.rmtree(image_dir)
             except PermissionError:
                 print(f"Could not delete image dir {image_dir} due to PermissionError.")
 

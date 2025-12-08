@@ -11,6 +11,7 @@ import { AuditModule } from './modules/audit/audit.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { HealthModule } from './modules/health/health.module';
 import { RepositoryModule } from './modules/repository/repository.module';
+import { UploadModule } from './modules/upload/upload.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { RepositoryModule } from './modules/repository/repository.module';
     AuditModule,
     AdminModule,
     HealthModule,
-    RepositoryModule
+    RepositoryModule,
+    UploadModule
   ],
 })
 export class AppModule {}

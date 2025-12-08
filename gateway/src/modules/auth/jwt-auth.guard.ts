@@ -32,7 +32,7 @@ export class JwtAuthGuard implements CanActivate {
         const user = await this.prisma.user.findUnique({
           where: { id: data.userId },
         });
-        console.log("user ==>", user);
+        // console.log("user ==>", user);
 
         if (!user) throw new Error("User not found");
 

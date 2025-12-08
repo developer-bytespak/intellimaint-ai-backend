@@ -83,6 +83,16 @@ export class AuthController {
 
     const email = req.user.email;
 
+    if(role === ""){
+      const existingUser = await this.authService.checkUserEmail(email);
+      if(!existingUser){
+        return res.redirect(`${process.env.FRONTEND_URL}/callback?error=No user found with this email`);
+      }
+  
+      role = existingUser.role;
+    }
+    console.log("role", role);
+
     if (email.endsWith('.com')) {
       if (role !== 'civilian') {
         return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
@@ -100,11 +110,10 @@ export class AuthController {
     }
 
 
-    try {
-      const authResult = await this.authService.googleLogin(req.user, role, company);
-      const { accessToken, isNewUser, user } = authResult as { accessToken: string, isNewUser: boolean, user: any };
-      
-      // Set Google access token cookie
+    const authResult = await this.authService.googleLogin(req.user, role, company, res as any);
+    const { accessToken, isNewUser, user } = authResult as { accessToken: string, isNewUser: boolean, user: any };
+    
+    // Set Google access token cookie
     res.cookie('google_access', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
