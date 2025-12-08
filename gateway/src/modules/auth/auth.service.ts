@@ -237,12 +237,23 @@ export class AuthService {
         const refreshToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret as string, { expiresIn: '7d' });
         
         // Set access token cookie
+        // For cross-domain cookies (Vercel frontend <-> Render backend), use sameSite: 'none' and secure: true
+        const isProduction = process.env.NODE_ENV === 'production';
         res.cookie('local_access', accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            secure: isProduction, // Must be true in production for cross-domain cookies
+            sameSite: isProduction ? 'none' : 'lax', // 'none' for cross-domain, 'lax' for same-domain
             path: '/',
             maxAge: 60 * 60 * 1000, // 1 hour
+        });
+        
+        // Set refresh token cookie
+        res.cookie('refresh_token', refreshToken, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? 'none' : 'lax',
+            path: '/',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
         
        
@@ -276,7 +287,12 @@ export class AuthService {
        }
 
         
-        return nestResponse(200, 'Login successful')(res);
+        // Return user data along with success message for frontend to use
+        const { passwordHash, ...userWithoutPassword } = user;
+        return nestResponse(200, 'Login successful', {
+            user: userWithoutPassword,
+            accessToken: accessToken, // Also return in response body for client-side use if needed
+        })(res);
     }
 
     // Forgot Password
