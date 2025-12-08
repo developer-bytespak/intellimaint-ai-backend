@@ -9,6 +9,8 @@ import {
   Req,
   UseGuards,
   Res,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { RepositoryService } from '../services/repository.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
@@ -18,6 +20,7 @@ import { nestResponse, nestError } from 'src/common/helpers/responseHelpers';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import type { Response } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('repository')
 @UseGuards(JwtAuthGuard)
@@ -25,14 +28,20 @@ export class RepositoryController {
   constructor(private readonly repositoryService: RepositoryService) {}
 
   @Post('documents')
+  // @UseInterceptors(FileInterceptor('file'))
   async createDocuments(
+    // @UploadedFile() file: Express.Multer.File,
     @Req() req: any,
     @Body() body: any,
     @Res({ passthrough: true }) res: Response,
   ) {
     try {
+      // console.log("req ==>", req);
       const userId = req.user.id;
+      console.log("body ==>", body);
       const createDto = plainToInstance(CreateDocumentsRequestDto, body);
+      console.log("createDto ==>", createDto);
+      return
       const errors = await validate(createDto);
 
       if (errors.length > 0) {
@@ -76,7 +85,8 @@ export class RepositoryController {
     @Param('id') id: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    try {
+    try { 
+      console.log("id ==>", id);
       const userId = req.user.id;
       const document = await this.repositoryService.getDocumentById(userId, id);
 

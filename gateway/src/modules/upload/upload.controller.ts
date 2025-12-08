@@ -122,7 +122,7 @@ export class UploadController {
         url: blob.url,
         pathname: blob.pathname,
       })(res as any);
-    } catch (error) {
+    } catch (error:any) {
       console.error('Upload error:', error);
       return nestError(500, 'Error uploading file', error.message)(res as any);
     }
@@ -131,15 +131,15 @@ export class UploadController {
   @UseGuards(JwtAuthGuard)
   @Get('/history/images')
   async getHistoryImages(
-    @Req() req, 
+    @Req() req: Request, 
     @Res({ passthrough: true }) res: Response,
     @Query('page') page?: number,        // ✅ Add this
     @Query('limit') limit?: number       // ✅ Add this
   ) {
-    if(!req.user){
+    if(!(req as any).user){
       return nestError(401, 'Unauthorized')(res as any);
     }
-    const userId = req.user.id;
+    const userId = (req as Request & { user: { id: string } }).user.id;
     if (!userId) {
       return nestError(401, 'Unauthorized')(res as any);
     }

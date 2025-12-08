@@ -1,7 +1,8 @@
 """Main FastAPI application combining all AI services"""
 
 from fastapi import FastAPI
-from .routes import orchestrator, vision, rag, asr_tts
+from fastapi.middleware.cors import CORSMiddleware
+from .routes import orchestrator, vision, rag, asr_tts, doc_extract
 
 app = FastAPI(
     title="IntelliMaint AI Service",
