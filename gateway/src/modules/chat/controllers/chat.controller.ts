@@ -146,14 +146,36 @@ export class ChatController {
 
       if (errors.length > 0) {
         const messages = errors.map((err) => Object.values(err.constraints || {})).flat();
+        console.error('Validation errors:', messages);
+        console.error('Request body:', body);
         return nestError(400, 'Validation failed', messages)(res);
+      }
+
+      // Additional validation: must have either content or images
+      const hasContent = createDto.content && createDto.content.trim().length > 0;
+      const hasImages = createDto.images && createDto.images.length > 0;
+      
+      if (!hasContent && !hasImages) {
+        console.error('Validation failed: No content or images provided');
+        console.error('DTO received:', JSON.stringify(createDto, null, 2));
+        return nestError(400, 'Message must have either content or images')(res);
       }
 
       const result = await this.chatService.createMessageWithSession(userId, createDto);
       return nestResponse(201, 'Message and session created successfully', result)(res);
     } catch (error) {
       console.error('Error creating message with session:', error);
-      return nestError(500, 'Failed to create message', error.message || 'Internal server error')(res);
+      console.error('Error stack:', error.stack);
+      console.error('Error details:', {
+        message: error.message,
+        name: error.name,
+        status: error.status,
+      });
+      return nestError(
+        error.status || 500,
+        'Failed to create message',
+        error.message || 'Internal server error',
+      )(res);
     }
   }
 

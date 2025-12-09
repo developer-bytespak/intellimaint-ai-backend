@@ -4,12 +4,13 @@
     "target": "es2023",
     "moduleResolution": "node",
     "outDir": "./dist",
+    "rootDir": "./",
     "baseUrl": "./",
     "paths": {
       "src/*": ["src/*"],
       "prisma/*": ["prisma/*"]
     },
-    "strict": true,
+    "strict": false,
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
