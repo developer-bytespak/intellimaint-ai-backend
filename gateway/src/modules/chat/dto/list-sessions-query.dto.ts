@@ -1,8 +1,8 @@
 import { IsOptional, IsInt, Min, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
-import { RepositoryStatus } from '@prisma/client';
+import { ChatSessionStatus } from '@prisma/client';
 
-export class ListDocumentsQueryDto {
+export class ListSessionsQueryDto {
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -16,7 +16,7 @@ export class ListDocumentsQueryDto {
   limit?: number = 10;
 
   @IsOptional()
-  @IsEnum(RepositoryStatus)
-  status?: RepositoryStatus;
+  @IsEnum(ChatSessionStatus)
+  status?: ChatSessionStatus;
 }
 

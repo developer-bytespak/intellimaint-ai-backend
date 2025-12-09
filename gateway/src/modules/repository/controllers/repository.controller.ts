@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { RepositoryService } from '../services/repository.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
-import { UploadUrlsRequestDto } from '../dto/upload-urls.dto';
 import { CreateDocumentsRequestDto } from '../dto/create-document.dto';
 import { ListDocumentsQueryDto } from '../dto/list-documents.dto';
 import { nestResponse, nestError } from 'src/common/helpers/responseHelpers';
