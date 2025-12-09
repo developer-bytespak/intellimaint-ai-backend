@@ -38,10 +38,10 @@ export class RepositoryController {
     try {
       // console.log("req ==>", req);
       const userId = req.user.id;
-      console.log("body ==>", body);
+      // console.log("body ==>", body);
       const createDto = plainToInstance(CreateDocumentsRequestDto, body);
       console.log("createDto ==>", createDto);
-      return
+      // return
       const errors = await validate(createDto);
 
       if (errors.length > 0) {
@@ -70,6 +70,8 @@ export class RepositoryController {
       const userId = req.user.id;
       const result = await this.repositoryService.listDocuments(userId, query);
 
+      // console.log("result ==>", result);
+
       return nestResponse(200, 'Documents retrieved successfully', result)(res);
     } catch (error) {
       console.error('Error listing documents:', error);
@@ -86,7 +88,7 @@ export class RepositoryController {
     @Res({ passthrough: true }) res: Response,
   ) {
     try { 
-      console.log("id ==>", id);
+      // console.log("id ==>", id);
       const userId = req.user.id;
       const document = await this.repositoryService.getDocumentById(userId, id);
 

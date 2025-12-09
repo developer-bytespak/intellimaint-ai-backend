@@ -8,6 +8,9 @@ class ProgressTracker:
     
     _jobs: Dict[str, Dict] = {}  # job_id -> progress data
     
+    # Milestones for each API call: 1st call = 25%, 2nd = 50%, 3rd = 75%, 4th = 100%
+    API_MILESTONES = [25, 50, 75, 100]
+    
     # Step weights for overall progress calculation
     STEP_WEIGHTS = {
         "text_extraction": 60,    # 60% of total
@@ -35,6 +38,7 @@ class ProgressTracker:
             },
             "data": None,  # Will store final extracted content
             "error": None,
+            "api_call_count": 0,  # Track number of API calls made
             "created_at": datetime.now().isoformat(),
             "updated_at": datetime.now().isoformat()
         }
@@ -108,6 +112,37 @@ class ProgressTracker:
     def get_progress(cls, job_id: str) -> Optional[Dict]:
         """Get current progress for a job"""
         return cls._jobs.get(job_id)
+    
+    @classmethod
+    def check_and_increment_api_call(cls, job_id: str) -> tuple[bool, int]:
+        """
+        Check if progress should be returned and increment call count if milestone reached
+        Returns (should_return, api_call_count)
+        - should_return: True if progress >= milestone for next call
+        - api_call_count: current call count (after increment if milestone reached)
+        """
+        if job_id not in cls._jobs:
+            return (False, 0)
+        
+        current_call_count = cls._jobs[job_id].get("api_call_count", 0)
+        current_progress = cls._jobs[job_id].get("progress", 0)
+        
+        # If all milestones passed, always return
+        if current_call_count >= len(cls.API_MILESTONES):
+            return (True, current_call_count)
+        
+        # Get expected milestone for next API call (0-indexed)
+        # Call 1 (count=0) should return at 25%, Call 2 (count=1) at 50%, etc.
+        expected_milestone = cls.API_MILESTONES[current_call_count]
+        
+        # Check if progress has reached the expected milestone
+        if current_progress >= expected_milestone:
+            # Increment call count only when milestone is reached
+            cls._jobs[job_id]["api_call_count"] = current_call_count + 1
+            return (True, current_call_count + 1)
+        
+        # Milestone not reached yet, don't increment
+        return (False, current_call_count)
     
     @classmethod
     def cleanup_old_jobs(cls, max_age_hours: int = 24):

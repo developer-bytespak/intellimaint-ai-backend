@@ -2,6 +2,7 @@ import os
 import uuid
 import shutil
 import fitz
+import asyncio
 
 from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse, PlainTextResponse
@@ -136,38 +137,70 @@ async def extract_text_and_images(
 
 @router.get("/extract/progress/{job_id}")
 async def get_extraction_progress(job_id: str):
-    """Get progress of PDF extraction job"""
+    """
+    Get progress of PDF extraction job with long polling at milestones
+    Each API call waits until its milestone is reached (25%, 50%, 75%, 100%)
+    Returns 200 with progress/data at each milestone
+    """
     
+    # Maximum wait time: 5 minutes
+    MAX_WAIT_TIME = 300  # seconds
+    POLL_INTERVAL = 1  # Check every 1 second
+    elapsed_time = 0
+    
+    while elapsed_time < MAX_WAIT_TIME:
+        progress = ProgressTracker.get_progress(job_id)
+        
+        if not progress:
+            raise HTTPException(status_code=404, detail="Job not found")
+        
+        # If completed, return data as plain text
+        if progress["status"] == "completed":
+            return PlainTextResponse(
+                content=progress["data"],
+                media_type="text/plain"
+            )
+        
+        # If failed, return error
+        if progress["status"] == "failed":
+            return JSONResponse({
+                "job_id": job_id,
+                "status": "failed",
+                "error": progress["error"]
+            }, status_code=500)
+        
+        # Check if we should return progress based on milestone
+        should_return, api_call_count = ProgressTracker.check_and_increment_api_call(job_id)
+        
+        if should_return:
+            # Calculate which milestone was reached
+            milestone_index = min(api_call_count - 1, len(ProgressTracker.API_MILESTONES) - 1)
+            milestone = ProgressTracker.API_MILESTONES[milestone_index] if milestone_index >= 0 else 0
+            
+            # Return progress info as JSON at milestone
+            return JSONResponse({
+                "job_id": job_id,
+                "status": "processing",
+                "progress": progress["progress"],
+                "current_step": progress["current_step"],
+                "message": progress.get("message", "Processing..."),
+                "api_call": api_call_count,
+                "milestone": milestone
+            })
+        
+        # Milestone not reached yet, wait and check again
+        await asyncio.sleep(POLL_INTERVAL)
+        elapsed_time += POLL_INTERVAL
+    
+    # Timeout - return current progress
     progress = ProgressTracker.get_progress(job_id)
-    
     if not progress:
         raise HTTPException(status_code=404, detail="Job not found")
     
-    # If completed, return data in response
-    if progress["status"] == "completed":
-        return JSONResponse({
-            "job_id": job_id,
-            "status": "completed",
-            "progress": 100,
-            "current_step": "completed",
-            "data": progress["data"]  # Final extracted content
-        })
-    
-    # If failed, return error
-    if progress["status"] == "failed":
-        return JSONResponse({
-            "job_id": job_id,
-            "status": "failed",
-            "error": progress["error"]
-        }, status_code=500)
-    
-    # If still processing, return progress
     return JSONResponse({
         "job_id": job_id,
         "status": "processing",
         "progress": progress["progress"],
-        "current_page": progress["current_page"],
-        "total_pages": progress["total_pages"],
         "current_step": progress["current_step"],
-        "step_progress": progress["step_progress"]
-    })
+        "message": "Timeout: Job still processing"
+    }, status_code=408)
