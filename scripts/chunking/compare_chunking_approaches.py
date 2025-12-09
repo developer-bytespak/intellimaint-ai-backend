@@ -37,8 +37,8 @@ class CustomChunking:
         self.tokenizer = tiktoken.get_encoding("cl100k_base")
         # Tuned defaults
         self.chunk_target = 300         # target tokens (used for sentence-based splitting)
-        self.chunk_size_max = 500       # hard cap tokens for a single chunk
-        self.chunk_size_min = 150       # merge until >= this
+        self.chunk_size_max = 450       # hard cap tokens for a single chunk
+        self.chunk_size_min = 180       # merge until >= this
         self.chunk_overlap = 50         # tokens to overlap between adjacent chunks
 
     def count_tokens(self, text: str) -> int:
@@ -119,22 +119,37 @@ class CustomChunking:
         for s in sentences:
             s_tokens = self.count_tokens(s)
             if s_tokens > self.chunk_size_max:
-                # Sentence too large: split it into smaller subpieces by words
-                words = s.split()
-                subpiece: List[str] = []
-                for w in words:
-                    subpiece.append(w)
-                    sub_text = " ".join(subpiece)
-                    sub_tokens = self.count_tokens(sub_text)
-                    if sub_tokens >= self.chunk_size_max:
-                        # emit subpiece as its own chunk (will be subject to flush logic)
-                        chunks.append((heading, sub_text.strip()))
-                        subpiece = []
-                if subpiece:
-                    # remaining tail
-                    tail_text = " ".join(subpiece).strip()
-                    if tail_text:
-                        chunks.append((heading, tail_text))
+                # Sentence too large: split it by tokenizer token windows to guarantee
+                # no emitted chunk exceeds chunk_size_max.
+                try:
+                    token_ids = self.tokenizer.encode(s)
+                except Exception:
+                    # Fallback to naive word split if tokenizer fails
+                    words = s.split()
+                    subpiece: List[str] = []
+                    for w in words:
+                        subpiece.append(w)
+                        sub_text = " ".join(subpiece)
+                        sub_tokens = self.count_tokens(sub_text)
+                        if sub_tokens >= self.chunk_size_max:
+                            chunks.append((heading, sub_text.strip()))
+                            subpiece = []
+                    if subpiece:
+                        tail_text = " ".join(subpiece).strip()
+                        if tail_text:
+                            chunks.append((heading, tail_text))
+                else:
+                    window = self.chunk_size_max
+                    step = max(1, self.chunk_size_max - self.chunk_overlap)
+                    for start in range(0, len(token_ids), step):
+                        piece = token_ids[start:start + window]
+                        try:
+                            piece_text = self.tokenizer.decode(piece)
+                        except Exception:
+                            # If decode unavailable, fallback to joining original words
+                            piece_text = s
+                        if piece_text.strip():
+                            chunks.append((heading, piece_text.strip()))
             else:
                 if current_tokens + s_tokens > self.chunk_size_max and current_sentences:
                     flush_chunk()
@@ -227,9 +242,171 @@ class CustomChunking:
 
         final_sections = self.combine_small_sections(processed)
 
+        # --- Final deterministic pass ---
+        # 1) Ensure no section exceeds chunk_size_max by slicing token windows
+        fixed_sections: List[Tuple[Optional[str], str]] = []
+        for heading, content in final_sections:
+            tok_count = self.count_tokens(content)
+            if tok_count <= self.chunk_size_max:
+                fixed_sections.append((heading, content))
+                continue
+
+            # Split by token windows using tokenizer to guarantee hard cap
+            try:
+                token_ids = self.tokenizer.encode(content)
+                window = self.chunk_size_max
+                step = max(1, self.chunk_size_max - self.chunk_overlap)
+                for start in range(0, len(token_ids), step):
+                    piece = token_ids[start:start + window]
+                    try:
+                        piece_text = self.tokenizer.decode(piece)
+                    except Exception:
+                        # fallback to whitespace-joined words if decode fails
+                        piece_text = None
+                    if not piece_text:
+                        # fallback: build by words until token limit
+                        words = content.split()
+                        buf: List[str] = []
+                        for w in words:
+                            buf.append(w)
+                            if self.count_tokens(" ".join(buf)) >= self.chunk_size_max:
+                                fixed_sections.append((heading, " ".join(buf).strip()))
+                                buf = []
+                        if buf:
+                            fixed_sections.append((heading, " ".join(buf).strip()))
+                        break
+                    else:
+                        if piece_text.strip():
+                            fixed_sections.append((heading, piece_text.strip()))
+            except Exception:
+                # tokenizer.encode failed; fallback to word-based splitting
+                words = content.split()
+                buf: List[str] = []
+                for w in words:
+                    buf.append(w)
+                    if self.count_tokens(" ".join(buf)) >= self.chunk_size_max:
+                        fixed_sections.append((heading, " ".join(buf).strip()))
+                        buf = []
+                if buf:
+                    fixed_sections.append((heading, " ".join(buf).strip()))
+
+        # 2) Merge any very-small final sections into neighbors (prefer previous)
+        merged_final: List[Tuple[Optional[str], str]] = []
+        pending: Optional[Tuple[Optional[str], str]] = None
+        for heading, content in fixed_sections:
+            tok = self.count_tokens(content)
+            if tok < max(40, int(self.chunk_size_min * 0.25)):
+                if merged_final:
+                    prev_h, prev_c = merged_final[-1]
+                    merged_final[-1] = (prev_h if prev_h else heading, prev_c + "\n\n" + content)
+                else:
+                    # hold pending to merge into next if exists
+                    pending = (heading, content) if pending is None else (pending[0], (pending[1] + "\n\n" + content))
+                continue
+
+            if pending:
+                # merge pending small chunk into current
+                ph, pc = pending
+                content = pc + "\n\n" + content
+                pending = None
+
+            merged_final.append((heading, content))
+
+        # If pending still exists, merge into last if possible
+        if pending:
+            if merged_final:
+                ph, pc = merged_final[-1]
+                merged_final[-1] = (ph, pc + "\n\n" + pending[1])
+            else:
+                merged_final.append(pending)
+
+        # --- Strong enforcement: slice by tokenizer token IDs to guarantee hard cap ---
+        enforced: List[Tuple[Optional[str], str, int]] = []  # heading, text, token_count
+        for heading, content in merged_final:
+            try:
+                t_ids = self.tokenizer.encode(content)
+            except Exception:
+                # Fallback: use text-based slicing
+                if self.count_tokens(content) <= self.chunk_size_max:
+                    enforced.append((heading, content, self.count_tokens(content)))
+                else:
+                    words = content.split()
+                    buf: List[str] = []
+                    for w in words:
+                        buf.append(w)
+                        if self.count_tokens(" ".join(buf)) >= self.chunk_size_max:
+                            txt = " ".join(buf).strip()
+                            enforced.append((heading, txt, self.count_tokens(txt)))
+                            buf = []
+                    if buf:
+                        txt = " ".join(buf).strip()
+                        enforced.append((heading, txt, self.count_tokens(txt)))
+                continue
+
+            # slice token ids with a small safety margin to avoid decode/re-encode inflation
+            safety = 8
+            window = max(1, self.chunk_size_max - safety)
+            step = max(1, window - self.chunk_overlap)
+            for start in range(0, len(t_ids), step):
+                piece = t_ids[start:start + window]
+                if not piece:
+                    continue
+                try:
+                    piece_text = self.tokenizer.decode(piece).strip()
+                except Exception:
+                    piece_text = None
+                piece_count = len(piece)
+                if piece_text:
+                    enforced.append((heading if start == 0 else None, piece_text, piece_count))
+                else:
+                    # fallback to safe whitespace slice
+                    words = content.split()
+                    buf: List[str] = []
+                    for w in words:
+                        buf.append(w)
+                        if self.count_tokens(" ".join(buf)) >= self.chunk_size_max:
+                            txt = " ".join(buf).strip()
+                            enforced.append((heading if len(enforced) == 0 else None, txt, self.count_tokens(txt)))
+                            buf = []
+                    if buf:
+                        txt = " ".join(buf).strip()
+                        enforced.append((heading if len(enforced) == 0 else None, txt, self.count_tokens(txt)))
+
+        # Merge any very-small enforced pieces into neighbors (prefer previous)
+        final_chunks_data: List[Tuple[Optional[str], str, int]] = []
+        pending_small: Optional[Tuple[Optional[str], str, int]] = None
+        for h, txt, tcount in enforced:
+            if tcount < max(40, int(self.chunk_size_min * 0.25)):
+                if final_chunks_data:
+                    ph, pc, pt = final_chunks_data[-1]
+                    final_chunks_data[-1] = (ph, pc + "\n\n" + txt, pt + tcount)
+                else:
+                    # hold pending to merge into next
+                    if pending_small is None:
+                        pending_small = (h, txt, tcount)
+                    else:
+                        # accumulate pending
+                        pending_small = (pending_small[0], pending_small[1] + "\n\n" + txt, pending_small[2] + tcount)
+                continue
+
+            if pending_small:
+                ph, pc, pt = pending_small
+                txt = pc + "\n\n" + txt
+                tcount = pt + tcount
+                pending_small = None
+
+            final_chunks_data.append((h, txt, tcount))
+
+        if pending_small:
+            if final_chunks_data:
+                ph, pc, pt = final_chunks_data[-1]
+                final_chunks_data[-1] = (ph, pc + "\n\n" + pending_small[1], pt + pending_small[2])
+            else:
+                final_chunks_data.append(pending_small)
+
+        # Build Chunk objects using token_count from enforced slicing (avoid re-encoding)
         chunks: List[Chunk] = []
-        for idx, (heading, content) in enumerate(final_sections):
-            token_count = self.count_tokens(content)
+        for idx, (heading, content, token_count) in enumerate(final_chunks_data):
             chunks.append(Chunk(
                 chunk_index=idx,
                 content=content,
