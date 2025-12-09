@@ -156,6 +156,7 @@ async def get_extraction_progress(job_id: str):
         
         # If completed, return data as plain text
         if progress["status"] == "completed":
+            print(f"Progress: {progress['data']}")
             return PlainTextResponse(
                 content=progress["data"],
                 media_type="text/plain"
