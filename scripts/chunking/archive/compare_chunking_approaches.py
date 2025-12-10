@@ -404,6 +404,46 @@ class CustomChunking:
             else:
                 final_chunks_data.append(pending_small)
 
+        # --- ADDED: Re-enforce hard cap in case merges pushed chunks over the limit ---
+        enforced_final_list: List[Tuple[Optional[str], str, int]] = []
+        safety = 8
+        window = max(1, getattr(self, "chunk_size_max", 450) - safety)
+        step = max(1, window - getattr(self, "chunk_overlap", 50))
+        for h, txt, tcount in final_chunks_data:
+            if tcount <= getattr(self, "chunk_size_max", 450):
+                enforced_final_list.append((h, txt, tcount))
+                continue
+            # Try token-id slicing first (deterministic)
+            try:
+                t_ids = self.tokenizer.encode(txt)
+                first = True
+                for start in range(0, len(t_ids), step):
+                    piece_ids = t_ids[start:start + window]
+                    if not piece_ids:
+                        continue
+                    piece_text = self.tokenizer.decode(piece_ids).strip()
+                    piece_count = len(piece_ids)
+                    enforced_final_list.append((h if first else None, piece_text, piece_count))
+                    first = False
+            except Exception:
+                # Fallback to word-based slicing using count_tokens
+                words = txt.split()
+                buf: List[str] = []
+                first = True
+                for w in words:
+                    buf.append(w)
+                    if self.count_tokens(" ".join(buf)) >= getattr(self, "chunk_size_max", 450):
+                        part = " ".join(buf).strip()
+                        enforced_final_list.append((h if first else None, part, self.count_tokens(part)))
+                        buf = []
+                        first = False
+                if buf:
+                    part = " ".join(buf).strip()
+                    enforced_final_list.append((h if first else None, part, self.count_tokens(part)))
+
+        # Replace with strictly capped list
+        final_chunks_data = enforced_final_list
+
         # Build Chunk objects using token_count from enforced slicing (avoid re-encoding)
         chunks: List[Chunk] = []
         for idx, (heading, content, token_count) in enumerate(final_chunks_data):
