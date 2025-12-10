@@ -14,6 +14,7 @@ import { RepositoryService } from '../services/repository.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { CreateDocumentsRequestDto } from '../dto/create-document.dto';
 import { ListDocumentsQueryDto } from '../dto/list-documents.dto';
+import { UploadUrlsRequestDto } from '../dto/upload-urls.dto';
 import { nestResponse, nestError } from 'src/common/helpers/responseHelpers';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
