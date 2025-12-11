@@ -19,7 +19,6 @@ class Settings:
         self.database_url = os.getenv("DATABASE_URL")
         self.redis_url = os.getenv("REDIS_URL")
         self.deepgram_api_key = os.getenv("DEEPGRAM_API_KEY")
-        print(f"Deepgram API Key: {self.deepgram_api_key}")  # Debugging line
 
 @lru_cache()
 def get_settings():
