@@ -80,11 +80,11 @@ export class GeminiChatService {
     let totalChars = 0;
     const maxChars = maxTokens * 4; // Rough estimate: 1 token ≈ 4 chars
 
-    // Take most recent messages (up to 10)
-    const recentMessages = messages.slice(-10);
+    // Take most recent messages (up to 5)
+    const recentMessages = messages.slice(-5);
 
-    // If there's a context summary and we have more than 10 messages, include it
-    if (contextSummary && messages.length > 10) {
+    // If there's a context summary and we have more than 5 messages, include it
+    if (contextSummary && messages.length > 5) {
       // Add summary as a system-like context message
       const summaryMessage = `[Previous conversation summary: ${contextSummary}]`;
       if (totalChars + summaryMessage.length <= maxChars) {
@@ -220,7 +220,7 @@ Summary:`;
       // FIXED: prompt must be wrapped in object with 'text' property
       parts.push({ text: prompt });
 
-      // Generate response
+      // Generate response (non-streaming)
       let response: any;
       try {
         if (history.length > 0) {
@@ -408,6 +408,105 @@ Summary:`;
         response: error.response?.data || error.response,
       });
       throw new Error(`Failed to generate chat response: ${error.message || 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Stream chat response token by token (for SSE)
+   * Returns an async generator that yields tokens as they arrive
+   */
+  async *streamChatResponse(
+    sessionId: string,
+    prompt: string,
+    messages: Array<{ role: string; content: string }>,
+    images?: Array<{ base64: string; mimeType: string }>,
+    contextSummary?: string | null,
+  ): AsyncGenerator<{ token: string; done: boolean; fullText?: string; tokenUsage?: TokenUsage }> {
+    try {
+      // Build conversation history with context summary
+      const history = this.buildHistory(messages, contextSummary);
+
+      // Get cached images for this session
+      let sessionImages = this.getSessionImages(sessionId);
+
+      // If new images provided, cache them
+      if (images && images.length > 0) {
+        for (const img of images) {
+          this.cacheSessionImage(sessionId, img.base64, img.mimeType);
+        }
+        sessionImages = this.getSessionImages(sessionId);
+      }
+
+      // Prepare content parts
+      const parts: Array<{ text: string } | { inlineData: { data: string; mimeType: string } }> = [];
+
+      // Add all session images first
+      for (const img of sessionImages) {
+        parts.push(this.imageToInlineData(img.data, img.mimeType));
+      }
+
+      // Add prompt text
+      parts.push({ text: prompt });
+
+      let fullResponseText = '';
+      let usageMetadata: any = null;
+
+      let result: any;
+      
+      if (history.length > 0) {
+        const chat = this.model.startChat({ history });
+        result = await chat.sendMessageStream(parts);
+      } else {
+        result = await this.model.generateContentStream(parts);
+      }
+
+      // Stream tokens as they arrive
+      // The result.stream is an async iterable
+      for await (const chunk of result.stream) {
+        const chunkText = chunk.text();
+        if (chunkText) {
+          fullResponseText += chunkText;
+          yield {
+            token: chunkText,
+            done: false,
+            fullText: fullResponseText,
+          };
+        }
+      }
+
+      // Get final response for token usage
+      const finalResponse = result.response;
+      
+      // Extract token usage from final response
+      if (finalResponse && typeof finalResponse === 'object' && finalResponse !== null) {
+        try {
+          if (finalResponse.usageMetadata) {
+            usageMetadata = finalResponse.usageMetadata;
+          } else if (finalResponse.response?.usageMetadata) {
+            usageMetadata = finalResponse.response.usageMetadata;
+          }
+        } catch (error) {
+          this.logger.warn('Error accessing usage metadata:', error);
+        }
+      }
+
+      const tokenUsage: TokenUsage = {
+        promptTokens: usageMetadata?.promptTokenCount ?? null,
+        completionTokens: usageMetadata?.candidatesTokenCount ?? null,
+        cachedTokens: usageMetadata?.cachedContentTokenCount ?? null,
+        totalTokens: usageMetadata?.totalTokenCount ?? null,
+      };
+
+      // Send final message with token usage
+      yield {
+        token: '',
+        done: true,
+        fullText: fullResponseText,
+        tokenUsage,
+      };
+    } catch (error) {
+      this.logger.error('Gemini streaming API call failed:', error);
+      throw error;
     }
   }
 }

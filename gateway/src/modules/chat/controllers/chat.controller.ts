@@ -10,6 +10,7 @@ import {
   Req,
   UseGuards,
   Res,
+  Sse,
 } from '@nestjs/common';
 import { ChatService } from '../services/chat.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
@@ -207,6 +208,138 @@ export class ChatController {
       }
       console.error('Error creating message:', error);
       return nestError(500, 'Failed to create message', error.message || 'Internal server error')(res);
+    }
+  }
+
+  @Post('sessions/:sessionId/messages/stream')
+  async streamMessage(
+    @Req() req: any,
+    @Param('sessionId') sessionId: string,
+    @Body() body: any,
+    @Res() res: Response,
+  ) {
+    try {
+      const userId = req.user.id;
+      const createDto = plainToInstance(CreateMessageDto, body);
+      const errors = await validate(createDto);
+
+      if (errors.length > 0) {
+        const messages = errors.map((err) => Object.values(err.constraints || {})).flat();
+        res.status(400).json({ statusCode: 400, message: 'Validation failed', data: messages });
+        return;
+      }
+
+      // Set SSE headers
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.setHeader('X-Accel-Buffering', 'no'); // Disable nginx buffering
+
+      // Stream tokens as they arrive
+      try {
+        for await (const chunk of this.chatService.streamMessage(userId, sessionId, createDto)) {
+          res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+        }
+        res.end();
+      } catch (streamError) {
+        console.error('Error in stream:', streamError);
+        res.write(`data: ${JSON.stringify({ error: streamError.message, done: true })}\n\n`);
+        res.end();
+      }
+    } catch (error) {
+      console.error('Error starting stream:', error);
+      if (!res.headersSent) {
+        res.status(error.status || 500).json({
+          statusCode: error.status || 500,
+          message: error.message || 'Internal server error',
+        });
+      } else {
+        res.write(`data: ${JSON.stringify({ error: error.message, done: true })}\n\n`);
+        res.end();
+      }
+    }
+  }
+
+  @Post('messages/stream')
+  async streamMessageWithSession(
+    @Req() req: any,
+    @Body() body: any,
+    @Res() res: Response,
+  ) {
+    try {
+      const userId = req.user.id;
+      const createDto = plainToInstance(CreateMessageDto, body);
+      const errors = await validate(createDto);
+
+      if (errors.length > 0) {
+        const messages = errors.map((err) => Object.values(err.constraints || {})).flat();
+        res.status(400).json({ statusCode: 400, message: 'Validation failed', data: messages });
+        return;
+      }
+
+      // Additional validation
+      const hasContent = createDto.content && createDto.content.trim().length > 0;
+      const hasImages = createDto.images && createDto.images.length > 0;
+      
+      if (!hasContent && !hasImages) {
+        res.status(400).json({ statusCode: 400, message: 'Message must have either content or images' });
+        return;
+      }
+
+      // Set SSE headers
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.setHeader('X-Accel-Buffering', 'no');
+
+      // Stream tokens as they arrive
+      try {
+        for await (const chunk of this.chatService.streamMessageWithSession(userId, createDto)) {
+          res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+        }
+        res.end();
+      } catch (streamError) {
+        console.error('Error in stream:', streamError);
+        res.write(`data: ${JSON.stringify({ error: streamError.message, done: true })}\n\n`);
+        res.end();
+      }
+    } catch (error) {
+      console.error('Error starting stream:', error);
+      if (!res.headersSent) {
+        res.status(error.status || 500).json({
+          statusCode: error.status || 500,
+          message: error.message || 'Internal server error',
+        });
+      } else {
+        res.write(`data: ${JSON.stringify({ error: error.message, done: true })}\n\n`);
+        res.end();
+      }
+    }
+  }
+
+  @Delete('sessions/:sessionId/messages/:messageId')
+  async deleteMessage(
+    @Req() req: any,
+    @Param('sessionId') sessionId: string,
+    @Param('messageId') messageId: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    try {
+      const userId = req.user.id;
+      const result = await this.chatService.deleteMessage(userId, sessionId, messageId);
+      return nestResponse(200, 'Message deleted successfully', result)(res);
+    } catch (error) {
+      if (error.status === 404) {
+        return nestError(404, error.message)(res);
+      }
+      if (error.status === 403) {
+        return nestError(403, error.message)(res);
+      }
+      if (error.status === 400) {
+        return nestError(400, error.message)(res);
+      }
+      console.error('Error deleting message:', error);
+      return nestError(500, 'Failed to delete message', error.message || 'Internal server error')(res);
     }
   }
 }

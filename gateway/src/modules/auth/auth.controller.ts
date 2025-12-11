@@ -146,12 +146,8 @@ export class AuthController {
   }
   @Post('refresh')
   refreshAccessToken(@Req() req, @Res({ passthrough: true }) res: Response) {
-
     // Validate refreshToken and generate new access token
-
-    return this.authService.refreshAccessToken(res as any);
-
-    
+    return this.authService.refreshAccessToken(req, res);
   }
 
   @UseGuards(JwtAuthGuard)
