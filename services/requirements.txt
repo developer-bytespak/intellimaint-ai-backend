@@ -47,3 +47,9 @@ pandas>=2.0.0
 
 # Supabase client for database operations
 supabase>=2.0.0
+deepgram-sdk==5.3.0
+
+pymupdf
+pdfplumber
+pandas
+supabase

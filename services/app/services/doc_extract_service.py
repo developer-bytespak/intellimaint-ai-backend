@@ -1,4 +1,5 @@
 import os
+import re
 from typing import List, Dict, Tuple
 
 import fitz  # PyMuPDF
@@ -68,7 +69,11 @@ class DocumentService:
     def extract_text_with_image_markers(file_path: str, output_dir: str) -> Tuple[str, List[str]]:
         """
         Extract text in reading order, skip table-like blocks,
-        avoid duplicate text blocks, and save images with markers.
+        avoid duplicate text blocks, and save images with compact markers.
+
+        Returns:
+            full_text: normalized text containing headings, paragraphs and markers like [IMAGE:1] and [TABLE_PLACEHOLDER]
+            image_files: list of local image paths extracted (same order as markers)
         """
 
         full_text = ""
@@ -157,7 +162,7 @@ class DocumentService:
 
                     # If image already extracted → reuse same number
                     if xref in image_seen:
-                        page_output_lines.append(f"IMAGE:{image_seen[xref]}")
+                        page_output_lines.append(f"[IMAGE:{image_seen[xref]}]")
                         page_output_lines.append("")
                         continue
 
@@ -168,14 +173,14 @@ class DocumentService:
                         continue
 
                     try:
-                        # FIX: Safe handling when pix.colorspace is None
+                        # Safe handling when pix.colorspace is None
                         if pix.colorspace is None:
                             try:
                                 pix = fitz.Pixmap(fitz.csRGB, pix)
                             except:
                                 continue  # skip images we can't convert
 
-                        # FIX: Convert CMYK, Indexed, Alpha → RGB
+                        # Convert CMYK, Indexed, Alpha → RGB
                         elif pix.colorspace and (pix.colorspace.n not in (1, 3) or pix.alpha):
                             try:
                                 pix = pix.copy(colorspace=fitz.csRGB, alpha=False)
@@ -189,7 +194,8 @@ class DocumentService:
                         image_files.append(img_path)
                         image_seen[xref] = image_counter
 
-                        page_output_lines.append(f"IMAGE:{image_counter}")
+                        # Use compact marker form
+                        page_output_lines.append(f"[IMAGE:{image_counter}]")
                         page_output_lines.append("")
 
                         image_counter += 1
@@ -198,9 +204,11 @@ class DocumentService:
                         pix = None
 
                 # -------------------------
-                # SAVE PAGE OUTPUT
+                # NORMALIZE PAGE OUTPUT
                 # -------------------------
-                full_text += "\n".join(page_output_lines) + "\n\n"
+                normalized_lines = DocumentService.normalize_page_lines(page_output_lines)
+                # join normalized lines with newlines and add to full_text
+                full_text += "\n".join(normalized_lines) + "\n\n"
 
         return full_text, image_files
 
@@ -286,11 +294,19 @@ class DocumentService:
     # ------------------------------------
     @staticmethod
     def replace_placeholders_with_urls(text: str, images: List[Dict]) -> str:
-        """Replace IMAGE:n markers with formatted image references."""
+        """
+        Replace IMAGE:n and [IMAGE:n] markers with a readable block including URL.
+        Accepts both formats to remain backward compatible.
+        """
+        # Replace both 'IMAGE:3' and '[IMAGE:3]' tokens
         for img in images:
-            marker = f"IMAGE:{img['image_number']}"
+            # accept either format when searching
+            marker_plain = f"IMAGE:{img['image_number']}"
+            marker_bracket = f"[IMAGE:{img['image_number']}]"
             replacement = f"\nimage: {img['image_number']}\nurl: {img['url']}\n"
-            text = text.replace(marker, replacement)
+            # Prefer replacing bracketed first, then plain
+            text = text.replace(marker_bracket, replacement)
+            text = text.replace(marker_plain, replacement)
         return text
 
     # ------------------------------------
@@ -382,3 +398,90 @@ class DocumentService:
             "deleted": deleted,
             "failed": failed,
         }
+
+    # ------------------------------------
+    # Normalize page lines
+    # ------------------------------------
+    @staticmethod
+    def normalize_page_lines(lines: List[str]) -> List[str]:
+        """
+        Normalize page output lines:
+        - Remove '# Page N' lines
+        - Collapse sequences of short lines into a single paragraph
+        - Preserve heading lines (starting with '#')
+        - Normalize image markers to '[IMAGE:n]'
+        - Preserve '[TABLE_PLACEHOLDER]'
+        """
+        out: List[str] = []
+        buffer: List[str] = []
+
+        def flush_buffer():
+            nonlocal buffer
+            if buffer:
+                joined = " ".join(l for l in buffer if l)
+                if joined.strip():
+                    out.append(joined.strip())
+                buffer = []
+
+        for raw in lines:
+            line = raw.strip()
+
+            # Skip page markers
+            if re.match(r'^#\s*Page\s+\d+', line, re.IGNORECASE):
+                flush_buffer()
+                continue
+
+            # Heading lines: flush buffer, keep heading as a line
+            if line.startswith("#"):
+                flush_buffer()
+                out.append(line)
+                continue
+
+            # Table placeholder: flush and keep
+            if line.startswith("[TABLE_PLACEHOLDER]"):
+                flush_buffer()
+                out.append("[TABLE_PLACEHOLDER]")
+                continue
+
+            # Normalize image markers (either "IMAGE:1" or "[IMAGE:1]" -> "[IMAGE:1]")
+            m = re.match(r'^\[?IMAGE:?\s*([0-9]+)\]?$', line, re.IGNORECASE)
+            if m:
+                flush_buffer()
+                out.append(f"[IMAGE:{int(m.group(1))}]")
+                continue
+
+            # Blank line: flush buffer and preserve a single blank
+            if line == "":
+                flush_buffer()
+                out.append("")
+                continue
+
+            # Short-line accumulation heuristic
+            words = line.split()
+            if len(words) <= 6:
+                # accumulate short lines; likely soft-wrapped
+                buffer.append(line)
+            else:
+                # longer lines: attach to buffer if any, otherwise emit directly
+                if buffer:
+                    buffer.append(line)
+                    flush_buffer()
+                else:
+                    out.append(line)
+
+        # flush remaining
+        flush_buffer()
+
+        # Collapse multiple blank lines into single blank
+        final: List[str] = []
+        prev_blank = False
+        for l in out:
+            if l == "":
+                if not prev_blank:
+                    final.append("")
+                    prev_blank = True
+            else:
+                final.append(l)
+                prev_blank = False
+
+        return final

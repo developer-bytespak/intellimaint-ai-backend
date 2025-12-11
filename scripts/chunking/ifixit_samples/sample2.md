@@ -1,0 +1,204 @@
+# Steam Deck Left Button Board Replacement
+
+Use this guide to replace the left button daughterboard on your Steam Deck LCD.
+
+Remember: follow general [link|https://www.ifixit.com/News/4883/esd-is-not-a-venereal-disease|electrostatic discharge (ESD) safety procedures] while repairing your device.
+
+These steps only describe how to physically remove and replace your console’s button board. ***You may need additional software tools and calibration procedures*** to get a replacement board to function as intended.
+
+## 1. Prepare your Steam Deck for disassembly
+> ⚠️ **Caution:** Turn on your Steam Deck and allow the battery to discharge below 25% before starting your repairs, as a charged lithium-ion polymer battery can be dangerous if accidentally punctured.
+> **Note:** As an extra precaution, Valve recommends putting your Steam Deck into ***battery storage mode*** within the BIOS before starting any internal repairs. [guide|149962|Read how to do that here].
+- Power down your Steam Deck and unplug any cables.
+> ⚠️ **Caution:** If you have a microSD card installed, ***make sure to remove it*** before opening the Steam Deck. If you attempt to remove the back cover with it still installed, [post|744361|it could snap right in half|new_window=true].
+> **Note:** During your repair, it can be helpful at times to lay the Steam Deck face-down into its case to protect the thumbsticks and prevent wobble.
+![Step 1 Image 2859003](https://guide-images.cdn.ifixit.com/igi/vQyR3PAE4HOMSLAZ.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/vQyR3PAE4HOMSLAZ.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/vQyR3PAE4HOMSLAZ.medium, large=https://guide-images.cdn.ifixit.com/igi/vQyR3PAE4HOMSLAZ.large, original=https://guide-images.cdn.ifixit.com/igi/vQyR3PAE4HOMSLAZ.full -->
+![Step 1 Image 2858999](https://guide-images.cdn.ifixit.com/igi/aIKAs5r3P3bY2iTE.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/aIKAs5r3P3bY2iTE.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/aIKAs5r3P3bY2iTE.medium, large=https://guide-images.cdn.ifixit.com/igi/aIKAs5r3P3bY2iTE.large, original=https://guide-images.cdn.ifixit.com/igi/aIKAs5r3P3bY2iTE.full -->
+![Step 1 Image 2903279](https://guide-images.cdn.ifixit.com/igi/hD1USYJCkAbkluud.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/hD1USYJCkAbkluud.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/hD1USYJCkAbkluud.medium, large=https://guide-images.cdn.ifixit.com/igi/hD1USYJCkAbkluud.large, original=https://guide-images.cdn.ifixit.com/igi/hD1USYJCkAbkluud.full -->
+
+## 2. Remove the back cover screws
+- Use a Phillips driver to remove the eight screws securing the back cover:
+  - Four coarse thread 9.5 mm-long screws
+  - Four fine thread 5.8 mm-long screws
+> **Note:** Despite the standards, Phillips screwdrivers can vary in size and shape—two drivers labeled as the same size may fit differently in the same screw.  Use the size that fits the snuggest into the screw head.
+> **Note:** Throughout this repair, [product|IF145-491|keep track of each screw|new_window=true] and make sure it goes back exactly where it came from to avoid damaging your Steam Deck.
+![Step 2 Image 2617672](https://guide-images.cdn.ifixit.com/igi/bpUGGPG32OkLXnC4.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/bpUGGPG32OkLXnC4.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/bpUGGPG32OkLXnC4.medium, large=https://guide-images.cdn.ifixit.com/igi/bpUGGPG32OkLXnC4.large, original=https://guide-images.cdn.ifixit.com/igi/bpUGGPG32OkLXnC4.full -->
+
+## 3. Unclip the back cover
+- Insert an opening pick into the thin gap between the back cover and the front shell, along the edge of the right grip.
+> **Note:** If you're having trouble inserting your pick at the grip seam, try starting at either the top or bottom long edges first, then slide the pick towards the grip.
+- Pry up on the back cover to release it from the locking clips.
+![Step 3 Image 2617602](https://guide-images.cdn.ifixit.com/igi/6jtVcFtMGa5ZMqcF.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/6jtVcFtMGa5ZMqcF.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/6jtVcFtMGa5ZMqcF.medium, large=https://guide-images.cdn.ifixit.com/igi/6jtVcFtMGa5ZMqcF.large, original=https://guide-images.cdn.ifixit.com/igi/6jtVcFtMGa5ZMqcF.full -->
+![Step 3 Image 2617601](https://guide-images.cdn.ifixit.com/igi/Ux5LEj3JfJlkmQMQ.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/Ux5LEj3JfJlkmQMQ.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/Ux5LEj3JfJlkmQMQ.medium, large=https://guide-images.cdn.ifixit.com/igi/Ux5LEj3JfJlkmQMQ.large, original=https://guide-images.cdn.ifixit.com/igi/Ux5LEj3JfJlkmQMQ.full -->
+
+## 4. Remove the back cover
+> **Note:** Once the clips are disconnected from one edge, the rest disconnect easily.
+- Grip the back cover at the opening you just created and pull it up and away from the device to unclip the long edges.
+- Remove the back cover.
+![Step 4 Image 2617668](https://guide-images.cdn.ifixit.com/igi/6IvIWWqEXPTqW1XB.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/6IvIWWqEXPTqW1XB.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/6IvIWWqEXPTqW1XB.medium, large=https://guide-images.cdn.ifixit.com/igi/6IvIWWqEXPTqW1XB.large, original=https://guide-images.cdn.ifixit.com/igi/6IvIWWqEXPTqW1XB.full -->
+![Step 4 Image 2617667](https://guide-images.cdn.ifixit.com/igi/1FxwYDjIGOAOCZT2.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/1FxwYDjIGOAOCZT2.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/1FxwYDjIGOAOCZT2.medium, large=https://guide-images.cdn.ifixit.com/igi/1FxwYDjIGOAOCZT2.large, original=https://guide-images.cdn.ifixit.com/igi/1FxwYDjIGOAOCZT2.full -->
+![Step 4 Image 2617669](https://guide-images.cdn.ifixit.com/igi/KpIx4YIAZrDH1b5T.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/KpIx4YIAZrDH1b5T.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/KpIx4YIAZrDH1b5T.medium, large=https://guide-images.cdn.ifixit.com/igi/KpIx4YIAZrDH1b5T.large, original=https://guide-images.cdn.ifixit.com/igi/KpIx4YIAZrDH1b5T.full -->
+
+## 5. Uncover the hidden shield screw
+> **Note:** If you have a [link|https://guide-images.cdn.ifixit.com/igi/l2ABGc6CMQFIytZB.full|refreshed Steam Deck version|new_window=true] with the black motherboard cover, skip this step.
+- Use a pair of [product|IF145-020|tweezers] to remove the piece of foil tape covering the hidden screw on the board shield.
+> **Note:** If possible, try not to rip or tear this tape so it can be reused. If necessary, you can fashion a replacement by cutting a piece of aluminum foil tape to fit.
+![Step 5 Image 2617665](https://guide-images.cdn.ifixit.com/igi/WuMbLgtJF5JwQtjF.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/WuMbLgtJF5JwQtjF.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/WuMbLgtJF5JwQtjF.medium, large=https://guide-images.cdn.ifixit.com/igi/WuMbLgtJF5JwQtjF.large, original=https://guide-images.cdn.ifixit.com/igi/WuMbLgtJF5JwQtjF.full -->
+![Step 5 Image 2617664](https://guide-images.cdn.ifixit.com/igi/I6pEKNGEKEDbNymT.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/I6pEKNGEKEDbNymT.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/I6pEKNGEKEDbNymT.medium, large=https://guide-images.cdn.ifixit.com/igi/I6pEKNGEKEDbNymT.large, original=https://guide-images.cdn.ifixit.com/igi/I6pEKNGEKEDbNymT.full -->
+
+## 6. Remove the shield screws
+- Use a Phillips driver to remove the three screws securing the board shield:
+  - One 3.4 mm screw
+  - Two 3.7 mm screws
+> **Note:** Only the two 3.7 mm screws along the left edge are present in refreshed Steam Decks.
+![Step 6 Image 2617697](https://guide-images.cdn.ifixit.com/igi/fpjCmGxopRvFvGbm.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/fpjCmGxopRvFvGbm.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/fpjCmGxopRvFvGbm.medium, large=https://guide-images.cdn.ifixit.com/igi/fpjCmGxopRvFvGbm.large, original=https://guide-images.cdn.ifixit.com/igi/fpjCmGxopRvFvGbm.full -->
+![Step 6 Image 3027240](https://guide-images.cdn.ifixit.com/igi/faiNkXVlQKKBKQT5.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/faiNkXVlQKKBKQT5.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/faiNkXVlQKKBKQT5.medium, large=https://guide-images.cdn.ifixit.com/igi/faiNkXVlQKKBKQT5.large, original=https://guide-images.cdn.ifixit.com/igi/faiNkXVlQKKBKQT5.full -->
+
+## 7. Remove the shield
+- Remove the board shield.
+> **Note:** Depending on the age of your Steam Deck, this shield may stick to the thermal pads underneath.
+- During reassembly, ensure that the fan cable [link|https://guide-images.cdn.ifixit.com/igi/GghDN4jfZlhN4fZD.full|lays on the side of the board shield] and isn't pinched underneath.
+![Step 7 Image 2617663](https://guide-images.cdn.ifixit.com/igi/JXePTdtVUbrOvVJT.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/JXePTdtVUbrOvVJT.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/JXePTdtVUbrOvVJT.medium, large=https://guide-images.cdn.ifixit.com/igi/JXePTdtVUbrOvVJT.large, original=https://guide-images.cdn.ifixit.com/igi/JXePTdtVUbrOvVJT.full -->
+![Step 7 Image 2617662](https://guide-images.cdn.ifixit.com/igi/QqjInaZugM3yJK1q.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/QqjInaZugM3yJK1q.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/QqjInaZugM3yJK1q.medium, large=https://guide-images.cdn.ifixit.com/igi/QqjInaZugM3yJK1q.large, original=https://guide-images.cdn.ifixit.com/igi/QqjInaZugM3yJK1q.full -->
+![Step 7 Image 3027255](https://guide-images.cdn.ifixit.com/igi/q4yCQlQQmrvlOOuU.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/q4yCQlQQmrvlOOuU.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/q4yCQlQQmrvlOOuU.medium, large=https://guide-images.cdn.ifixit.com/igi/q4yCQlQQmrvlOOuU.large, original=https://guide-images.cdn.ifixit.com/igi/q4yCQlQQmrvlOOuU.full -->
+
+## 8. Disconnect the battery
+- Grip the battery cable by its pull tab and pull it directly away from the motherboard to disconnect it.
+> **Note:** Alternatively, use the flat end of a spudger or a clean fingernail to gently push the connector out of its socket, then disconnect it completely by hand.
+![Step 8 Image 2617661](https://guide-images.cdn.ifixit.com/igi/XjI1homB4a5VNhbV.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/XjI1homB4a5VNhbV.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/XjI1homB4a5VNhbV.medium, large=https://guide-images.cdn.ifixit.com/igi/XjI1homB4a5VNhbV.large, original=https://guide-images.cdn.ifixit.com/igi/XjI1homB4a5VNhbV.full -->
+![Step 8 Image 2617659](https://guide-images.cdn.ifixit.com/igi/qvcjxPUTxawsUUMB.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/qvcjxPUTxawsUUMB.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/qvcjxPUTxawsUUMB.medium, large=https://guide-images.cdn.ifixit.com/igi/qvcjxPUTxawsUUMB.large, original=https://guide-images.cdn.ifixit.com/igi/qvcjxPUTxawsUUMB.full -->
+![Step 8 Image 2617658](https://guide-images.cdn.ifixit.com/igi/qa3R33nVHlO1SOpy.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/qa3R33nVHlO1SOpy.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/qa3R33nVHlO1SOpy.medium, large=https://guide-images.cdn.ifixit.com/igi/qa3R33nVHlO1SOpy.large, original=https://guide-images.cdn.ifixit.com/igi/qa3R33nVHlO1SOpy.full -->
+
+## 9. Unclip the left trigger
+> **Note:** The ***left*** trigger will be on your ***right-hand side*** when working on the Steam Deck, as it's laying upside down.
+> **Note:** The Steam Deck's triggers clip into place on two pegs on the trigger bracket, which doubles as the hinge.
+- Place the flat end of a spudger onto the inside edge of the trigger's left clip.
+- Pivot the trigger clip out, away, and up from the peg to unlatch it.
+- During reassembly, latch the outermost peg first. Once in place, push down on the trigger to latch the innermost peg, producing an audible "***click***" sound.
+> **Note:** Check to make sure that the trigger spring is properly aligned. Test the trigger action before continuing reassembly.
+![Step 9 Image 2617627](https://guide-images.cdn.ifixit.com/igi/EWppHNyTD2c1kDxt.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/EWppHNyTD2c1kDxt.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/EWppHNyTD2c1kDxt.medium, large=https://guide-images.cdn.ifixit.com/igi/EWppHNyTD2c1kDxt.large, original=https://guide-images.cdn.ifixit.com/igi/EWppHNyTD2c1kDxt.full -->
+![Step 9 Image 2617625](https://guide-images.cdn.ifixit.com/igi/uIiUGhOUlETpu42S.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/uIiUGhOUlETpu42S.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/uIiUGhOUlETpu42S.medium, large=https://guide-images.cdn.ifixit.com/igi/uIiUGhOUlETpu42S.large, original=https://guide-images.cdn.ifixit.com/igi/uIiUGhOUlETpu42S.full -->
+
+## 10. Remove the left trigger
+- Remove the left trigger.
+> **Note:** Take care to not lose the trigger spring. It press-fits onto a peg on the trigger's underside.
+![Step 10 Image 2617626](https://guide-images.cdn.ifixit.com/igi/SBsBhSJIRJhqfCNd.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/SBsBhSJIRJhqfCNd.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/SBsBhSJIRJhqfCNd.medium, large=https://guide-images.cdn.ifixit.com/igi/SBsBhSJIRJhqfCNd.large, original=https://guide-images.cdn.ifixit.com/igi/SBsBhSJIRJhqfCNd.full -->
+![Step 10 Image 2617622](https://guide-images.cdn.ifixit.com/igi/eqNcME4RdKWjBlPH.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/eqNcME4RdKWjBlPH.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/eqNcME4RdKWjBlPH.medium, large=https://guide-images.cdn.ifixit.com/igi/eqNcME4RdKWjBlPH.large, original=https://guide-images.cdn.ifixit.com/igi/eqNcME4RdKWjBlPH.full -->
+
+## 11. Remove the trigger bracket screws
+- Use a Phillips driver to remove the three 5.2 mm screws securing the left trigger bracket.
+![Step 11 Image 2617757](https://guide-images.cdn.ifixit.com/igi/IQ1XfGaxeSPaaoo5.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/IQ1XfGaxeSPaaoo5.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/IQ1XfGaxeSPaaoo5.medium, large=https://guide-images.cdn.ifixit.com/igi/IQ1XfGaxeSPaaoo5.large, original=https://guide-images.cdn.ifixit.com/igi/IQ1XfGaxeSPaaoo5.full -->
+
+## 12. Remove the trigger bracket
+- Remove the left trigger bracket.
+- Replacement triggers require calibration to work as expected. To calibrate new triggers, follow [link|https://www.ifixit.com/Guide/How+to+Calibrate+Steam+Deck+Triggers/150411|this calibration guide].
+![Step 12 Image 2617623](https://guide-images.cdn.ifixit.com/igi/gLTTOYllyXg1MQkM.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/gLTTOYllyXg1MQkM.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/gLTTOYllyXg1MQkM.medium, large=https://guide-images.cdn.ifixit.com/igi/gLTTOYllyXg1MQkM.large, original=https://guide-images.cdn.ifixit.com/igi/gLTTOYllyXg1MQkM.full -->
+
+## 13. Disconnect the left thumbstick
+- Use the pointed end of a spudger to lift up the small locking flap on the thumbstick cable's [guide|25629|ZIF connector|stepid=64969|new_window=true].
+- Use a pair of [product|IF145-020|tweezers] to slide the cable out of its connector.
+> **Note:** Grip the cable by the blue pull tab, not by the cable itself.
+![Step 13 Image 2619353](https://guide-images.cdn.ifixit.com/igi/6oggHEmLNyWtjQOW.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/6oggHEmLNyWtjQOW.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/6oggHEmLNyWtjQOW.medium, large=https://guide-images.cdn.ifixit.com/igi/6oggHEmLNyWtjQOW.large, original=https://guide-images.cdn.ifixit.com/igi/6oggHEmLNyWtjQOW.full -->
+![Step 13 Image 2619354](https://guide-images.cdn.ifixit.com/igi/gFu215gY6TEGHsXA.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/gFu215gY6TEGHsXA.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/gFu215gY6TEGHsXA.medium, large=https://guide-images.cdn.ifixit.com/igi/gFu215gY6TEGHsXA.large, original=https://guide-images.cdn.ifixit.com/igi/gFu215gY6TEGHsXA.full -->
+![Step 13 Image 2619355](https://guide-images.cdn.ifixit.com/igi/vvsWCYPLany4OFI4.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/vvsWCYPLany4OFI4.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/vvsWCYPLany4OFI4.medium, large=https://guide-images.cdn.ifixit.com/igi/vvsWCYPLany4OFI4.large, original=https://guide-images.cdn.ifixit.com/igi/vvsWCYPLany4OFI4.full -->
+
+## 14. Remove the thumbstick screws
+- Use a Phillips driver to remove the three 5.2 mm screws securing the thumbstick.
+> **Note:** During reassembly, you may need to hold the Steam Deck off of the work surface so it isn't resting on the new thumbstick while you tighten down the screws.
+![Step 14 Image 2619357](https://guide-images.cdn.ifixit.com/igi/HRNOTKMgOUugPJFH.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/HRNOTKMgOUugPJFH.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/HRNOTKMgOUugPJFH.medium, large=https://guide-images.cdn.ifixit.com/igi/HRNOTKMgOUugPJFH.large, original=https://guide-images.cdn.ifixit.com/igi/HRNOTKMgOUugPJFH.full -->
+![Step 14 Image 2619358](https://guide-images.cdn.ifixit.com/igi/oPFIHB3Jmtv3SI3t.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/oPFIHB3Jmtv3SI3t.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/oPFIHB3Jmtv3SI3t.medium, large=https://guide-images.cdn.ifixit.com/igi/oPFIHB3Jmtv3SI3t.large, original=https://guide-images.cdn.ifixit.com/igi/oPFIHB3Jmtv3SI3t.full -->
+
+## 15. Remove the left thumbstick
+- Remove the left thumbstick.
+![Step 15 Image 2619301](https://guide-images.cdn.ifixit.com/igi/IgmCIUSUWQftAMuX.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/IgmCIUSUWQftAMuX.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/IgmCIUSUWQftAMuX.medium, large=https://guide-images.cdn.ifixit.com/igi/IgmCIUSUWQftAMuX.large, original=https://guide-images.cdn.ifixit.com/igi/IgmCIUSUWQftAMuX.full -->
+![Step 15 Image 2619298](https://guide-images.cdn.ifixit.com/igi/V53KuXu23pjmic1d.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/V53KuXu23pjmic1d.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/V53KuXu23pjmic1d.medium, large=https://guide-images.cdn.ifixit.com/igi/V53KuXu23pjmic1d.large, original=https://guide-images.cdn.ifixit.com/igi/V53KuXu23pjmic1d.full -->
+
+## 16. Disconnect the interconnect cable
+- Use the pointed end of a spudger to lift up the small locking flap on the button board interconnect cable's ZIF connector.
+- Use a pair of tweezers to slide the cable out of its connector.
+> **Note:** Grip the cable by the blue pull tab, not by the cable itself.
+![Step 16 Image 2619299](https://guide-images.cdn.ifixit.com/igi/mDCVZu1Uhy4u1FDT.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/mDCVZu1Uhy4u1FDT.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/mDCVZu1Uhy4u1FDT.medium, large=https://guide-images.cdn.ifixit.com/igi/mDCVZu1Uhy4u1FDT.large, original=https://guide-images.cdn.ifixit.com/igi/mDCVZu1Uhy4u1FDT.full -->
+![Step 16 Image 2619296](https://guide-images.cdn.ifixit.com/igi/kGrqEKvGXVwu5Cl1.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/kGrqEKvGXVwu5Cl1.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/kGrqEKvGXVwu5Cl1.medium, large=https://guide-images.cdn.ifixit.com/igi/kGrqEKvGXVwu5Cl1.large, original=https://guide-images.cdn.ifixit.com/igi/kGrqEKvGXVwu5Cl1.full -->
+![Step 16 Image 2619294](https://guide-images.cdn.ifixit.com/igi/LxMfQatUstacaDiZ.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/LxMfQatUstacaDiZ.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/LxMfQatUstacaDiZ.medium, large=https://guide-images.cdn.ifixit.com/igi/LxMfQatUstacaDiZ.large, original=https://guide-images.cdn.ifixit.com/igi/LxMfQatUstacaDiZ.full -->
+
+## 17. Disconnect the remaining button board cables
+- If any connectors are [link|https://guide-images.cdn.ifixit.com/igi/1tddtLL4m5PnMdKF.full|new_window=true|covered with tape], use a pair of tweezers to remove it.
+- Use the pointed end of a spudger to lift up the small locking flaps on the rest of the button board ZIF connectors. Use a pair of tweezers to slide the cables out of their connectors:
+  - Disconnect the D-pad cable.
+  - Disconnect the touchpad board cable.
+  - Disconnect the touchpad cable.
+![Step 17 Image 2619295](https://guide-images.cdn.ifixit.com/igi/BpQaphbbu6FsVrgA.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/BpQaphbbu6FsVrgA.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/BpQaphbbu6FsVrgA.medium, large=https://guide-images.cdn.ifixit.com/igi/BpQaphbbu6FsVrgA.large, original=https://guide-images.cdn.ifixit.com/igi/BpQaphbbu6FsVrgA.full -->
+![Step 17 Image 2619293](https://guide-images.cdn.ifixit.com/igi/pK1xSdVRI5etk6Lp.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/pK1xSdVRI5etk6Lp.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/pK1xSdVRI5etk6Lp.medium, large=https://guide-images.cdn.ifixit.com/igi/pK1xSdVRI5etk6Lp.large, original=https://guide-images.cdn.ifixit.com/igi/pK1xSdVRI5etk6Lp.full -->
+![Step 17 Image 2619292](https://guide-images.cdn.ifixit.com/igi/YmJgw4ZUkjHTcmNR.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/YmJgw4ZUkjHTcmNR.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/YmJgw4ZUkjHTcmNR.medium, large=https://guide-images.cdn.ifixit.com/igi/YmJgw4ZUkjHTcmNR.large, original=https://guide-images.cdn.ifixit.com/igi/YmJgw4ZUkjHTcmNR.full -->
+
+## 18. Disconnect the left haptics
+> ⚠️ **Caution:** Exercise caution when lifting this connector—pry up on the connector itself, not its housing.
+- Use the pointed end of a spudger to lift up on the haptics cable to disconnect it.
+> **Note:** Alternatively, you can leave the haptics connected to the button board and flip the board up and over the edge of the shell and out of the way.
+![Step 18 Image 2619291](https://guide-images.cdn.ifixit.com/igi/N2a5ZS5voou2PGXw.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/N2a5ZS5voou2PGXw.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/N2a5ZS5voou2PGXw.medium, large=https://guide-images.cdn.ifixit.com/igi/N2a5ZS5voou2PGXw.large, original=https://guide-images.cdn.ifixit.com/igi/N2a5ZS5voou2PGXw.full -->
+![Step 18 Image 2619289](https://guide-images.cdn.ifixit.com/igi/N65FYVBb2Gr6RdCf.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/N65FYVBb2Gr6RdCf.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/N65FYVBb2Gr6RdCf.medium, large=https://guide-images.cdn.ifixit.com/igi/N65FYVBb2Gr6RdCf.large, original=https://guide-images.cdn.ifixit.com/igi/N65FYVBb2Gr6RdCf.full -->
+![Step 18 Image 2619288](https://guide-images.cdn.ifixit.com/igi/HPFEq1JNulDkfuWS.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/HPFEq1JNulDkfuWS.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/HPFEq1JNulDkfuWS.medium, large=https://guide-images.cdn.ifixit.com/igi/HPFEq1JNulDkfuWS.large, original=https://guide-images.cdn.ifixit.com/igi/HPFEq1JNulDkfuWS.full -->
+
+## 19. Remove the button board screws
+- Use a Phillips driver to disconnect the four screws securing the left button board:
+  - Three 5.2 mm screws
+  - One 3.9 mm screw
+![Step 19 Image 2619365](https://guide-images.cdn.ifixit.com/igi/UcMiMRyDPQsrZjom.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/UcMiMRyDPQsrZjom.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/UcMiMRyDPQsrZjom.medium, large=https://guide-images.cdn.ifixit.com/igi/UcMiMRyDPQsrZjom.large, original=https://guide-images.cdn.ifixit.com/igi/UcMiMRyDPQsrZjom.full -->
+
+## 20. Remove the button board
+- Remove the left button board.
+> **Note:** Keep track of the [link|https://www.ifixit.com/Guide/Steam+Deck+Steam+Button+Replacement/148933#s306620|Steam button] and its membrane, as once the left button board is removed, they're no longer secured in place.
+![Step 20 Image 2619287](https://guide-images.cdn.ifixit.com/igi/T3q2SpIndCErUVJK.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/T3q2SpIndCErUVJK.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/T3q2SpIndCErUVJK.medium, large=https://guide-images.cdn.ifixit.com/igi/T3q2SpIndCErUVJK.large, original=https://guide-images.cdn.ifixit.com/igi/T3q2SpIndCErUVJK.full -->
+![Step 20 Image 2619286](https://guide-images.cdn.ifixit.com/igi/hYjLHCFdWsy1cjKZ.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/hYjLHCFdWsy1cjKZ.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/hYjLHCFdWsy1cjKZ.medium, large=https://guide-images.cdn.ifixit.com/igi/hYjLHCFdWsy1cjKZ.large, original=https://guide-images.cdn.ifixit.com/igi/hYjLHCFdWsy1cjKZ.full -->
+
+## Conclusion
+
+***To reassemble your device, follow these instructions in reverse order.***
+
+Take your e-waste to an [[E-Waste|R2 or e-Stewards certified recycler|new_window=true]].
+
+Repair didn’t go as planned? Try some [[Troubleshooting Problems After a Repair|basic troubleshooting]], or ask our [link|https://www.ifixit.com/Answers/Device/Steam%20Deck|Steam Deck answers community] for help.

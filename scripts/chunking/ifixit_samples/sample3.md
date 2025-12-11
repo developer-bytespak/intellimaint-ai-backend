@@ -1,0 +1,215 @@
+# How to identify your iPhone
+
+## 1. iPhone 5
+- iPhone 5 has two parallel, horizontal screen connectors in the top right.. The larger, top one is the Digitizer connector, and the bottom, smaller one is the LCD connector. The vertical connection is used for camera and speaker functionality.
+![Step 1 Image 2264387](https://guide-images.cdn.ifixit.com/igi/ySELyVMBiNvYXhea.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/ySELyVMBiNvYXhea.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/ySELyVMBiNvYXhea.medium, large=https://guide-images.cdn.ifixit.com/igi/ySELyVMBiNvYXhea.large, original=https://guide-images.cdn.ifixit.com/igi/ySELyVMBiNvYXhea.full -->
+![Step 1 Image 2264392](https://guide-images.cdn.ifixit.com/igi/RvHQuj6mkEhEyASi.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/RvHQuj6mkEhEyASi.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/RvHQuj6mkEhEyASi.medium, large=https://guide-images.cdn.ifixit.com/igi/RvHQuj6mkEhEyASi.large, original=https://guide-images.cdn.ifixit.com/igi/RvHQuj6mkEhEyASi.full -->
+![Step 1 Image 2271335](https://guide-images.cdn.ifixit.com/igi/6x1vxAOVElELTBKC.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/6x1vxAOVElELTBKC.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/6x1vxAOVElELTBKC.medium, large=https://guide-images.cdn.ifixit.com/igi/6x1vxAOVElELTBKC.large, original=https://guide-images.cdn.ifixit.com/igi/6x1vxAOVElELTBKC.full -->
+
+## 2. iPhone 5c
+- iPhone 5c has it's LCD and digitizer connectors in the top right. It has a horizontal digitizer connecter and a vertical LCD connecter to it's top left.
+![Step 2 Image 2264399](https://guide-images.cdn.ifixit.com/igi/4bcttAYilHNMdvge.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/4bcttAYilHNMdvge.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/4bcttAYilHNMdvge.medium, large=https://guide-images.cdn.ifixit.com/igi/4bcttAYilHNMdvge.large, original=https://guide-images.cdn.ifixit.com/igi/4bcttAYilHNMdvge.full -->
+![Step 2 Image 2264401](https://guide-images.cdn.ifixit.com/igi/tFMScvINgkn2JshZ.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/tFMScvINgkn2JshZ.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/tFMScvINgkn2JshZ.medium, large=https://guide-images.cdn.ifixit.com/igi/tFMScvINgkn2JshZ.large, original=https://guide-images.cdn.ifixit.com/igi/tFMScvINgkn2JshZ.full -->
+![Step 2 Image 2277839](https://guide-images.cdn.ifixit.com/igi/DJcuymcDqNbkrZOs.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/DJcuymcDqNbkrZOs.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/DJcuymcDqNbkrZOs.medium, large=https://guide-images.cdn.ifixit.com/igi/DJcuymcDqNbkrZOs.large, original=https://guide-images.cdn.ifixit.com/igi/DJcuymcDqNbkrZOs.full -->
+
+## 3. Difference between 5 and 5c
+- The main difference between the 5s and 5c is the 5s (left) is a thinner display than the 5c (right). The other smaller difference is that the digitizer connection is slightly larger.
+![Step 3 Image 2264408](https://guide-images.cdn.ifixit.com/igi/lY4vGWoRrYTg1OrT.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/lY4vGWoRrYTg1OrT.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/lY4vGWoRrYTg1OrT.medium, large=https://guide-images.cdn.ifixit.com/igi/lY4vGWoRrYTg1OrT.large, original=https://guide-images.cdn.ifixit.com/igi/lY4vGWoRrYTg1OrT.full -->
+
+## 4. iPhone 5s
+- The iPhone 5s has connectors that are similar to 5c where there is a horizontal LCD and a vertical digitizer.
+![Step 4 Image 2264714](https://guide-images.cdn.ifixit.com/igi/YJyFmGb2puL5qsBO.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/YJyFmGb2puL5qsBO.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/YJyFmGb2puL5qsBO.medium, large=https://guide-images.cdn.ifixit.com/igi/YJyFmGb2puL5qsBO.large, original=https://guide-images.cdn.ifixit.com/igi/YJyFmGb2puL5qsBO.full -->
+![Step 4 Image 2264716](https://guide-images.cdn.ifixit.com/igi/asmIHRuokBdbjHO6.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/asmIHRuokBdbjHO6.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/asmIHRuokBdbjHO6.medium, large=https://guide-images.cdn.ifixit.com/igi/asmIHRuokBdbjHO6.large, original=https://guide-images.cdn.ifixit.com/igi/asmIHRuokBdbjHO6.full -->
+![Step 4 Image 2277844](https://guide-images.cdn.ifixit.com/igi/LcxsLdMBwkVWfgVN.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/LcxsLdMBwkVWfgVN.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/LcxsLdMBwkVWfgVN.medium, large=https://guide-images.cdn.ifixit.com/igi/LcxsLdMBwkVWfgVN.large, original=https://guide-images.cdn.ifixit.com/igi/LcxsLdMBwkVWfgVN.full -->
+
+## 5. Difference between the 5 and 5s
+- The iPhone 5 has two vertical connectors and the iPhone 5s has a horizontal and a vertical connector.
+![Step 5 Image 2264722](https://guide-images.cdn.ifixit.com/igi/RNjAiD6kUbnCGNOJ.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/RNjAiD6kUbnCGNOJ.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/RNjAiD6kUbnCGNOJ.medium, large=https://guide-images.cdn.ifixit.com/igi/RNjAiD6kUbnCGNOJ.large, original=https://guide-images.cdn.ifixit.com/igi/RNjAiD6kUbnCGNOJ.full -->
+
+## 6. iPhone SE
+- iPhone SE is very similar to iPhone 5s.
+- You can tell between the iPhone SE and iPhone 5s by checking the back of the phone.
+![Step 6 Image 2264725](https://guide-images.cdn.ifixit.com/igi/md5dYx3dmInjdrZV.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/md5dYx3dmInjdrZV.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/md5dYx3dmInjdrZV.medium, large=https://guide-images.cdn.ifixit.com/igi/md5dYx3dmInjdrZV.large, original=https://guide-images.cdn.ifixit.com/igi/md5dYx3dmInjdrZV.full -->
+![Step 6 Image 2281385](https://guide-images.cdn.ifixit.com/igi/oXba3NAyWYPZEbeP.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/oXba3NAyWYPZEbeP.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/oXba3NAyWYPZEbeP.medium, large=https://guide-images.cdn.ifixit.com/igi/oXba3NAyWYPZEbeP.large, original=https://guide-images.cdn.ifixit.com/igi/oXba3NAyWYPZEbeP.full -->
+
+## 7. iPhone 6
+- iPhone 6 has two parallel horizontal connectors in the top right. Following the same convention as the 5 series.
+![Step 7 Image 2264727](https://guide-images.cdn.ifixit.com/igi/BSQW6cD2xXI1UtPv.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/BSQW6cD2xXI1UtPv.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/BSQW6cD2xXI1UtPv.medium, large=https://guide-images.cdn.ifixit.com/igi/BSQW6cD2xXI1UtPv.large, original=https://guide-images.cdn.ifixit.com/igi/BSQW6cD2xXI1UtPv.full -->
+![Step 7 Image 2264730](https://guide-images.cdn.ifixit.com/igi/KO4PRtZcPU2DBdKL.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/KO4PRtZcPU2DBdKL.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/KO4PRtZcPU2DBdKL.medium, large=https://guide-images.cdn.ifixit.com/igi/KO4PRtZcPU2DBdKL.large, original=https://guide-images.cdn.ifixit.com/igi/KO4PRtZcPU2DBdKL.full -->
+![Step 7 Image 2277846](https://guide-images.cdn.ifixit.com/igi/HOQDnPR6gcnuKBYD.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/HOQDnPR6gcnuKBYD.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/HOQDnPR6gcnuKBYD.medium, large=https://guide-images.cdn.ifixit.com/igi/HOQDnPR6gcnuKBYD.large, original=https://guide-images.cdn.ifixit.com/igi/HOQDnPR6gcnuKBYD.full -->
+
+## 8. iPhone 6 Plus
+- The iPhone 6 Plus is very similar to the iPhone 6 except it's larger, and the connectors are longer.
+![Step 8 Image 2271334](https://guide-images.cdn.ifixit.com/igi/6fMIOYOWMYv3E4Yl.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/6fMIOYOWMYv3E4Yl.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/6fMIOYOWMYv3E4Yl.medium, large=https://guide-images.cdn.ifixit.com/igi/6fMIOYOWMYv3E4Yl.large, original=https://guide-images.cdn.ifixit.com/igi/6fMIOYOWMYv3E4Yl.full -->
+![Step 8 Image 2271338](https://guide-images.cdn.ifixit.com/igi/IuPgP5ElbgpIaMAx.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/IuPgP5ElbgpIaMAx.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/IuPgP5ElbgpIaMAx.medium, large=https://guide-images.cdn.ifixit.com/igi/IuPgP5ElbgpIaMAx.large, original=https://guide-images.cdn.ifixit.com/igi/IuPgP5ElbgpIaMAx.full -->
+![Step 8 Image 2271340](https://guide-images.cdn.ifixit.com/igi/HKp4ZvDOMiUAFvVw.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/HKp4ZvDOMiUAFvVw.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/HKp4ZvDOMiUAFvVw.medium, large=https://guide-images.cdn.ifixit.com/igi/HKp4ZvDOMiUAFvVw.large, original=https://guide-images.cdn.ifixit.com/igi/HKp4ZvDOMiUAFvVw.full -->
+
+## 9. iPhone 6s
+- The iPhone 6s has vertical and horizontal connectors as well as an identifying mark on the back of the phone designating it as an s
+![Step 9 Image 2271363](https://guide-images.cdn.ifixit.com/igi/oYnmOkFBPunDuHgX.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/oYnmOkFBPunDuHgX.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/oYnmOkFBPunDuHgX.medium, large=https://guide-images.cdn.ifixit.com/igi/oYnmOkFBPunDuHgX.large, original=https://guide-images.cdn.ifixit.com/igi/oYnmOkFBPunDuHgX.full -->
+![Step 9 Image 2271372](https://guide-images.cdn.ifixit.com/igi/mswsVGEZphclWS3y.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/mswsVGEZphclWS3y.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/mswsVGEZphclWS3y.medium, large=https://guide-images.cdn.ifixit.com/igi/mswsVGEZphclWS3y.large, original=https://guide-images.cdn.ifixit.com/igi/mswsVGEZphclWS3y.full -->
+![Step 9 Image 2277855](https://guide-images.cdn.ifixit.com/igi/Y2ZaweGNpTXmfWKw.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/Y2ZaweGNpTXmfWKw.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/Y2ZaweGNpTXmfWKw.medium, large=https://guide-images.cdn.ifixit.com/igi/Y2ZaweGNpTXmfWKw.large, original=https://guide-images.cdn.ifixit.com/igi/Y2ZaweGNpTXmfWKw.full -->
+
+## 10. Difference between 6 and 6s
+- The main way to tell between the 6 and 6s is to check the back of the phone. If you don't already have it open.
+![Step 10 Image 2281386](https://guide-images.cdn.ifixit.com/igi/KfJRtbaSDcfL2Uiy.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/KfJRtbaSDcfL2Uiy.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/KfJRtbaSDcfL2Uiy.medium, large=https://guide-images.cdn.ifixit.com/igi/KfJRtbaSDcfL2Uiy.large, original=https://guide-images.cdn.ifixit.com/igi/KfJRtbaSDcfL2Uiy.full -->
+
+## 11. iPhone 6s Plus
+- The iPhone 6s Plus is very similar to the 6s, except that the connectors are longer, and the screen is much larger.
+![Step 11 Image 2271376](https://guide-images.cdn.ifixit.com/igi/Rfjc333SbifTa24k.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/Rfjc333SbifTa24k.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/Rfjc333SbifTa24k.medium, large=https://guide-images.cdn.ifixit.com/igi/Rfjc333SbifTa24k.large, original=https://guide-images.cdn.ifixit.com/igi/Rfjc333SbifTa24k.full -->
+![Step 11 Image 2271378](https://guide-images.cdn.ifixit.com/igi/OvENPKRMsvAnMcBK.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/OvENPKRMsvAnMcBK.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/OvENPKRMsvAnMcBK.medium, large=https://guide-images.cdn.ifixit.com/igi/OvENPKRMsvAnMcBK.large, original=https://guide-images.cdn.ifixit.com/igi/OvENPKRMsvAnMcBK.full -->
+![Step 11 Image 2271379](https://guide-images.cdn.ifixit.com/igi/pkLIPHQGEsAEQSSF.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/pkLIPHQGEsAEQSSF.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/pkLIPHQGEsAEQSSF.medium, large=https://guide-images.cdn.ifixit.com/igi/pkLIPHQGEsAEQSSF.large, original=https://guide-images.cdn.ifixit.com/igi/pkLIPHQGEsAEQSSF.full -->
+
+## 12. iPhone 7
+- iPhone 7 has its connectors near the bottom right.
+![Step 12 Image 2272087](https://guide-images.cdn.ifixit.com/igi/CoR3XIKF1TqwiRsR.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/CoR3XIKF1TqwiRsR.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/CoR3XIKF1TqwiRsR.medium, large=https://guide-images.cdn.ifixit.com/igi/CoR3XIKF1TqwiRsR.large, original=https://guide-images.cdn.ifixit.com/igi/CoR3XIKF1TqwiRsR.full -->
+![Step 12 Image 2271384](https://guide-images.cdn.ifixit.com/igi/KZYGfKn2G1sTs22D.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/KZYGfKn2G1sTs22D.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/KZYGfKn2G1sTs22D.medium, large=https://guide-images.cdn.ifixit.com/igi/KZYGfKn2G1sTs22D.large, original=https://guide-images.cdn.ifixit.com/igi/KZYGfKn2G1sTs22D.full -->
+![Step 12 Image 2277856](https://guide-images.cdn.ifixit.com/igi/CSm1faFTl1CqrZIG.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/CSm1faFTl1CqrZIG.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/CSm1faFTl1CqrZIG.medium, large=https://guide-images.cdn.ifixit.com/igi/CSm1faFTl1CqrZIG.large, original=https://guide-images.cdn.ifixit.com/igi/CSm1faFTl1CqrZIG.full -->
+
+## 13. iPhone 7 Plus
+- iPhone 7 Plus is the same as the iPhone 7, except the screen and connectors are larger.
+![Step 13 Image 2271386](https://guide-images.cdn.ifixit.com/igi/UAr51kPxwTaAjSWL.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/UAr51kPxwTaAjSWL.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/UAr51kPxwTaAjSWL.medium, large=https://guide-images.cdn.ifixit.com/igi/UAr51kPxwTaAjSWL.large, original=https://guide-images.cdn.ifixit.com/igi/UAr51kPxwTaAjSWL.full -->
+![Step 13 Image 2272073](https://guide-images.cdn.ifixit.com/igi/GNDtSHiOQ1CajJUP.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/GNDtSHiOQ1CajJUP.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/GNDtSHiOQ1CajJUP.medium, large=https://guide-images.cdn.ifixit.com/igi/GNDtSHiOQ1CajJUP.large, original=https://guide-images.cdn.ifixit.com/igi/GNDtSHiOQ1CajJUP.full -->
+![Step 13 Image 2272071](https://guide-images.cdn.ifixit.com/igi/nv5NBvBoLYeLeBPL.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/nv5NBvBoLYeLeBPL.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/nv5NBvBoLYeLeBPL.medium, large=https://guide-images.cdn.ifixit.com/igi/nv5NBvBoLYeLeBPL.large, original=https://guide-images.cdn.ifixit.com/igi/nv5NBvBoLYeLeBPL.full -->
+
+## 14. iPhone 8
+- iPhone 8 has its connectors in the same orientation as the iPhone 7 and are the same size.
+![Step 14 Image 2272074](https://guide-images.cdn.ifixit.com/igi/RQEyvgs1J5Qmwulj.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/RQEyvgs1J5Qmwulj.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/RQEyvgs1J5Qmwulj.medium, large=https://guide-images.cdn.ifixit.com/igi/RQEyvgs1J5Qmwulj.large, original=https://guide-images.cdn.ifixit.com/igi/RQEyvgs1J5Qmwulj.full -->
+![Step 14 Image 2272075](https://guide-images.cdn.ifixit.com/igi/fbAgnmaf3IRVX1wA.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/fbAgnmaf3IRVX1wA.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/fbAgnmaf3IRVX1wA.medium, large=https://guide-images.cdn.ifixit.com/igi/fbAgnmaf3IRVX1wA.large, original=https://guide-images.cdn.ifixit.com/igi/fbAgnmaf3IRVX1wA.full -->
+![Step 14 Image 2277857](https://guide-images.cdn.ifixit.com/igi/LmG6qtxWIL6wZpRD.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/LmG6qtxWIL6wZpRD.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/LmG6qtxWIL6wZpRD.medium, large=https://guide-images.cdn.ifixit.com/igi/LmG6qtxWIL6wZpRD.large, original=https://guide-images.cdn.ifixit.com/igi/LmG6qtxWIL6wZpRD.full -->
+
+## 15. iPhone 8 Plus
+- The iPhone 8 Plus is the same as the iPhone 8, except the screen and connectors are larger.
+![Step 15 Image 2272076](https://guide-images.cdn.ifixit.com/igi/TFxamJnKUIkA4IJZ.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/TFxamJnKUIkA4IJZ.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/TFxamJnKUIkA4IJZ.medium, large=https://guide-images.cdn.ifixit.com/igi/TFxamJnKUIkA4IJZ.large, original=https://guide-images.cdn.ifixit.com/igi/TFxamJnKUIkA4IJZ.full -->
+![Step 15 Image 2272078](https://guide-images.cdn.ifixit.com/igi/YqOqDKL4eSAHxuXH.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/YqOqDKL4eSAHxuXH.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/YqOqDKL4eSAHxuXH.medium, large=https://guide-images.cdn.ifixit.com/igi/YqOqDKL4eSAHxuXH.large, original=https://guide-images.cdn.ifixit.com/igi/YqOqDKL4eSAHxuXH.full -->
+![Step 15 Image 2277858](https://guide-images.cdn.ifixit.com/igi/qEDmbK2TUvKUVADH.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/qEDmbK2TUvKUVADH.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/qEDmbK2TUvKUVADH.medium, large=https://guide-images.cdn.ifixit.com/igi/qEDmbK2TUvKUVADH.large, original=https://guide-images.cdn.ifixit.com/igi/qEDmbK2TUvKUVADH.full -->
+
+## 16. Main differences between iPhone 7 and iPhone 8
+- iPhone 7 and 8 are very similar except for the following differences:
+- The top brackets of the iPhone 7 are plastic and are metal for the iPhone 8. This makes changing screens considerably easier.
+- The back of the iPhone 7 is Aluminum whereas the back of the iPhone 8 is glass to facilitate wireless charging.
+![Step 16 Image 2263189](https://guide-images.cdn.ifixit.com/igi/HDQHOrWoDbkFeNOu.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/HDQHOrWoDbkFeNOu.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/HDQHOrWoDbkFeNOu.medium, large=https://guide-images.cdn.ifixit.com/igi/HDQHOrWoDbkFeNOu.large, original=https://guide-images.cdn.ifixit.com/igi/HDQHOrWoDbkFeNOu.full -->
+![Step 16 Image 2272081](https://guide-images.cdn.ifixit.com/igi/rnbjxCB3sVgIldav.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/rnbjxCB3sVgIldav.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/rnbjxCB3sVgIldav.medium, large=https://guide-images.cdn.ifixit.com/igi/rnbjxCB3sVgIldav.large, original=https://guide-images.cdn.ifixit.com/igi/rnbjxCB3sVgIldav.full -->
+
+## 17. iPhone X
+- The iPhone X has two battery cells perpendicular to each other.
+![Step 17 Image 2277887](https://guide-images.cdn.ifixit.com/igi/jUSt22WIN4YFKMT1.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/jUSt22WIN4YFKMT1.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/jUSt22WIN4YFKMT1.medium, large=https://guide-images.cdn.ifixit.com/igi/jUSt22WIN4YFKMT1.large, original=https://guide-images.cdn.ifixit.com/igi/jUSt22WIN4YFKMT1.full -->
+![Step 17 Image 2277911](https://guide-images.cdn.ifixit.com/igi/wlRIZgMBLZMOq6d4.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/wlRIZgMBLZMOq6d4.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/wlRIZgMBLZMOq6d4.medium, large=https://guide-images.cdn.ifixit.com/igi/wlRIZgMBLZMOq6d4.large, original=https://guide-images.cdn.ifixit.com/igi/wlRIZgMBLZMOq6d4.full -->
+![Step 17 Image 2277913](https://guide-images.cdn.ifixit.com/igi/Vcb5vM4gEGSAJBXC.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/Vcb5vM4gEGSAJBXC.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/Vcb5vM4gEGSAJBXC.medium, large=https://guide-images.cdn.ifixit.com/igi/Vcb5vM4gEGSAJBXC.large, original=https://guide-images.cdn.ifixit.com/igi/Vcb5vM4gEGSAJBXC.full -->
+
+## 18. iPhone Xs
+- The iPhone XS has a gold square to the right of the camera bracket.
+![Step 18 Image 2277886](https://guide-images.cdn.ifixit.com/igi/PaZeUwUp2UASiMeZ.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/PaZeUwUp2UASiMeZ.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/PaZeUwUp2UASiMeZ.medium, large=https://guide-images.cdn.ifixit.com/igi/PaZeUwUp2UASiMeZ.large, original=https://guide-images.cdn.ifixit.com/igi/PaZeUwUp2UASiMeZ.full -->
+![Step 18 Image 2481412](https://guide-images.cdn.ifixit.com/igi/KL1GB1CZAEXJs3WN.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/KL1GB1CZAEXJs3WN.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/KL1GB1CZAEXJs3WN.medium, large=https://guide-images.cdn.ifixit.com/igi/KL1GB1CZAEXJs3WN.large, original=https://guide-images.cdn.ifixit.com/igi/KL1GB1CZAEXJs3WN.full -->
+![Step 18 Image 2481411](https://guide-images.cdn.ifixit.com/igi/KPF6saFBqWCRWErP.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/KPF6saFBqWCRWErP.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/KPF6saFBqWCRWErP.medium, large=https://guide-images.cdn.ifixit.com/igi/KPF6saFBqWCRWErP.large, original=https://guide-images.cdn.ifixit.com/igi/KPF6saFBqWCRWErP.full -->
+
+## 19. Step 19
+- The iPhone X (Left) and Xs (Right) are extremely similar the only discernible way to tell the difference is to take a look at the back of the display. Look to the right of the camera bracket. The Xs will have a gold square and that is the only discernible difference.
+![Step 19 Image 2481397](https://guide-images.cdn.ifixit.com/igi/B4uFrmYxv1ycP6es.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/B4uFrmYxv1ycP6es.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/B4uFrmYxv1ycP6es.medium, large=https://guide-images.cdn.ifixit.com/igi/B4uFrmYxv1ycP6es.large, original=https://guide-images.cdn.ifixit.com/igi/B4uFrmYxv1ycP6es.full -->
+
+## 20. iPhone XS Max
+- The Xs Max is just a larger version of the Xs just as the 11 pro has the 11 pro max.
+![Step 20 Image 2481388](https://guide-images.cdn.ifixit.com/igi/CJVkZQkoweuZGkUO.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/CJVkZQkoweuZGkUO.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/CJVkZQkoweuZGkUO.medium, large=https://guide-images.cdn.ifixit.com/igi/CJVkZQkoweuZGkUO.large, original=https://guide-images.cdn.ifixit.com/igi/CJVkZQkoweuZGkUO.full -->
+![Step 20 Image 2481413](https://guide-images.cdn.ifixit.com/igi/ZpjlHwWhFrRSXWuB.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/ZpjlHwWhFrRSXWuB.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/ZpjlHwWhFrRSXWuB.medium, large=https://guide-images.cdn.ifixit.com/igi/ZpjlHwWhFrRSXWuB.large, original=https://guide-images.cdn.ifixit.com/igi/ZpjlHwWhFrRSXWuB.full -->
+![Step 20 Image 2481422](https://guide-images.cdn.ifixit.com/igi/6IdeehhjfFPZFHTT.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/6IdeehhjfFPZFHTT.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/6IdeehhjfFPZFHTT.medium, large=https://guide-images.cdn.ifixit.com/igi/6IdeehhjfFPZFHTT.large, original=https://guide-images.cdn.ifixit.com/igi/6IdeehhjfFPZFHTT.full -->
+
+## 21. iPhone XR
+- Insert wisdom here.
+![Step 21 Image 2277885](https://guide-images.cdn.ifixit.com/igi/JfHEiyTPtPvwxGUp.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/JfHEiyTPtPvwxGUp.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/JfHEiyTPtPvwxGUp.medium, large=https://guide-images.cdn.ifixit.com/igi/JfHEiyTPtPvwxGUp.large, original=https://guide-images.cdn.ifixit.com/igi/JfHEiyTPtPvwxGUp.full -->
+![Step 21 Image 2481421](https://guide-images.cdn.ifixit.com/igi/BNWfbcr13yp3GYXm.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/BNWfbcr13yp3GYXm.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/BNWfbcr13yp3GYXm.medium, large=https://guide-images.cdn.ifixit.com/igi/BNWfbcr13yp3GYXm.large, original=https://guide-images.cdn.ifixit.com/igi/BNWfbcr13yp3GYXm.full -->
+![Step 21 Image 2481420](https://guide-images.cdn.ifixit.com/igi/KAvF2cxLnDUUEgBR.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/KAvF2cxLnDUUEgBR.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/KAvF2cxLnDUUEgBR.medium, large=https://guide-images.cdn.ifixit.com/igi/KAvF2cxLnDUUEgBR.large, original=https://guide-images.cdn.ifixit.com/igi/KAvF2cxLnDUUEgBR.full -->
+
+## 22. iPhone 11
+- Insert wisdom here.
+![Step 22 Image 2481389](https://guide-images.cdn.ifixit.com/igi/wVQqKnW1uoFbx1B3.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/wVQqKnW1uoFbx1B3.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/wVQqKnW1uoFbx1B3.medium, large=https://guide-images.cdn.ifixit.com/igi/wVQqKnW1uoFbx1B3.large, original=https://guide-images.cdn.ifixit.com/igi/wVQqKnW1uoFbx1B3.full -->
+![Step 22 Image 2481419](https://guide-images.cdn.ifixit.com/igi/oLj1qUAZ4crYQKQo.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/oLj1qUAZ4crYQKQo.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/oLj1qUAZ4crYQKQo.medium, large=https://guide-images.cdn.ifixit.com/igi/oLj1qUAZ4crYQKQo.large, original=https://guide-images.cdn.ifixit.com/igi/oLj1qUAZ4crYQKQo.full -->
+![Step 22 Image 2481418](https://guide-images.cdn.ifixit.com/igi/Hfue3xR11KKyEG2D.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/Hfue3xR11KKyEG2D.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/Hfue3xR11KKyEG2D.medium, large=https://guide-images.cdn.ifixit.com/igi/Hfue3xR11KKyEG2D.large, original=https://guide-images.cdn.ifixit.com/igi/Hfue3xR11KKyEG2D.full -->
+
+## 23. Step 23
+- The XR (Left) and 11 (Right) are extremely similar design the only real difference is that their cables are swapped.  They are both the LCD version of that generation.
+![Step 23 Image 2481393](https://guide-images.cdn.ifixit.com/igi/1Eugxtl2YSeTSZBt.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/1Eugxtl2YSeTSZBt.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/1Eugxtl2YSeTSZBt.medium, large=https://guide-images.cdn.ifixit.com/igi/1Eugxtl2YSeTSZBt.large, original=https://guide-images.cdn.ifixit.com/igi/1Eugxtl2YSeTSZBt.full -->
+
+## 24. iPhone 11 Pro
+- Insert wisdom here.
+![Step 24 Image 2481391](https://guide-images.cdn.ifixit.com/igi/rtTauDOf1AlFygCe.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/rtTauDOf1AlFygCe.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/rtTauDOf1AlFygCe.medium, large=https://guide-images.cdn.ifixit.com/igi/rtTauDOf1AlFygCe.large, original=https://guide-images.cdn.ifixit.com/igi/rtTauDOf1AlFygCe.full -->
+![Step 24 Image 2481417](https://guide-images.cdn.ifixit.com/igi/KfSMGlqFpswHqNBl.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/KfSMGlqFpswHqNBl.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/KfSMGlqFpswHqNBl.medium, large=https://guide-images.cdn.ifixit.com/igi/KfSMGlqFpswHqNBl.large, original=https://guide-images.cdn.ifixit.com/igi/KfSMGlqFpswHqNBl.full -->
+![Step 24 Image 2481416](https://guide-images.cdn.ifixit.com/igi/rZ4KjP4JZWCnRVia.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/rZ4KjP4JZWCnRVia.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/rZ4KjP4JZWCnRVia.medium, large=https://guide-images.cdn.ifixit.com/igi/rZ4KjP4JZWCnRVia.large, original=https://guide-images.cdn.ifixit.com/igi/rZ4KjP4JZWCnRVia.full -->
+
+## 25. iPhone 11 Pro Max
+- Insert wisdom here.
+![Step 25 Image 2481390](https://guide-images.cdn.ifixit.com/igi/XYYZwuLTvcjWmvg2.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/XYYZwuLTvcjWmvg2.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/XYYZwuLTvcjWmvg2.medium, large=https://guide-images.cdn.ifixit.com/igi/XYYZwuLTvcjWmvg2.large, original=https://guide-images.cdn.ifixit.com/igi/XYYZwuLTvcjWmvg2.full -->
+![Step 25 Image 2481415](https://guide-images.cdn.ifixit.com/igi/DaULfDPkBNmwvRgL.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/DaULfDPkBNmwvRgL.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/DaULfDPkBNmwvRgL.medium, large=https://guide-images.cdn.ifixit.com/igi/DaULfDPkBNmwvRgL.large, original=https://guide-images.cdn.ifixit.com/igi/DaULfDPkBNmwvRgL.full -->
+![Step 25 Image 2481414](https://guide-images.cdn.ifixit.com/igi/2aAVHomsPQljeWXK.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/2aAVHomsPQljeWXK.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/2aAVHomsPQljeWXK.medium, large=https://guide-images.cdn.ifixit.com/igi/2aAVHomsPQljeWXK.large, original=https://guide-images.cdn.ifixit.com/igi/2aAVHomsPQljeWXK.full -->
+
+## 26. If your iPhone is Working
+- Open Settings.
+- Go to General.
+- Go to About.
+- The Model Number is listed as a part number. Tap it to display the "A" Model ID.
+![Step 26 Image 2998393](https://guide-images.cdn.ifixit.com/igi/vfGX4loFZxeFXDcQ.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/vfGX4loFZxeFXDcQ.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/vfGX4loFZxeFXDcQ.medium, large=https://guide-images.cdn.ifixit.com/igi/vfGX4loFZxeFXDcQ.large, original=https://guide-images.cdn.ifixit.com/igi/vfGX4loFZxeFXDcQ.full -->
+![Step 26 Image 2998395](https://guide-images.cdn.ifixit.com/igi/LumFTXUlRuOhSXif.full)
+<!-- Image URLs: thumbnail=https://guide-images.cdn.ifixit.com/igi/LumFTXUlRuOhSXif.thumbnail, medium=https://guide-images.cdn.ifixit.com/igi/LumFTXUlRuOhSXif.medium, large=https://guide-images.cdn.ifixit.com/igi/LumFTXUlRuOhSXif.large, original=https://guide-images.cdn.ifixit.com/igi/LumFTXUlRuOhSXif.full -->

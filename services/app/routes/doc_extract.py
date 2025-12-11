@@ -14,7 +14,6 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 
-
 @router.post("/extract/full", response_class=PlainTextResponse)
 async def extract_text_and_images(file: UploadFile = File(...)):
     """Extract text, images, and tables from a PDF with real spacing."""

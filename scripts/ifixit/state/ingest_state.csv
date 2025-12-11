@@ -1,0 +1,2 @@
+category_path,status,last_device_path,last_device_index,last_guide_id,total_devices_processed,total_guides_processed,retry_count,failed_devices,last_error,updated_at
+Mac,in_progress,,,,0,0,0,[],,2025-11-17T17:45:28.256300
