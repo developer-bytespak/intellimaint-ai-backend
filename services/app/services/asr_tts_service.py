@@ -7,6 +7,9 @@ import io
 try:
     from pydub import AudioSegment
     PYDUB_AVAILABLE = True
+     # 🔥 Force ffmpeg path (works on Render)
+    AudioSegment.converter = "/usr/bin/ffmpeg"
+    AudioSegment.ffprobe = "/usr/bin/ffprobe"
 except ImportError:
     PYDUB_AVAILABLE = False
     print("[Warning] pydub not available. Audio conversion will be disabled. Install pydub and ffmpeg for WebM support.")
