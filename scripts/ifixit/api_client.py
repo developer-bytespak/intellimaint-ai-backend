@@ -93,10 +93,28 @@ class iFixitAPIClient:
         )
 
         for attempt in retryer:
+            # Check for global shutdown flag before each request
+            try:
+                from scripts.ifixit.collect_ifixit_data import _shutdown_requested_global
+                if _shutdown_requested_global:
+                    logger.warning("Shutdown requested, aborting request to %s", url)
+                    raise KeyboardInterrupt("Shutdown requested")
+            except ImportError:
+                pass  # If import fails, continue (might be called from different context)
+                
             with attempt:
                 self._rate_limit(delay_override)
-                logger.debug("Requesting %s params=%s", url, params)
-                response = self.session.get(url, params=params, timeout=timeout or self.timeout)
+                logger.debug("Requesting %s params=%s (attempt %d/%d)", url, params, attempt.retry_state.attempt_number, self.max_retries)
+                try:
+                    # Use shorter timeout for faster interrupt response
+                    request_timeout = min(timeout or self.timeout, 5)  # Max 5 seconds per request
+                    response = self.session.get(url, params=params, timeout=request_timeout)
+                except requests.exceptions.Timeout as exc:
+                    logger.warning("Request timeout after %s seconds for %s", timeout or self.timeout, url)
+                    raise
+                except requests.exceptions.RequestException as exc:
+                    logger.warning("Request error for %s: %s", url, exc)
+                    raise
 
                 if self._should_retry(response):
                     logger.warning(
@@ -162,20 +180,28 @@ class iFixitAPIClient:
 
         page_index = 0
         while True:
+            # Check for global shutdown flag
+            from scripts.ifixit.collect_ifixit_data import _shutdown_requested_global
+            if _shutdown_requested_global:
+                logger.warning("Shutdown requested, stopping pagination")
+                break
+                
+            logger.info("Fetching page %d from %s (offset=%d, limit=%d, params=%s)", page_index + 1, url, offset, size, base_params)
             page_params = {**base_params, "limit": size, "offset": offset}
-            response = self._request_with_retry(url, params=page_params, delay_override=delay_override)
-            payload = response.json()
-            items, total = self._extract_results(payload)
+            try:
+                response = self._request_with_retry(url, params=page_params, delay_override=delay_override)
+                payload = response.json()
+                items, total = self._extract_results(payload)
 
-            logger.debug(
-                "Fetched page %s from %s offset=%s size=%s received=%s total=%s",
-                page_index,
-                url,
-                offset,
-                size,
-                len(items),
-                total,
-            )
+                logger.info(
+                    "Fetched page %d: received %d items (total=%s)",
+                    page_index + 1,
+                    len(items),
+                    total if total is not None else "unknown",
+                )
+            except Exception as exc:
+                logger.error("Error fetching page %d: %s", page_index + 1, exc)
+                break
 
             if not items:
                 break
@@ -186,11 +212,20 @@ class iFixitAPIClient:
             offset += size
 
             if len(items) < size:
+                logger.info("Received fewer items than page size (%d < %d), stopping pagination", len(items), size)
                 break
             if max_pages is not None and page_index >= max_pages:
+                logger.warning("Reached max_pages limit (%d), stopping pagination. There may be more items.", max_pages)
                 break
             if total is not None and offset >= total:
+                logger.info("Reached total items (%d), stopping pagination", total)
                 break
+            
+            # Safety check: if we've fetched more than 10,000 items without a total count, warn but continue
+            # The script will stop naturally when it receives fewer items than page size (end of results)
+            if total is None and offset >= 10000 and offset % 10000 == 0:
+                logger.warning("Fetched %d+ items without total count. Continuing to fetch all guides...", offset)
+                # Don't break - continue fetching until we get an empty response or fewer items than page size
 
     # ------------------------------------------------------------------ #
     # API methods
@@ -254,6 +289,7 @@ class iFixitAPIClient:
         self,
         device_id: Optional[str] = None,
         device_name: Optional[str] = None,
+        category: Optional[str] = None,
         paginate: bool = False,
         page_size: Optional[int] = None,
         max_pages: Optional[int] = None,
@@ -265,14 +301,26 @@ class iFixitAPIClient:
             params["device"] = device_id
         elif device_name:
             params["device"] = device_name
+        
+        if category:
+            params["category"] = category
 
-        logger.info("Fetching guides from %s with params=%s", url, params)
+        if params:
+            logger.info("Fetching guides from %s with params=%s", url, params)
+        else:
+            logger.warning("Fetching guides from %s WITHOUT device filter - this will fetch ALL guides!", url)
 
         try:
             if paginate:
                 collected: List[Dict[str, Any]] = []
+                page_count = 0
                 for page in self.paginate(url, params=params, page_size=page_size, max_pages=max_pages):
                     collected.extend(page)
+                    page_count += 1
+                    # Log progress every 5 pages or on first page
+                    if page_count == 1 or page_count % 5 == 0:
+                        logger.info("Progress: Collected %d guides so far (from %d pages)...", len(collected), page_count)
+                logger.info("✅ Completed fetching: %d total guides from %d pages", len(collected), page_count)
                 return collected
 
             response = self._request_with_retry(url, params=params or None)

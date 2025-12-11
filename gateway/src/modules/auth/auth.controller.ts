@@ -314,21 +314,20 @@ export class AuthController {
 
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
-  async googleRedirect(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    async googleRedirect(@Req() req, @Res({ passthrough: true }) res: Response) {
     try {
       let { role, company } = JSON.parse(req.query.state as string);
+      // console.log("role", role);
+      // console.log("company", company);
 
-      const email = (req.user as any).email;
-      if(!email){
-        return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Email not found`);
-      }
+      const email = req.user.email;
 
       if(role === ""){
         const existingUser = await this.authService.checkUserEmail(email);
         if(!existingUser){
           return res.redirect(`${process.env.FRONTEND_URL}/callback?error=No user found with this email`);
         }
-    
+  
         role = existingUser.role;
       }
       console.log("role", role);
@@ -348,6 +347,7 @@ export class AuthController {
       } else {
         return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
       }
+
 
       const authResult = await this.authService.googleLogin(req.user, role, company, res as any);
       const { accessToken, isNewUser, user } = authResult as { accessToken: string, isNewUser: boolean, user: any };
@@ -370,18 +370,22 @@ export class AuthController {
         maxAge: 1 * 60 * 60 * 1000, // 1 hours
       });
 
+      // if (!isNewUser) {
+      //   return nestResponse(201, 'User created successfully', user)(res);
+      // }
+      // return nestResponse(200, 'Login successful', user)(res);
       return res.redirect(`${process.env.FRONTEND_URL}/chat`);
-    } catch (error:any) {
+    } catch (error) {
       if (error.status === 400) {
         return res.redirect(`${process.env.FRONTEND_URL}/callback?error=${encodeURIComponent(error.message || 'Account has been deleted')}`);
       }
       return res.redirect(`${process.env.FRONTEND_URL}/callback?error=${encodeURIComponent('Authentication failed')}`);
     }
   }
-
   @Post('refresh')
-  refreshAccessToken(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    return this.authService.refreshAccessToken(res as any);
+  refreshAccessToken(@Req() req, @Res({ passthrough: true }) res: Response) {
+    // Validate refreshToken and generate new access token
+    return this.authService.refreshAccessToken(req, res);
   }
 
   @UseGuards(JwtAuthGuard)
