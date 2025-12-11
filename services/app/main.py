@@ -1,6 +1,7 @@
 """Main FastAPI application combining all AI services"""
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from .routes import orchestrator, vision, rag, asr_tts, doc_extract
 
 app = FastAPI(
@@ -9,6 +10,13 @@ app = FastAPI(
     version="1.0.0"
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Change "*" to your frontend URL in production
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
 # Include all routers with appropriate prefixes
 app.include_router(
     orchestrator.router,
@@ -37,8 +45,18 @@ app.include_router(
 app.include_router(
     doc_extract.router,
     prefix="/api/v1/extract",
-    tags=["document-extraction"]
+    tags=["doc_extract"]
 )
+# app.include_router(
+#     voice_agent.router,
+#     prefix="/api/v1/upload_audio",
+#     tags=["voice_agent"]
+# )
+# app.include_router(
+#     stream.router,
+#     prefix="/api/v1",
+#     tags=["stream"]
+# )
 
 @app.get("/")
 async def root():

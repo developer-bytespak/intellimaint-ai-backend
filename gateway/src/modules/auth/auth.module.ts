@@ -37,5 +37,6 @@ const googleStrategyEnabled =
     TokenRefreshCronService,
     ...(googleStrategyEnabled ? [GoogleStrategy] : []),
   ],
+  exports: [JwtAuthGuard],
 })
 export class AuthModule {}

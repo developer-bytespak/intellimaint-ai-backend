@@ -73,6 +73,13 @@ env/
 ENV/
 .venv/
 
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
 # dotenv environment variable files
 **/.env
 **/.env.development.local

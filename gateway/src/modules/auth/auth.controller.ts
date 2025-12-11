@@ -76,64 +76,78 @@ export class AuthController {
 
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
-  async googleRedirect(@Req() req, @Res({ passthrough: true }) res: Response) {
-    const { role, company } = JSON.parse(req.query.state as string);
-    // console.log("role", role);
-    // console.log("company", company);
+    async googleRedirect(@Req() req, @Res({ passthrough: true }) res: Response) {
+    try {
+      let { role, company } = JSON.parse(req.query.state as string);
+      // console.log("role", role);
+      // console.log("company", company);
 
-    const email = req.user.email;
+      const email = req.user.email;
 
-    if (email.endsWith('.com')) {
-      if (role !== 'civilian') {
+      if(role === ""){
+        const existingUser = await this.authService.checkUserEmail(email);
+        if(!existingUser){
+          return res.redirect(`${process.env.FRONTEND_URL}/callback?error=No user found with this email`);
+        }
+  
+        role = existingUser.role;
+      }
+      console.log("role", role);
+
+      if (email.endsWith('.com')) {
+        if (role !== 'civilian') {
+          return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
+        }
+      } else if (email.endsWith('.edu')) {
+        if (role !== 'student') {
+          return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
+        }
+      } else if (email.endsWith('.mil')) {
+        if (role !== 'military') {
+          return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
+        }
+      } else {
         return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
       }
-    } else if (email.endsWith('.edu')) {
-      if (role !== 'student') {
-        return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
+
+
+      const authResult = await this.authService.googleLogin(req.user, role, company, res as any);
+      const { accessToken, isNewUser, user } = authResult as { accessToken: string, isNewUser: boolean, user: any };
+      
+      // Set Google access token cookie
+      res.cookie('google_access', accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 1 * 60 * 60 * 1000, // 1 hours
+      });
+      
+      // Set user email cookie for refresh token logic
+      res.cookie('google_user_email', user.email, {
+        httpOnly: false, // Not httpOnly so guard can read it for refresh
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 1 * 60 * 60 * 1000, // 1 hours
+      });
+
+      // if (!isNewUser) {
+      //   return nestResponse(201, 'User created successfully', user)(res);
+      // }
+      // return nestResponse(200, 'Login successful', user)(res);
+      return res.redirect(`${process.env.FRONTEND_URL}/chat`);
+    } catch (error) {
+      if (error.status === 400) {
+        return res.redirect(`${process.env.FRONTEND_URL}/callback?error=${encodeURIComponent(error.message || 'Account has been deleted')}`);
       }
-    } else if (email.endsWith('.mil')) {
-      if (role !== 'military') {
-        return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
-      }
-    } else {
-      return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
+      return res.redirect(`${process.env.FRONTEND_URL}/callback?error=${encodeURIComponent('Authentication failed')}`);
     }
-
-
-    const authResult = await this.authService.googleLogin(req.user, role, company);
-    const { accessToken, isNewUser, user } = authResult as { accessToken: string, isNewUser: boolean, user: any };
-    
-    // Set Google access token cookie
-    res.cookie('google_access', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 1 * 60 * 60 * 1000, // 1 hours
-    });
-    
-    // Set user email cookie for refresh token logic
-    res.cookie('google_user_email', user.email, {
-      httpOnly: false, // Not httpOnly so guard can read it for refresh
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 1 * 60 * 60 * 1000, // 1 hours
-    });
-
-    // if (!isNewUser) {
-    //   return nestResponse(201, 'User created successfully', user)(res);
-    // }
-    // return nestResponse(200, 'Login successful', user)(res);
-    return res.redirect(`${process.env.FRONTEND_URL}/chat`)
   }
-
   @Post('refresh')
   refreshAccessToken(@Req() req, @Res({ passthrough: true }) res: Response) {
-
     // Validate refreshToken and generate new access token
-
-    return this.authService.refreshAccessToken(res as any);
-
-    
+    return this.authService.refreshAccessToken(req, res);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -147,6 +161,7 @@ export class AuthController {
 
   // Logout
   // This is the endpoint that is called when the user clicks the Logout button
+  @UseGuards(JwtAuthGuard)
   @Get('logout')
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     console.log("logout called successfully");

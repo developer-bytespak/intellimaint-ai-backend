@@ -8,11 +8,16 @@ import * as cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true,
+    transformOptions: {
+      enableImplicitConversion: true,
+    },
+  }));
   app.setGlobalPrefix(appConfig.apiPrefix);
   app.enableCors(
     {
-      origin: ["http://localhost:3001", "http://localhost:5173"],
+      origin: process.env.FRONTEND_URL?.split(',') || ["http://localhost:3001"],
       credentials: true,
     }
   );
