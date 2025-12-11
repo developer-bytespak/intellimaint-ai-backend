@@ -1,12 +1,16 @@
-import { IsString, IsOptional, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsArray, ValidateIf, IsNotEmpty } from 'class-validator';
 
 export class CreateMessageDto {
+  @IsOptional()
   @IsString()
-  content: string;
+  content?: string;
 
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  @IsOptional()
   images?: string[];
+
+  // Custom validation: at least one of content or images must be provided
+  // This is handled in the service layer with explicit check
 }
 

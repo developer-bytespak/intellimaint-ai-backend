@@ -12,6 +12,7 @@ import { otpExpiry } from 'src/common/helpers/otpExpiry';
 import { safeGet, safeSet } from 'src/common/lib/redis';
 import { sendEmailOTP } from 'src/common/lib/nodemailer';
 import { appConfig } from 'src/config/app.config';
+import axios from 'axios';
 // import { UserRole, AgentStatus } from '../../generated/prisma/enums';
 dotenv.config();
 
@@ -375,15 +376,168 @@ export class AuthService {
     }
 
     // refresh access token
-    // This is the function that is called when the user clicks the Refresh Access Token button
-    async refreshAccessToken(res: any) {
-        // const session = await this.prisma.session.findFirst({
-        //     where: { userId: user.id },
-        // });
-        // if(!session){
-        //     return nestError(400, 'Session not found')(res);
-        // }
-        // return session.token;
+    // This function handles token refresh for both local JWT tokens and Google OAuth tokens
+    async refreshAccessToken(req: any, res: any) {
+        try {
+            const localToken = req.cookies?.local_access;
+            const googleToken = req.cookies?.google_access;
+            const googleEmail = req.cookies?.google_user_email;
+
+            // ==============================
+            // CASE 1: LOCAL TOKEN REFRESH
+            // ==============================
+            if (localToken) {
+                try {
+                    let userId: string;
+                    
+                    // Try to decode token (even if expired) to get userId
+                    try {
+                        const decoded = jwt.verify(localToken, appConfig.jwtSecret as string) as any;
+                        userId = decoded.userId;
+                    } catch (error) {
+                        // Token is expired or invalid, try to decode without verification to get userId
+                        const decoded = jwt.decode(localToken) as any;
+                        if (!decoded || !decoded.userId) {
+                            res.clearCookie('local_access');
+                            return nestError(401, 'Invalid token format')(res);
+                        }
+                        userId = decoded.userId;
+                    }
+                    
+                    // Find user's session with refresh token
+                    const session = await this.prisma.session.findFirst({
+                        where: {
+                            userId: userId,
+                            expiresAt: { gt: new Date() } // Session must still be valid
+                        },
+                    });
+
+                    if (!session) {
+                        res.clearCookie('local_access');
+                        return nestError(401, 'Session not found or expired')(res);
+                    }
+
+                    // Verify refresh token
+                    try {
+                        jwt.verify(session.token, appConfig.jwtSecret as string);
+                    } catch (error) {
+                        // Refresh token expired
+                        res.clearCookie('local_access');
+                        return nestError(401, 'Refresh token expired')(res);
+                    }
+
+                    // Get user to verify they still exist and are verified
+                    const user = await this.prisma.user.findUnique({
+                        where: { id: userId }
+                    });
+
+                    if (!user) {
+                        res.clearCookie('local_access');
+                        return nestError(401, 'User not found')(res);
+                    }
+
+                    if (!user.emailVerified) {
+                        return nestError(403, 'User not verified')(res);
+                    }
+
+                    // Generate new access token
+                    const newAccessToken = jwt.sign(
+                        { userId: user.id },
+                        appConfig.jwtSecret as string,
+                        { expiresIn: '1h' }
+                    );
+
+                    // Update cookie with new access token
+                    res.cookie('local_access', newAccessToken, {
+                        httpOnly: true,
+                        secure: process.env.NODE_ENV === 'production',
+                        sameSite: 'lax',
+                        path: '/',
+                        maxAge: 60 * 60 * 1000, // 1 hour
+                    });
+
+                    // Mark user as active in Redis
+                    const activeUserKey = `user_active:${user.id}`;
+                    await safeSet(activeUserKey, '1', 900); // 15 minutes TTL
+
+                    return nestResponse(200, 'Token refreshed successfully', { refreshed: true })(res);
+                } catch (error) {
+                    res.clearCookie('local_access');
+                    return nestError(401, 'Invalid or expired token')(res);
+                }
+            }
+
+            // ==============================
+            // CASE 2: GOOGLE TOKEN REFRESH
+            // ==============================
+            if (googleToken && googleEmail) {
+                try {
+                    // Find user by email
+                    const user = await this.prisma.user.findUnique({
+                        where: { email: googleEmail },
+                        include: {
+                            oauthProviders: {
+                                where: { provider: 'google' },
+                            },
+                        },
+                    });
+
+                    if (!user) {
+                        res.clearCookie('google_access');
+                        res.clearCookie('google_user_email');
+                        return nestError(401, 'User not found')(res);
+                    }
+
+                    const provider = user.oauthProviders?.[0];
+                    if (!provider?.refreshToken) {
+                        res.clearCookie('google_access');
+                        res.clearCookie('google_user_email');
+                        return nestError(401, 'Refresh token not found')(res);
+                    }
+
+                    // Call Google API to refresh access token
+                    const refreshRes = await axios.post(
+                        'https://oauth2.googleapis.com/token',
+                        {
+                            client_id: process.env.GOOGLE_CLIENT_ID,
+                            client_secret: process.env.GOOGLE_CLIENT_SECRET,
+                            refresh_token: provider.refreshToken,
+                            grant_type: 'refresh_token',
+                        }
+                    );
+
+                    const newAccessToken = refreshRes.data.access_token;
+
+                    // Update cookie with new access token
+                    res.cookie('google_access', newAccessToken, {
+                        httpOnly: true,
+                        sameSite: 'lax',
+                        secure: process.env.NODE_ENV === 'production',
+                        path: '/',
+                        maxAge: 2 * 60 * 60 * 1000, // 2 hours
+                    });
+
+                    // Mark user as active in Redis
+                    const activeUserKey = `user_active:${user.id}`;
+                    await safeSet(activeUserKey, '1', 900); // 15 minutes TTL
+
+                    return nestResponse(200, 'Token refreshed successfully', { refreshed: true })(res);
+                } catch (error) {
+                    console.error('Google token refresh failed:', error.message);
+                    res.clearCookie('google_access');
+                    res.clearCookie('google_user_email');
+                    return nestError(401, 'Failed to refresh token')(res);
+                }
+            }
+
+            // ==============================
+            // NO TOKEN FOUND
+            // ==============================
+            return nestError(401, 'No valid token found')(res);
+        } catch (error) {
+            console.error('Token refresh error:', error);
+            return nestError(500, 'Internal server error during token refresh')(res);
+        }
     }
 
 }

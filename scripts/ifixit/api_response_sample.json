@@ -1,0 +1,438 @@
+{
+  "conclusion_raw": "To reassemble your device, follow these instructions in reverse order.",
+  "conclusion_rendered": "<p>To reassemble your device, follow these instructions in reverse order.</p>",
+  "difficulty": "Easy",
+  "documents": [],
+  "flags": [
+    {
+      "title": "Needs More Images",
+      "flagid": "GUIDE_MISSING_IMAGES",
+      "text": "A few more images would make this guide's procedures crystal clear."
+    }
+  ],
+  "guideid": 1,
+  "image": {
+    "id": 233435,
+    "guid": "ZVym3xZncXLlv6He",
+    "mini": "https://guide-images.cdn.ifixit.com/igi/ZVym3xZncXLlv6He.mini",
+    "thumbnail": "https://guide-images.cdn.ifixit.com/igi/ZVym3xZncXLlv6He.thumbnail",
+    "140x105": "https://guide-images.cdn.ifixit.com/igi/ZVym3xZncXLlv6He.140x105",
+    "200x150": "https://guide-images.cdn.ifixit.com/igi/ZVym3xZncXLlv6He.200x150",
+    "standard": "https://guide-images.cdn.ifixit.com/igi/ZVym3xZncXLlv6He.standard",
+    "440x330": "https://guide-images.cdn.ifixit.com/igi/ZVym3xZncXLlv6He.440x330",
+    "medium": "https://guide-images.cdn.ifixit.com/igi/ZVym3xZncXLlv6He.medium",
+    "large": "https://guide-images.cdn.ifixit.com/igi/ZVym3xZncXLlv6He.large",
+    "original": "https://guide-images.cdn.ifixit.com/igi/ZVym3xZncXLlv6He.full"
+  },
+  "introduction_raw": "Replacing this keyboard is easy and takes only a few minutes.",
+  "introduction_rendered": "<p>Replacing this keyboard is easy and takes only a few minutes.</p>",
+  "featured_document_embed_url": "",
+  "featured_document_thumbnail_url": "",
+  "locale": "en",
+  "parts": [
+    {
+      "text": "G3 WallStreet Keyboard",
+      "notes": null,
+      "type": "",
+      "quantity": 1,
+      "url": "/Item/G3_WallStreet_Keyboard",
+      "thumbnail": null,
+      "isoptional": false
+    }
+  ],
+  "prerequisites": [],
+  "steps": [
+    {
+      "title": "",
+      "lines": [
+        {
+          "text_raw": "Remove both expansion bay modules using the levers on the front of the computer.",
+          "bullet": "black",
+          "level": 0,
+          "lineid": null,
+          "text_rendered": "Remove both expansion bay modules using the levers on the front of the computer."
+        },
+        {
+          "text_raw": "Insert your index fingers inside the expansion bays and search for the two ribbed tabs on the underside of the upper case. The tabs are located near the bottom corners of the keyboard.",
+          "bullet": "black",
+          "level": 0,
+          "lineid": null,
+          "text_rendered": "Insert your index fingers inside the expansion bays and search for the two ribbed tabs on the underside of the upper case. The tabs are located near the bottom corners of the keyboard."
+        },
+        {
+          "text_raw": "Pull the tabs toward yourself and the keyboard will pop up.",
+          "bullet": "black",
+          "level": 0,
+          "lineid": null,
+          "text_rendered": "Pull the tabs toward yourself and the keyboard will pop up."
+        }
+      ],
+      "guideid": 1,
+      "stepid": 1,
+      "orderby": 1,
+      "revisionid": 1357831,
+      "media": {
+        "type": "image",
+        "data": [
+          {
+            "id": 233436,
+            "guid": "H5wkkFSj1tYhJdrg",
+            "mini": "https://guide-images.cdn.ifixit.com/igi/H5wkkFSj1tYhJdrg.mini",
+            "thumbnail": "https://guide-images.cdn.ifixit.com/igi/H5wkkFSj1tYhJdrg.thumbnail",
+            "140x105": "https://guide-images.cdn.ifixit.com/igi/H5wkkFSj1tYhJdrg.140x105",
+            "200x150": "https://guide-images.cdn.ifixit.com/igi/H5wkkFSj1tYhJdrg.200x150",
+            "standard": "https://guide-images.cdn.ifixit.com/igi/H5wkkFSj1tYhJdrg.standard",
+            "440x330": "https://guide-images.cdn.ifixit.com/igi/H5wkkFSj1tYhJdrg.440x330",
+            "medium": "https://guide-images.cdn.ifixit.com/igi/H5wkkFSj1tYhJdrg.medium",
+            "large": "https://guide-images.cdn.ifixit.com/igi/H5wkkFSj1tYhJdrg.large",
+            "original": "https://guide-images.cdn.ifixit.com/igi/H5wkkFSj1tYhJdrg.full"
+          }
+        ]
+      },
+      "comments": []
+    },
+    {
+      "title": "",
+      "lines": [
+        {
+          "text_raw": "Pull the keyboard forward to disengage the tabs holding it in back and rotate it toward you.",
+          "bullet": "black",
+          "level": 0,
+          "lineid": null,
+          "text_rendered": "Pull the keyboard forward to disengage the tabs holding it in back and rotate it toward you."
+        },
+        {
+          "text_raw": "Rest the keyboard on the trackpad.",
+          "bullet": "black",
+          "level": 0,
+          "lineid": null,
+          "text_rendered": "Rest the keyboard on the trackpad."
+        }
+      ],
+      "guideid": 1,
+      "stepid": 2,
+      "orderby": 2,
+      "revisionid": 744221,
+      "media": {
+        "type": "image",
+        "data": [
+          {
+            "id": 233437,
+            "guid": "FcfuGOOuNyteOIUU",
+            "mini": "https://guide-images.cdn.ifixit.com/igi/FcfuGOOuNyteOIUU.mini",
+            "thumbnail": "https://guide-images.cdn.ifixit.com/igi/FcfuGOOuNyteOIUU.thumbnail",
+            "140x105": "https://guide-images.cdn.ifixit.com/igi/FcfuGOOuNyteOIUU.140x105",
+            "200x150": "https://guide-images.cdn.ifixit.com/igi/FcfuGOOuNyteOIUU.200x150",
+            "standard": "https://guide-images.cdn.ifixit.com/igi/FcfuGOOuNyteOIUU.standard",
+            "440x330": "https://guide-images.cdn.ifixit.com/igi/FcfuGOOuNyteOIUU.440x330",
+            "medium": "https://guide-images.cdn.ifixit.com/igi/FcfuGOOuNyteOIUU.medium",
+            "large": "https://guide-images.cdn.ifixit.com/igi/FcfuGOOuNyteOIUU.large",
+            "original": "https://guide-images.cdn.ifixit.com/igi/FcfuGOOuNyteOIUU.full"
+          }
+        ]
+      },
+      "comments": []
+    },
+    {
+      "title": "",
+      "lines": [
+        {
+          "text_raw": "This is a diagram of the ribbon clamp connectors you will disconnect in the next step.",
+          "bullet": "icon_note",
+          "level": 0,
+          "lineid": null,
+          "text_rendered": "This is a diagram of the ribbon clamp connectors you will disconnect in the next step."
+        },
+        {
+          "text_raw": "1) With your fingernails, grasp the locking bar on either side and pull up a small amount (about 1/16\" or 2 mm).",
+          "bullet": "black",
+          "level": 0,
+          "lineid": null,
+          "text_rendered": "1) With your fingernails, grasp the locking bar on either side and pull up a small amount (about 1/16&quot; or 2 mm)."
+        },
+        {
+          "text_raw": "2) After disengaging the locking bar, slide the cable out of the connector.",
+          "bullet": "black",
+          "level": 0,
+          "lineid": null,
+          "text_rendered": "2) After disengaging the locking bar, slide the cable out of the connector."
+        }
+      ],
+      "guideid": 1,
+      "stepid": 3,
+      "orderby": 3,
+      "revisionid": 539835,
+      "media": {
+        "type": "image",
+        "data": []
+      },
+      "comments": []
+    },
+    {
+      "title": "",
+      "lines": [
+        {
+          "text_raw": "Disconnect the two keyboard connectors by disengaging the clamps and pulling the ribbons directly upward.",
+          "bullet": "black",
+          "level": 0,
+          "lineid": null,
+          "text_rendered": "Disconnect the two keyboard connectors by disengaging the clamps and pulling the ribbons directly upward."
+        }
+      ],
+      "guideid": 1,
+      "stepid": 4,
+      "orderby": 4,
+      "revisionid": 924357,
+      "media": {
+        "type": "image",
+        "data": [
+          {
+            "id": 122000,
+            "guid": "iRKPmiRk1Eo1eCX5",
+            "mini": "https://guide-images.cdn.ifixit.com/igi/iRKPmiRk1Eo1eCX5.mini",
+            "thumbnail": "https://guide-images.cdn.ifixit.com/igi/iRKPmiRk1Eo1eCX5.thumbnail",
+            "140x105": "https://guide-images.cdn.ifixit.com/igi/iRKPmiRk1Eo1eCX5.140x105",
+            "200x150": "https://guide-images.cdn.ifixit.com/igi/iRKPmiRk1Eo1eCX5.200x150",
+            "standard": "https://guide-images.cdn.ifixit.com/igi/iRKPmiRk1Eo1eCX5.standard",
+            "440x330": "https://guide-images.cdn.ifixit.com/igi/iRKPmiRk1Eo1eCX5.440x330",
+            "medium": "https://guide-images.cdn.ifixit.com/igi/iRKPmiRk1Eo1eCX5.medium",
+            "large": "https://guide-images.cdn.ifixit.com/igi/iRKPmiRk1Eo1eCX5.large",
+            "huge": "https://guide-images.cdn.ifixit.com/igi/iRKPmiRk1Eo1eCX5.huge",
+            "original": "https://guide-images.cdn.ifixit.com/igi/iRKPmiRk1Eo1eCX5.full"
+          }
+        ]
+      },
+      "comments": []
+    },
+    {
+      "title": "",
+      "lines": [
+        {
+          "text_raw": "Slide a spudger downward between each plastic strain relief cable and the wall of the case in order to bow out the cable beyond the small tab holding it in place.",
+          "bullet": "black",
+          "level": 0,
+          "lineid": null,
+          "text_rendered": "Slide a spudger downward between each plastic strain relief cable and the wall of the case in order to bow out the cable beyond the small tab holding it in place."
+        },
+        {
+          "text_raw": "Once the strain relief cables are free, lift the keyboard off.",
+          "bullet": "black",
+          "level": 0,
+          "lineid": null,
+          "text_rendered": "Once the strain relief cables are free, lift the keyboard off."
+        }
+      ],
+      "guideid": 1,
+      "stepid": 5,
+      "orderby": 5,
+      "revisionid": 738675,
+      "media": {
+        "type": "image",
+        "data": [
+          {
+            "id": 5,
+            "guid": "mTV1dagEupVxJkKM",
+            "mini": "https://guide-images.cdn.ifixit.com/igi/mTV1dagEupVxJkKM.mini",
+            "thumbnail": "https://guide-images.cdn.ifixit.com/igi/mTV1dagEupVxJkKM.thumbnail",
+            "140x105": "https://guide-images.cdn.ifixit.com/igi/mTV1dagEupVxJkKM.140x105",
+            "200x150": "https://guide-images.cdn.ifixit.com/igi/mTV1dagEupVxJkKM.200x150",
+            "standard": "https://guide-images.cdn.ifixit.com/igi/mTV1dagEupVxJkKM.standard",
+            "440x330": "https://guide-images.cdn.ifixit.com/igi/mTV1dagEupVxJkKM.440x330",
+            "medium": "https://guide-images.cdn.ifixit.com/igi/mTV1dagEupVxJkKM.medium",
+            "large": "https://guide-images.cdn.ifixit.com/igi/mTV1dagEupVxJkKM.large",
+            "original": "https://guide-images.cdn.ifixit.com/igi/mTV1dagEupVxJkKM.full"
+          }
+        ]
+      },
+      "comments": []
+    },
+    {
+      "title": "",
+      "lines": [
+        {
+          "text_raw": "Your laptop should look approximately like this.",
+          "bullet": "black",
+          "level": 0,
+          "lineid": null,
+          "text_rendered": "Your laptop should look approximately like this."
+        }
+      ],
+      "guideid": 1,
+      "stepid": 6,
+      "orderby": 6,
+      "revisionid": 605059,
+      "media": {
+        "type": "image",
+        "data": [
+          {
+            "id": 6,
+            "guid": "2NLSgL1vj32SjIxD",
+            "mini": "https://guide-images.cdn.ifixit.com/igi/2NLSgL1vj32SjIxD.mini",
+            "thumbnail": "https://guide-images.cdn.ifixit.com/igi/2NLSgL1vj32SjIxD.thumbnail",
+            "140x105": "https://guide-images.cdn.ifixit.com/igi/2NLSgL1vj32SjIxD.140x105",
+            "200x150": "https://guide-images.cdn.ifixit.com/igi/2NLSgL1vj32SjIxD.200x150",
+            "standard": "https://guide-images.cdn.ifixit.com/igi/2NLSgL1vj32SjIxD.standard",
+            "440x330": "https://guide-images.cdn.ifixit.com/igi/2NLSgL1vj32SjIxD.440x330",
+            "medium": "https://guide-images.cdn.ifixit.com/igi/2NLSgL1vj32SjIxD.medium",
+            "large": "https://guide-images.cdn.ifixit.com/igi/2NLSgL1vj32SjIxD.large",
+            "original": "https://guide-images.cdn.ifixit.com/igi/2NLSgL1vj32SjIxD.full"
+          }
+        ]
+      },
+      "comments": []
+    }
+  ],
+  "subject": "Keyboard",
+  "summary": "Replacing this keyboard is easy and takes only...",
+  "time_required": "No estimate",
+  "time_required_min": 0,
+  "time_required_max": 0,
+  "title": "PowerBook G3 Wallstreet Keyboard Replacement",
+  "tools": [],
+  "type": "replacement",
+  "revisionid": 1357831,
+  "created_date": 1253855471,
+  "published_date": 1253855471,
+  "modified_date": 1736973864,
+  "prereq_modified_date": 0,
+  "public": true,
+  "comments": [
+    {
+      "commentid": 794593,
+      "locale": "en",
+      "context": "guide",
+      "contextid": 1,
+      "parentid": null,
+      "author": {
+        "userid": 4101208,
+        "username": "Landon Messer",
+        "unique_username": "ljcool2006",
+        "join_date": 1646862700,
+        "image": {
+          "id": 2598457,
+          "guid": "OgQwrjg1u3uE5erH",
+          "mini": "https://guide-images.cdn.ifixit.com/igi/OgQwrjg1u3uE5erH.mini",
+          "thumbnail": "https://guide-images.cdn.ifixit.com/igi/OgQwrjg1u3uE5erH.thumbnail",
+          "medium": "https://guide-images.cdn.ifixit.com/igi/OgQwrjg1u3uE5erH.medium",
+          "original": "https://guide-images.cdn.ifixit.com/igi/OgQwrjg1u3uE5erH.full"
+        },
+        "reputation": 1,
+        "url": "https://www.ifixit.com/User/4101208/Landon+Messer",
+        "teams": []
+      },
+      "title": "PowerBook G3 Wallstreet Keyboard Replacement",
+      "text_raw": "The first iFixit guide?",
+      "text_rendered": "<p>The first iFixit guide?</p>",
+      "rating": 0,
+      "date": 1646862765,
+      "modified_date": 0,
+      "status": "public",
+      "replies": [
+        {
+          "commentid": 869305,
+          "locale": "en",
+          "context": "guide",
+          "contextid": 1,
+          "parentid": 794593,
+          "author": {
+            "userid": 4101652,
+            "username": "guardian10",
+            "unique_username": "guardian10",
+            "join_date": 1646947433,
+            "image": {
+              "id": 2902576,
+              "guid": "iAZGUddsvJKmWFeb",
+              "mini": "https://guide-images.cdn.ifixit.com/igi/iAZGUddsvJKmWFeb.mini",
+              "thumbnail": "https://guide-images.cdn.ifixit.com/igi/iAZGUddsvJKmWFeb.thumbnail",
+              "140x105": "https://guide-images.cdn.ifixit.com/igi/iAZGUddsvJKmWFeb.140x105",
+              "200x150": "https://guide-images.cdn.ifixit.com/igi/iAZGUddsvJKmWFeb.200x150",
+              "standard": "https://guide-images.cdn.ifixit.com/igi/iAZGUddsvJKmWFeb.standard",
+              "440x330": "https://guide-images.cdn.ifixit.com/igi/iAZGUddsvJKmWFeb.440x330",
+              "medium": "https://guide-images.cdn.ifixit.com/igi/iAZGUddsvJKmWFeb.medium",
+              "large": "https://guide-images.cdn.ifixit.com/igi/iAZGUddsvJKmWFeb.large",
+              "original": "https://guide-images.cdn.ifixit.com/igi/iAZGUddsvJKmWFeb.full"
+            },
+            "reputation": 10502,
+            "url": "https://www.ifixit.com/User/4101652/guardian10",
+            "teams": [
+              1013,
+              1364,
+              46361
+            ]
+          },
+          "title": "PowerBook G3 Wallstreet Keyboard Replacement",
+          "text_raw": "Yes sir! (text minimum)",
+          "text_rendered": "<p>Yes sir! (text minimum)</p>",
+          "rating": 0,
+          "date": 1678479696,
+          "modified_date": 0,
+          "status": "public"
+        }
+      ]
+    },
+    {
+      "commentid": 1025494,
+      "locale": "en",
+      "context": "guide",
+      "contextid": 1,
+      "parentid": null,
+      "author": {
+        "userid": 4895045,
+        "username": "Lol",
+        "unique_username": null,
+        "join_date": 1756658821,
+        "image": {
+          "id": -32,
+          "guid": "default_avatar_placeholder_guid",
+          "original": "https://assets.cdn.ifixit.com/static/images/avatars/User/ifixit/avatar-8",
+          "mini": "https://assets.cdn.ifixit.com/static/images/avatars/User/ifixit/avatar-8.mini",
+          "thumbnail": "https://assets.cdn.ifixit.com/static/images/avatars/User/ifixit/avatar-8.thumbnail",
+          "140x105": "https://assets.cdn.ifixit.com/static/images/avatars/User/ifixit/avatar-8.140x105",
+          "200x150": "https://assets.cdn.ifixit.com/static/images/avatars/User/ifixit/avatar-8.200x150",
+          "standard": "https://assets.cdn.ifixit.com/static/images/avatars/User/ifixit/avatar-8.standard",
+          "440x330": "https://assets.cdn.ifixit.com/static/images/avatars/User/ifixit/avatar-8.440x330",
+          "medium": "https://assets.cdn.ifixit.com/static/images/avatars/User/ifixit/avatar-8.medium",
+          "large": "https://assets.cdn.ifixit.com/static/images/avatars/User/ifixit/avatar-8.large"
+        },
+        "reputation": 1,
+        "url": "https://www.ifixit.com/User/4895045/Lol",
+        "teams": []
+      },
+      "title": "PowerBook G3 Wallstreet Keyboard Replacement",
+      "text_raw": "Yes yes yes yes",
+      "text_rendered": "<p>Yes yes yes yes</p>",
+      "rating": 0,
+      "date": 1756659121,
+      "modified_date": 0,
+      "status": "public",
+      "replies": []
+    }
+  ],
+  "category": "PowerBook G3 Wallstreet",
+  "url": "https://www.ifixit.com/Guide/PowerBook+G3+Wallstreet+Keyboard+Replacement/1",
+  "patrol_threshold": 100000000,
+  "can_edit": true,
+  "favorited": false,
+  "author": {
+    "userid": 1,
+    "username": "iRobot",
+    "unique_username": "irobot",
+    "join_date": 1253855471,
+    "image": {
+      "id": 2715415,
+      "guid": "AjiayMD6LWqf5FAL",
+      "mini": "https://guide-images.cdn.ifixit.com/igi/AjiayMD6LWqf5FAL.mini",
+      "thumbnail": "https://guide-images.cdn.ifixit.com/igi/AjiayMD6LWqf5FAL.thumbnail",
+      "medium": "https://guide-images.cdn.ifixit.com/igi/AjiayMD6LWqf5FAL.medium",
+      "original": "https://guide-images.cdn.ifixit.com/igi/AjiayMD6LWqf5FAL.full"
+    },
+    "reputation": 0,
+    "url": "https://www.ifixit.com/User/1/iRobot",
+    "teams": []
+  },
+  "langid": "en",
+  "featured_documentid": null,
+  "intro_video_url": null,
+  "intro_video": null,
+  "completed": false
+}

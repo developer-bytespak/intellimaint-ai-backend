@@ -334,35 +334,9 @@ model ChatMessage {
   // 8. USER REPOSITORIES (SIMPLIFIED)
   // ============================================
 
-  enum RepositoryStatus {
-    uploading
-    processing
-    ready
-    failed
-  }
-
-  model Repository {
-    id     String @id @default(uuid()) @db.Uuid
-    userId String @map("user_id") @db.Uuid
-
-    // File info
-    fileName String @map("file_name") @db.VarChar(500)
-    fileUrl  String @map("file_url") @db.Text
-    fileSize Int    @map("file_size") // bytes
-
-    // Processing
-    status            RepositoryStatus @default(uploading)
-    knowledgeSourceId String?          @unique @map("knowledge_source_id") @db.Uuid
-
-    // Timestamps
-    uploadedAt DateTime @default(now()) @map("uploaded_at") @db.Timestamp(6)
-    createdAt  DateTime @default(now()) @map("created_at") @db.Timestamp(6)
-
-    // Relations
-    user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-    knowledgeSource KnowledgeSource? @relation(fields: [knowledgeSourceId], references: [id], onDelete: SetNull)
-
-    @@index([userId])
-    @@index([status])
-    @@map("repositories")
-  }
+enum RepositoryStatus {
+  uploading
+  processing
+  ready
+  failed
+}

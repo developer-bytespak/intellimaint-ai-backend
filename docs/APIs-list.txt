@@ -1,0 +1,391 @@
+
+# Gateway API Implementation Plan
+
+## Overview
+
+This plan defines all REST API endpoints needed in the NestJS Gateway to support the IntelliMaint frontend and integrate with Python AI services. All endpoints will use the `/api/v1` prefix.
+
+## API Response Format (Standard)
+
+All APIs will return consistent response structure:
+
+```typescript
+// Success response
+{
+  success: true,
+  data: { ... },
+  message?: string
+}
+
+// Error response
+{
+  success: false,
+  error: {
+    code: string,
+    message: string,
+    details?: any
+  }
+}
+```
+
+## 1. Authentication Module (`/api/v1/auth`)
+
+### Endpoints
+
+- `POST /auth/register` - Manual signup (email, password, full name)
+- `POST /auth/login` - Email/password login
+- `POST /auth/verify-email` - Verify OTP code
+- `POST /auth/resend-otp` - Resend verification code
+- `POST /auth/oauth/google` - Google OAuth callback
+- `POST /auth/oauth/apple` - Apple OAuth callback
+- `POST /auth/refresh` - Refresh JWT token
+- `POST /auth/logout` - Invalidate session
+
+### DTOs Needed
+
+- `RegisterDto`: email, password, firstName, lastName
+- `LoginDto`: email, password
+- `VerifyEmailDto`: code (6 digits)
+- `OAuthCallbackDto`: provider, code, state
+
+### Integration Points
+
+- Prisma: User, OTP, Session, OAuthProvider models
+- JWT: Generate tokens, validate sessions
+
+---
+
+## 2. Users Module (`/api/v1/users`)
+
+### Endpoints
+
+- `GET /users/me` - Get current user profile
+- `PUT /users/me` - Update user profile (name, profileImageUrl)
+- `PUT /users/me/password` - Change password
+- `GET /users/me/role-status` - Get role and verification status
+- `POST /users/complete-signup` - Complete signup flow (company, role selection)
+- `DELETE /users/me` - Delete account
+
+### DTOs Needed
+
+- `UpdateUserDto`: firstName, lastName, profileImageUrl
+- `ChangePasswordDto`: currentPassword, newPassword
+- `CompleteSignupDto`: company (optional), role (civilian/military/student)
+- `UserResponseDto`: Full user object with relations
+
+### Integration Points
+
+- Prisma: User model
+- Email validation for military (.mil) and student (institution) domains
+
+---
+
+## 3. Chat Module (`/api/v1/chat`)
+
+### Endpoints
+
+- `POST /chat/sessions` - Create new chat session
+- `GET /chat/sessions` - List user's chat sessions (with pagination)
+- `GET /chat/sessions/:sessionId` - Get session with messages
+- `POST /chat/sessions/:sessionId/messages` - Send message (text, images, documents)
+- `GET /chat/sessions/:sessionId/messages` - Get messages in session
+- `PUT /chat/sessions/:sessionId/title` - Update session title
+- `DELETE /chat/sessions/:sessionId` - Delete/archive session
+- `POST /chat/sessions/:sessionId/feedback` - Submit feedback rating
+
+### DTOs Needed
+
+- `CreateSessionDto`: title (optional)
+- `SendMessageDto`: content, images[] (URLs), documents[] (URLs), audioDocument (optional)
+- `MessageResponseDto`: id, role, content, attachments, timestamp, tokenCount
+- `SessionResponseDto`: id, title, messages[], equipmentContext, contextSummary, createdAt
+- `FeedbackDto`: messageId, rating (1-5)
+
+### Integration Points
+
+- Prisma: ChatSession, ChatMessage, MessageAttachment, ImageAnalysis
+- Python Service: `POST /api/v1/orchestrate` - Send prompt with context
+- Equipment Context Logic: Store chunk IDs in `equipmentContext`, calculate token sum, generate summary when threshold reached
+
+### Equipment Context Management
+
+- When message sent: Fetch relevant chunks via RAG
+- Store chunk IDs in `equipmentContext` array
+- Calculate total token count from `KnowledgeChunk.tokenCount`
+- When threshold reached: Generate summary via LLM, store in `contextSummary`, clear `equipmentContext`
+- Threshold calculation: Implement in chat service (decision deferred)
+
+---
+
+## 4. RAG Module (`/api/v1/documents`)
+
+### Endpoints
+
+- `POST /documents/upload` - Upload document (triggers ingestion)
+- `GET /documents` - List user's documents (paginated)
+- `GET /documents/:id` - Get document metadata
+- `DELETE /documents/:id` - Delete document and chunks
+- `POST /documents/:id/reingest` - Re-process document
+- `GET /documents/ingestion-status/:jobId` - Check ingestion job status
+
+### DTOs Needed
+
+- `UploadDocumentDto`: fileUrl (S3 URL), fileName, sourceType
+- `DocumentResponseDto`: id, title, sourceType, wordCount, createdAt, status
+- `DocumentListResponseDto`: documents[], total, page, limit
+
+### Integration Points
+
+- Prisma: KnowledgeSource, KnowledgeChunk
+- Python Service: `POST /api/v1/rag/search` - Search for relevant chunks
+- Python Service: Document chunking and embedding (handled by Python service)
+- S3: Document storage
+- Document Validation: Implement validation logic (decision deferred)
+
+---
+
+## 5. Media Module (`/api/v1/media`)
+
+### Endpoints
+
+- `POST /media/upload-url` - Get S3 presigned URL for upload
+- `GET /media/:id` - Get media metadata and URL
+- `POST /media/analyze-image` - Trigger image analysis via VLM
+- `GET /media/user-attachments` - Get all user attachments (images/documents)
+
+### DTOs Needed
+
+- `PresignedUrlDto`: fileName, fileType, fileSize
+- `PresignedUrlResponseDto`: uploadUrl, fileUrl, expiresAt
+- `ImageAnalysisDto`: imageUrl
+- `ImageAnalysisResponseDto`: detectedComponents, ocrResults, sceneDescription
+
+### Integration Points
+
+- AWS S3: Generate presigned URLs
+- Prisma: MessageAttachment, ImageAnalysis
+- Python Service: `POST /api/v1/vision/explain` - VLM analysis
+
+---
+
+## 6. Settings Module (`/api/v1/settings`)
+
+### Endpoints
+
+- `GET /settings` - Get user settings
+- `PUT /settings` - Update user settings
+- `GET /settings/notifications` - Get notification preferences
+- `PUT /settings/notifications` - Update notification preferences
+
+### DTOs Needed
+
+- `SettingsDto`: emailNotifications, theme
+- `SettingsResponseDto`: Full settings object
+
+### Integration Points
+
+- Prisma: UserSettings model
+
+---
+
+## 7. Billing Module (`/api/v1/billing`)
+
+### Endpoints
+
+- `GET /billing/subscription` - Get current subscription
+- `POST /billing/subscribe` - Create/update subscription
+- `GET /billing/plans` - Get available subscription plans
+- `GET /billing/invoices` - Get invoice history
+- `POST /billing/webhook` - Stripe webhook handler
+
+### DTOs Needed
+
+- `SubscriptionDto`: planName
+- `SubscriptionResponseDto`: Full subscription object
+- `PlanResponseDto`: List of available plans
+
+### Integration Points
+
+- Prisma: Subscription model
+- Stripe: Create customers, subscriptions, handle webhooks
+
+---
+
+## 8. Recent History Module (`/api/v1/history`)
+
+### Endpoints
+
+- `GET /history/chats` - Get all user's chat sessions
+- `GET /history/photos` - Get all images uploaded by user
+- `GET /history/documents` - Get all documents uploaded by user
+
+### DTOs Needed
+
+- `HistoryChatsResponseDto`: chats[] with metadata
+- `HistoryPhotosResponseDto`: attachments[] (type=image)
+- `HistoryDocumentsResponseDto`: attachments[] (type=document)
+
+### Integration Points
+
+- Prisma: ChatSession, MessageAttachment (filtered by userId and attachmentType)
+
+---
+
+## 9. Repository Module (`/api/v1/repository`)
+
+### Endpoints
+
+- `GET /repository` - Get user's uploaded documents (same as `/documents` but filtered)
+- `POST /repository/upload` - Upload document to repository (alias for `/documents/upload`)
+
+### Integration Points
+
+- Same as RAG module, but ensures `userId` is set and only user's documents are returned
+
+---
+
+## 10. Health Module (`/api/v1/health`)
+
+### Endpoints
+
+- `GET /health` - Basic health check
+- `GET /health/detailed` - Detailed health (DB, services)
+
+---
+
+## Integration with Python Services
+
+### Service URLs (Environment Variables)
+
+- `AI_SERVICE_URL=http://localhost:8000` (or container URL)
+
+### Key Integration Points
+
+1. **Orchestrator**: `POST {AI_SERVICE_URL}/api/v1/orchestrate`
+
+   - Request: { prompt, images[], documents[], sessionContext }
+   - Response: { response, chunks[], tokenCount }
+
+2. **RAG Search**: `POST {AI_SERVICE_URL}/api/v1/rag/search`
+
+   - Request: { query, userId, topK }
+   - Response: { chunks[] with ids, scores }
+
+3. **Vision Analysis**: `POST {AI_SERVICE_URL}/api/v1/vision/explain`
+
+   - Request: { imageUrl, prompt }
+   - Response: { explanation, detectedComponents, ocrResults }
+
+4. **ASR/TTS**: Already handled by frontend directly
+
+---
+
+## Authentication & Authorization
+
+### JWT Strategy
+
+- All protected routes require `Authorization: Bearer <token>` header
+- Use `@UseGuards(JwtAuthGuard)` decorator
+- Extract userId from token payload
+
+### Role-Based Access
+
+- No special role restrictions needed (all users can upload docs)
+- Military docs isolation handled at RAG search level (filter by userId)
+
+---
+
+## Database Operations
+
+### Key Prisma Operations
+
+- User management: CRUD on User, OTP, Session
+- Chat: Create/read ChatSession, ChatMessage, MessageAttachment
+- RAG: Create KnowledgeSource, KnowledgeChunk, manage embeddings
+- Context: Update `equipmentContext` array, generate `contextSummary`
+
+### Equipment Context Logic (To Implement)
+
+- Fetch chunks by IDs from `equipmentContext`
+- Sum `tokenCount` from KnowledgeChunk records
+- When threshold reached: Call LLM to generate summary, update `contextSummary`, clear array
+- Threshold value and check timing: Decision deferred to implementation
+
+---
+
+## Error Handling
+
+### Standard HTTP Status Codes
+
+- 200: Success
+- 201: Created
+- 400: Bad Request (validation errors)
+- 401: Unauthorized (invalid/missing token)
+- 403: Forbidden (insufficient permissions)
+- 404: Not Found
+- 500: Internal Server Error
+
+### Validation
+
+- Use `class-validator` decorators in DTOs
+- Use `ValidationPipe` globally
+- Return detailed validation errors
+
+---
+
+## WebSocket Support
+
+### Chat Gateway (`/chat` namespace)
+
+- Real-time message updates
+- Connection: Authenticate via JWT
+- Events: `message`, `typing`, `error`
+
+---
+
+## File Structure Reference
+
+All modules follow this structure:
+
+```
+modules/
+  {module}/
+    {module}.module.ts
+    controllers/
+      {module}.controller.ts
+    services/
+      {module}.service.ts
+    dto/
+      *.dto.ts
+```
+
+Existing modules to implement:
+
+- `auth/` - Authentication endpoints
+- `users/` - User management
+- `chat/` - Chat sessions and messages
+- `rag/` - Document management
+- `media/` - File uploads and image analysis
+- `settings/` - User preferences
+- `billing/` - Subscriptions
+- `health/` - Health checks
+
+---
+
+## Implementation Priority
+
+1. **Phase 1**: Auth, Users, Health (foundation)
+2. **Phase 2**: Chat, Media (core functionality)
+3. **Phase 3**: RAG, Repository (document management)
+4. **Phase 4**: Billing, Settings (additional features)
+5. **Phase 5**: Recent History (convenience features)
+
+---
+
+## Notes
+
+- All endpoints require authentication except `/auth/*` and `/health`
+- Document validation logic to be decided during RAG module implementation
+- Equipment context threshold calculation to be decided during Chat module implementation
+- OAuth flow handled by another developer
+- Repository endpoints are essentially filtered RAG endpoints (user's documents only)
