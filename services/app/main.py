@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import orchestrator, vision, rag, asr_tts, doc_extract
+from .routes import orchestrator, vision, rag, asr_tts, doc_extract, chunking, chunking_v2
 
 app = FastAPI(
     title="IntelliMaint AI Service",
@@ -53,6 +53,17 @@ app.include_router(
 #     tags=["voice_agent"]
 # )
 # app.include_router(
+app.include_router(
+    chunking.router,
+    prefix="/api/v1/chunk",
+    tags=["chunking"]
+)
+
+app.include_router(
+    chunking_v2.router,
+    prefix="/api/v2/chunk",
+    tags=["chunking-v2"]
+)
 #     stream.router,
 #     prefix="/api/v1",
 #     tags=["stream"]
