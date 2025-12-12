@@ -23,7 +23,41 @@ export class JwtAuthGuard implements CanActivate {
     const isApiRequest = req.method !== 'GET' || req.headers.accept?.includes('application/json');
 
     // ==============================
-    // CASE 1: LOCAL TOKEN
+    // CASE 0: BEARER TOKEN (Authorization header)
+    // ==============================
+    const authHeader = req.headers.authorization;
+    if (authHeader?.startsWith('Bearer ')) {
+      const bearerToken = authHeader.slice(7); // Remove "Bearer " prefix
+      try {
+        const data = jwt.verify(bearerToken, appConfig.jwtSecret as string) as any;
+
+        const user = await this.prisma.user.findUnique({
+          where: { id: data.userId },
+        });
+
+        if (!user) throw new Error("User not found");
+
+        // Mark user as active in Redis (15 minutes TTL)
+        const activeUserKey = `user_active:${user.id}`;
+        const { success, error } = await safeSet(activeUserKey, '1', 900);
+        if (!success) {
+          console.log("Error marking user as active:", error);
+        }
+
+        req.user = user;
+        return true;
+      } catch (e) {
+        console.log("Bearer token validation failed:", e.message);
+        if (isApiRequest) {
+          throw new UnauthorizedException('Invalid or expired token');
+        }
+        res.redirect(`${process.env.FRONTEND_URL}/login`);
+        return false;
+      }
+    }
+
+    // ==============================
+    // CASE 1: LOCAL TOKEN (Cookie)
     // ==============================
     if (localToken) {
       try {
