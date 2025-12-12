@@ -192,7 +192,10 @@ export class AuthService {
         user.emailVerified = true;
         await this.prisma.user.update({
             where: { id: user.id },
-            data: { emailVerified: true }
+            data: { 
+                emailVerified: true,
+                status: UserStatus.ACTIVE  // Set status to ACTIVE when OTP is verified
+            }
         });
 
         await this.prisma.session.create({
@@ -245,6 +248,9 @@ export class AuthService {
         }
         if(!user.emailVerified){
             return nestError(400, 'User not verified')(res);
+        }
+        if(user.status !== UserStatus.ACTIVE){
+            return nestError(400, 'User account is not active. Please contact support.')(res);
         }
         if (!user || !user.passwordHash) {
             return nestError(400, 'Invalid password or user not found')(res);
