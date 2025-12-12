@@ -158,7 +158,7 @@ export class AuthService {
           if(!result.success){
             return nestError(500, 'Failed to send OTP', result.message)(res);
           }
-          return nestResponse(200, `OTP sent successfully to this ${payload.email}`)(res);
+          nestResponse(200, `OTP sent successfully to this ${payload.email}`)(res);
         } catch (error) {
             return nestError(500, 'Failed to send OTP', error)(res);
         }
@@ -205,7 +205,7 @@ export class AuthService {
                 expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
             }
         });
-        return nestResponse(200, 'OTP verified successfully')(res);
+        nestResponse(200, 'OTP verified successfully')(res);
     }
 
     // Resend OTP
@@ -227,7 +227,7 @@ export class AuthService {
               return nestError(500, 'Failed to send OTP', result.message)(res);
             }
 
-            return nestResponse(200, `OTP sent successfully to this ${email}`)(res);
+            nestResponse(200, `OTP sent successfully to this ${email}`)(res);
           } catch (error) {
 
               return nestError(500, 'Failed to send OTP', error)(res);
@@ -302,7 +302,7 @@ export class AuthService {
        }
 
         
-        return nestResponse(200, 'Login successful')(res);
+        nestResponse(200, 'Login successful')(res);
     }
 
     // Forgot Password
@@ -332,7 +332,7 @@ export class AuthService {
             if(!result.success){
                 return nestError(500, 'Failed to send OTP', result.message)(res);
             }
-        return nestResponse(200, 'OTP sent successfully')(res);
+        nestResponse(200, 'OTP sent successfully')(res);
         } catch (error) {
             return nestError(500, 'Failed to send OTP', error)(res);
         }
@@ -361,7 +361,7 @@ export class AuthService {
             where: { id: user.id },
             data: { passwordHash: password, emailVerified: true }
         });
-        return nestResponse(200, 'Password reset successfully')(res);
+        nestResponse(200, 'Password reset successfully')(res);
        
     }
 

@@ -236,7 +236,6 @@ export class AuthController {
       path: '/',
     });
     res.redirect(`${process.env.FRONTEND_URL}/login`);
-    return { message: 'Logged out successfully' };
   }
 
   // Register
