@@ -156,11 +156,13 @@ export class AuthService {
           const result = await sendEmailOTP(registerDto.email, otpCode);
           console.log("result", result);
           if(!result.success){
-            return nestError(500, 'Failed to send OTP', result.message)(res);
+            nestError(500, 'Failed to send OTP', result.message)(res);
+            return;
           }
           nestResponse(200, `OTP sent successfully to this ${payload.email}`)(res);
+          return;
         } catch (error) {
-            return nestError(500, 'Failed to send OTP', error)(res);
+            nestError(500, 'Failed to send OTP', error)(res);
         }
 
 
@@ -206,6 +208,7 @@ export class AuthService {
             }
         });
         nestResponse(200, 'OTP verified successfully')(res);
+        return;
     }
 
     // Resend OTP
@@ -224,14 +227,15 @@ export class AuthService {
         try {
             const result = await sendEmailOTP(email, otpCode as string);
             if(!result.success){
-              return nestError(500, 'Failed to send OTP', result.message)(res);
+              nestError(500, 'Failed to send OTP', result.message)(res);
+              return;
             }
 
             nestResponse(200, `OTP sent successfully to this ${email}`)(res);
+            return;
           } catch (error) {
 
-              return nestError(500, 'Failed to send OTP', error)(res);
-              
+              nestError(500, 'Failed to send OTP', error)(res);
           }
     }
 
@@ -298,11 +302,13 @@ export class AuthService {
         const userId = user.id;
        const {success,error} = await safeSet(`user_active:${userId}`, "1", 3600); // 1 hour TTL
        if(!success){
-        return nestError(500, 'Failed to set user active', error)(res);
+        nestError(500, 'Failed to set user active', error)(res);
+        return;
        }
 
         
         nestResponse(200, 'Login successful')(res);
+        return;
     }
 
     // Forgot Password
@@ -330,11 +336,13 @@ export class AuthService {
         }
             const result = await sendEmailOTP(email, otpCode as string);
             if(!result.success){
-                return nestError(500, 'Failed to send OTP', result.message)(res);
+                nestError(500, 'Failed to send OTP', result.message)(res);
+                return;
             }
         nestResponse(200, 'OTP sent successfully')(res);
+        return;
         } catch (error) {
-            return nestError(500, 'Failed to send OTP', error)(res);
+            nestError(500, 'Failed to send OTP', error)(res);
         }
     }
 
@@ -362,6 +370,7 @@ export class AuthService {
             data: { passwordHash: password, emailVerified: true }
         });
         nestResponse(200, 'Password reset successfully')(res);
+        return;
        
     }
 
