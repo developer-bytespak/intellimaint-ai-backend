@@ -398,7 +398,8 @@ export class AuthService {
                         const decoded = jwt.decode(localToken) as any;
                         if (!decoded || !decoded.userId) {
                             res.clearCookie('local_access');
-                            return nestError(401, 'Invalid token format')(res);
+                            nestError(401, 'Invalid token format')(res);
+                            return;
                         }
                         userId = decoded.userId;
                     }
@@ -413,7 +414,8 @@ export class AuthService {
 
                     if (!session) {
                         res.clearCookie('local_access');
-                        return nestError(401, 'Session not found or expired')(res);
+                        nestError(401, 'Session not found or expired')(res);
+                        return;
                     }
 
                     // Verify refresh token
@@ -422,7 +424,8 @@ export class AuthService {
                     } catch (error) {
                         // Refresh token expired
                         res.clearCookie('local_access');
-                        return nestError(401, 'Refresh token expired')(res);
+                        nestError(401, 'Refresh token expired')(res);
+                        return;
                     }
 
                     // Get user to verify they still exist and are verified
@@ -432,11 +435,13 @@ export class AuthService {
 
                     if (!user) {
                         res.clearCookie('local_access');
-                        return nestError(401, 'User not found')(res);
+                        nestError(401, 'User not found')(res);
+                        return;
                     }
 
                     if (!user.emailVerified) {
-                        return nestError(403, 'User not verified')(res);
+                        nestError(403, 'User not verified')(res);
+                        return;
                     }
 
                     // Generate new access token
@@ -449,8 +454,8 @@ export class AuthService {
                     // Update cookie with new access token
                     res.cookie('local_access', newAccessToken, {
                         httpOnly: true,
-                        secure: process.env.NODE_ENV === 'production',
-                        sameSite: 'lax',
+                        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+                        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
                         path: '/',
                         maxAge: 60 * 60 * 1000, // 1 hour
                     });
@@ -459,10 +464,12 @@ export class AuthService {
                     const activeUserKey = `user_active:${user.id}`;
                     await safeSet(activeUserKey, '1', 900); // 15 minutes TTL
 
-                    return nestResponse(200, 'Token refreshed successfully', { refreshed: true })(res);
+                    nestResponse(200, 'Token refreshed successfully', { refreshed: true })(res);
+                    return;
                 } catch (error) {
                     res.clearCookie('local_access');
-                    return nestError(401, 'Invalid or expired token')(res);
+                    nestError(401, 'Invalid or expired token')(res);
+                    return;
                 }
             }
 
@@ -484,14 +491,16 @@ export class AuthService {
                     if (!user) {
                         res.clearCookie('google_access');
                         res.clearCookie('google_user_email');
-                        return nestError(401, 'User not found')(res);
+                        nestError(401, 'User not found')(res);
+                        return;
                     }
 
                     const provider = user.oauthProviders?.[0];
                     if (!provider?.refreshToken) {
                         res.clearCookie('google_access');
                         res.clearCookie('google_user_email');
-                        return nestError(401, 'Refresh token not found')(res);
+                        nestError(401, 'Refresh token not found')(res);
+                        return;
                     }
 
                     // Call Google API to refresh access token
@@ -510,8 +519,8 @@ export class AuthService {
                     // Update cookie with new access token
                     res.cookie('google_access', newAccessToken, {
                         httpOnly: true,
-                        sameSite: 'lax',
-                        secure: process.env.NODE_ENV === 'production',
+                        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+                        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
                         path: '/',
                         maxAge: 2 * 60 * 60 * 1000, // 2 hours
                     });
@@ -520,22 +529,24 @@ export class AuthService {
                     const activeUserKey = `user_active:${user.id}`;
                     await safeSet(activeUserKey, '1', 900); // 15 minutes TTL
 
-                    return nestResponse(200, 'Token refreshed successfully', { refreshed: true })(res);
+                    nestResponse(200, 'Token refreshed successfully', { refreshed: true })(res);
+                    return;
                 } catch (error) {
                     console.error('Google token refresh failed:', error.message);
                     res.clearCookie('google_access');
                     res.clearCookie('google_user_email');
-                    return nestError(401, 'Failed to refresh token')(res);
+                    nestError(401, 'Failed to refresh token')(res);
+                    return;
                 }
             }
 
             // ==============================
             // NO TOKEN FOUND
             // ==============================
-            return nestError(401, 'No valid token found')(res);
+            nestError(401, 'No valid token found')(res);
         } catch (error) {
             console.error('Token refresh error:', error);
-            return nestError(500, 'Internal server error during token refresh')(res);
+            nestError(500, 'Internal server error during token refresh')(res);
         }
     }
 

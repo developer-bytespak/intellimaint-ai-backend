@@ -247,18 +247,22 @@ export class AuthController {
     const role = body.role;
     if (email.endsWith('.com')) {
       if (role !== 'civilian') {
-        return nestError(400, 'your email is not fit in your role')(res);
+        nestError(400, 'your email is not fit in your role')(res);
+        return;
       }
     } else if (email.endsWith('.edu')) {
       if (role !== 'student') {
-        return nestError(400, 'your email is not fit in your role')(res);
+        nestError(400, 'your email is not fit in your role')(res);
+        return;
       }
     } else if (email.endsWith('.mil')) {
       if (role !== 'military') {
-        return nestError(400, 'your email is not fit in your role')(res);
+        nestError(400, 'your email is not fit in your role')(res);
+        return;
       }
     } else {
-      return nestError(400, 'your email is not fit in your role')(res);
+      nestError(400, 'your email is not fit in your role')(res);
+      return;
     }
 
     // Map custom input to RegisterDto
@@ -279,11 +283,13 @@ export class AuthController {
       const messages = errors
         .map((err) => Object.values(err.constraints || {}))
         .flat();
-      return nestError(400, 'Validation failed', messages);
+      nestError(400, 'Validation failed', messages)(res);
+      return;
     }
 
     if (registerDto.password !== registerDto.confirmPassword) {
-      return nestError(400, 'Password and confirm password do not match');
+      nestError(400, 'Password and confirm password do not match')(res);
+      return;
     }
 
     return this.authService.register(registerDto, res as any);
