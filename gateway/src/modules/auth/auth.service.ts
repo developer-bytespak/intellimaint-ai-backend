@@ -66,10 +66,10 @@ export class AuthService {
                 }
             });
 
-            if (newUser) {
-                return { user: newUser, accessToken: user.accessToken, isNewUser: false };
+            if (!newUser) {
+                throw new BadRequestException('Failed to create user');
             }
-            return nestError(500, 'Failed to create user', null)(res);
+            return { user: newUser, accessToken: user.accessToken, isNewUser: false };
         }
         await this.prisma.oAuthProvider.updateMany({
             where: {
@@ -121,7 +121,8 @@ export class AuthService {
         if (existingUser) {
             // If user exists and is emailVerified, they already have an account
             if (existingUser.emailVerified) {
-                return nestError(400, 'User with this email already exists')(res);
+                nestError(400, 'User with this email already exists')(res);
+                return;
             }
             // Update existing unverified user
             const updatedUser = await this.prisma.user.update({
@@ -129,7 +130,8 @@ export class AuthService {
                 data: payload
             });
             if (!updatedUser) {
-                return nestError(500, 'Failed to update user')(res);
+                nestError(500, 'Failed to update user')(res);
+                return;
             }
         } else {
             // Create new user
@@ -137,19 +139,22 @@ export class AuthService {
                 data: payload
             });
             if (!newUser) {
-                return nestError(500, 'Failed to create user')(res);
+                nestError(500, 'Failed to create user')(res);
+                return;
             }
         }
 
         // Generate and send OTP (for both new and updated unverified users)
         const rediskey = `otp:${registerDto.email}`;
         if(!rediskey){
-            return nestError(400, 'OTP not found')(res);
+            nestError(400, 'OTP not found')(res);
+            return;
         }
         const otpCode = generateOTP();
         const {success,error} = await safeSet(rediskey, otpCode, 300); // 5 minutes
         if(!success){
-            return nestError(500, 'Failed to generate OTP', error)(res);
+            nestError(500, 'Failed to generate OTP', error)(res);
+            return;
         }
 
         try {
@@ -175,20 +180,24 @@ export class AuthService {
         const { email, otp } = body;
         const rediskey = `otp:${email}`;
         if(!rediskey){
-            return nestError(400, 'OTP not found')(res);
+            nestError(400, 'OTP not found')(res);
+            return;
         }
         const otpCode = await safeGet(rediskey);
         if(!otpCode){
-            return nestError(400, 'OTP expired')(res);
+            nestError(400, 'OTP expired')(res);
+            return;
         }
         if(otpCode.toString() !== otp.toString()){
-            return nestError(400, 'Invalid OTP')(res);
+            nestError(400, 'Invalid OTP')(res);
+            return;
         }
         const user = await this.prisma.user.findUnique({
             where: { email }
         });
         if(!user){
-            return nestError(400, 'User not found');
+            nestError(400, 'User not found')(res);
+            return;
         }
         const refreshToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret as string, { expiresIn: '7d' });
         user.emailVerified = true;
@@ -217,12 +226,14 @@ export class AuthService {
         const { email } = body;
         const rediskey = `otp:${email}`;
         if(!rediskey){
-            return nestError(400, 'OTP not found')(res);
+            nestError(400, 'OTP not found')(res);
+            return;
         }
         const otpCode = generateOTP();
         const {success,error} = await safeSet(rediskey, otpCode as string, 300); // 5 minutes
         if(!success){
-            return nestError(500, 'Failed to generate OTP', error)(res);
+            nestError(500, 'Failed to generate OTP', error)(res);
+            return;
         }
         try {
             const result = await sendEmailOTP(email, otpCode as string);
@@ -248,20 +259,25 @@ export class AuthService {
         });
         console.log("user", user);
         if(!user){
-            return nestError(400, 'User not found')(res);
+            nestError(400, 'User not found')(res);
+            return;
         }
         if(!user.emailVerified){
-            return nestError(400, 'User not verified')(res);
+            nestError(400, 'User not verified')(res);
+            return;
         }
         if(user.status !== UserStatus.ACTIVE){
-            return nestError(400, 'User account is not active. Please contact support.')(res);
+            nestError(400, 'User account is not active. Please contact support.')(res);
+            return;
         }
         if (!user || !user.passwordHash) {
-            return nestError(400, 'Invalid password or user not found')(res);
+            nestError(400, 'Invalid password or user not found')(res);
+            return;
           }
         const isPasswordValid = await bcrypt.compare(password, user?.passwordHash);
         if(!isPasswordValid){
-            return nestError(400, 'Invalid password')(res);
+            nestError(400, 'Invalid password')(res);
+            return;
         }
         const accessToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret as string, { expiresIn: '1h' });
         const refreshToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret as string, { expiresIn: '7d' });
@@ -317,22 +333,26 @@ export class AuthService {
         try {
         const { email } = body;
         if(!email){
-            return nestError(400, 'Email is required')(res);
+            nestError(400, 'Email is required')(res);
+            return;
         }
         const user = await this.prisma.user.findUnique({
             where: { email }
         });
         if(!user){
-            return nestError(400, 'User not found')(res);
+            nestError(400, 'User not found')(res);
+            return;
         }
         if(!user.emailVerified){
-            return nestError(400, 'User not verified')(res);
+            nestError(400, 'User not verified')(res);
+            return;
         }
         const otpCode = generateOTP();
         const rediskey = `otp:${email}`;
         const {success,error} = await safeSet(rediskey, otpCode as string, 300); // 5 minutes
         if(!success){
-            return nestError(500, 'Failed to generate OTP', error)(res);
+            nestError(500, 'Failed to generate OTP', error)(res);
+            return;
         }
             const result = await sendEmailOTP(email, otpCode as string);
             if(!result.success){
@@ -352,17 +372,20 @@ export class AuthService {
         const { email, newPassword } = body;
 
         if(!email || !newPassword){
-            return nestError(400, 'Email and new password are required')(res);
+            nestError(400, 'Email and new password are required')(res);
+            return;
         }
 
         const user = await this.prisma.user.findUnique({
             where: { email }
         });
         if(!user){
-            return nestError(400, 'User not found')(res);
+            nestError(400, 'User not found')(res);
+            return;
         }
         if(!user.emailVerified){
-            return nestError(400, 'User not verified')(res);
+            nestError(400, 'User not verified')(res);
+            return;
         }
         const password = await hashPassword(newPassword);
         await this.prisma.user.update({

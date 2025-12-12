@@ -184,9 +184,9 @@ export class AuthController {
     }
   }
   @Post('refresh')
-  refreshAccessToken(@Req() req, @Res({ passthrough: true }) res: Response) {
+  async refreshAccessToken(@Req() req, @Res({ passthrough: true }) res: Response) {
     // Validate refreshToken and generate new access token
-    return this.authService.refreshAccessToken(req, res);
+    await this.authService.refreshAccessToken(req, res);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -207,7 +207,8 @@ export class AuthController {
     // Clear all auth cookie
     const userId = (req as any).user?.id;
     if (!userId) {
-      return nestError(400, 'User not found')(res);
+      nestError(400, 'User not found')(res);
+      return;
     }
     await redisDeleteKey(`user_active:${userId}`);
 
@@ -292,7 +293,7 @@ export class AuthController {
       return;
     }
 
-    return this.authService.register(registerDto, res as any);
+    await this.authService.register(registerDto, res as any);
   }
 
   // Verify OTP
@@ -302,7 +303,7 @@ export class AuthController {
     @Body() body: any,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return this.authService.verifyOtp(body, res as any);
+    await this.authService.verifyOtp(body, res as any);
   }
 
   // Resend OTP
@@ -313,14 +314,14 @@ export class AuthController {
     @Body() body: any,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return this.authService.resendOtp(body, res as any);
+    await this.authService.resendOtp(body, res as any);
   }
 
   // Login
   @Post('login')
   async login(@Body() body: any, @Res({ passthrough: true }) res: Response) {
     console.log('login called successfully', body);
-    return this.authService.login(body, res as any);
+    await this.authService.login(body, res as any);
   }
 
   // Forgot Password
@@ -330,7 +331,7 @@ export class AuthController {
     @Body() body: any,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return this.authService.forgotPassword(body, res as any);
+    await this.authService.forgotPassword(body, res as any);
   }
 
   // reset password
@@ -340,6 +341,6 @@ export class AuthController {
     @Body() body: any,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return this.authService.resetPassword(body, res as any);
+    await this.authService.resetPassword(body, res as any);
   }
 }
