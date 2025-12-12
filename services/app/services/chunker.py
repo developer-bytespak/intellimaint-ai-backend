@@ -6,6 +6,7 @@ from typing import List, Optional, Tuple, Dict, Any
 
 import psycopg2
 from psycopg2.extras import RealDictCursor, execute_values
+from pathlib import Path
 
 try:
     import importlib.util
@@ -64,161 +65,286 @@ class TokenCounter:
         return self.tokenizer.decode(tids)
 
 
-class CustomChunking:
-    def __init__(self,
-                 counter: TokenCounter,
-                 chunk_target: int = 300,
-                 chunk_size_max: int = 450,
-                 chunk_size_min: int = 180,
-                 chunk_overlap: int = 50):
-        self.counter = counter
-        self.tokenizer = counter
-        self.chunk_target = chunk_target
-        self.chunk_size_max = chunk_size_max
-        self.chunk_size_min = chunk_size_min
-        self.chunk_overlap = chunk_overlap
 
-    def normalize_pdf_markdown(self, text: str) -> str:
-        text = re.sub(r'(?mi)^\s*(table of contents|contents)\s*$', '', text)
-        text = re.sub(r'(?m)^[-•*\d\.)\s]{1,20}$', '', text)
-        lines = text.splitlines()
-        out_lines: List[str] = []
-        for i, ln in enumerate(lines):
-            if ln.strip().startswith('#') or ln.strip() == '':
-                out_lines.append(ln)
-                continue
-            if out_lines and out_lines[-1].strip() and not out_lines[-1].strip().startswith('#'):
-                out_lines[-1] = out_lines[-1].rstrip() + ' ' + ln.strip()
+# --- Inline iFixit-style chunking functions (from scripts/chunking/test_script.py)
+
+
+def is_noise_line(line: str) -> bool:
+    s = line.strip()
+    if not s:
+        return False
+    if s.startswith("![") and "](" in s:
+        return True
+    if s.startswith("<!--") and s.endswith("-->"):
+        return True
+    return False
+
+
+def normalize_section_body(lines: List[str]) -> str:
+    out: List[str] = []
+    for line in lines:
+        if is_noise_line(line):
+            continue
+        out.append(line.rstrip())
+
+    text = "\n".join(out)
+    text = re.sub(r"\[[^|\]]+\|[^|\]]*\|([^|\]]+)\]", r"\1", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
+
+
+def parse_guide_sections(md_text: str) -> Tuple[str, str, List[Dict[str, Any]]]:
+    lines = md_text.splitlines()
+
+    title: str | None = None
+    intro_lines: List[str] = []
+    sections: List[Dict[str, Any]] = []
+    current_section: Dict[str, Any] | None = None
+    step_counter = 0
+
+    for line in lines:
+        if line.startswith("# "):
+            if title is None:
+                title = line[2:].strip()
             else:
-                out_lines.append(ln)
-        normalized = '\n'.join(out_lines)
-        normalized = re.sub(r'(?m)^(!\[.*\]\(.*\))\s*$', lambda m: m.group(1).rstrip() + '\n', normalized)
-        return normalized
+                if current_section is None:
+                    intro_lines.append(line)
+                else:
+                    current_section["lines"].append(line)
 
-    def detect_markdown_headings(self, text: str) -> List[Tuple[int, str, int]]:
-        headings: List[Tuple[int, str, int]] = []
-        lines = text.splitlines()
-        for i, line in enumerate(lines):
-            m = re.match(r'^(#{1,6})\s+(.*)', line.strip())
+        elif line.startswith("## "):
+            if current_section is not None:
+                sections.append(current_section)
+
+            heading_text = line[3:].strip()
+            m = re.match(r"(\d+)\.\s*(.*)", heading_text)
             if m:
-                level = len(m.group(1))
-                headings.append((i, m.group(2).strip(), level))
-        return headings
-
-    def split_by_headings(self, text: str) -> List[Tuple[Optional[str], str]]:
-        headings = self.detect_markdown_headings(text)
-        lines = text.splitlines()
-        if not headings:
-            return [(None, text)]
-        sections: List[Tuple[Optional[str], str]] = []
-        if headings[0][0] > 0:
-            pre = '\n'.join(lines[:headings[0][0]]).strip()
-            if pre:
-                sections.append((None, pre))
-        for idx, (ln, htxt, lvl) in enumerate(headings):
-            start = ln
-            end = headings[idx+1][0] if idx+1 < len(headings) else len(lines)
-            sec = '\n'.join(lines[start:end]).strip()
-            sections.append((htxt, sec))
-        return sections
-
-    def split_large_section(self, content: str, heading: Optional[str]) -> List[Tuple[Optional[str], str]]:
-        if self.counter.count(content) <= self.chunk_size_max:
-            return [(heading, content)]
-        tids = self.counter.encode(content)
-        safety = 8
-        window = max(1, self.chunk_size_max - safety)
-        step = max(1, window - self.chunk_overlap)
-        pieces: List[Tuple[Optional[str], str]] = []
-        first = True
-        for start in range(0, len(tids), step):
-            piece = tids[start:start + window]
-            if not piece:
-                continue
-            try:
-                txt = self.counter.decode(piece).strip()
-            except Exception:
-                txt = ' '.join(str(x) for x in piece)
-            pieces.append((heading if first else None, txt))
-            first = False
-        return pieces
-
-    def combine_small_sections(self, sections: List[Tuple[Optional[str], str]]) -> List[Tuple[Optional[str], str]]:
-        if not sections:
-            return []
-        merged: List[Tuple[Optional[str], str]] = []
-        for heading, content in sections:
-            if not merged:
-                merged.append((heading, content))
-                continue
-            prev_h, prev_c = merged[-1]
-            prev_tokens = self.counter.count(prev_c)
-            cur_tokens = self.counter.count(content)
-            if prev_tokens < self.chunk_size_min or (prev_tokens + cur_tokens) <= self.chunk_size_max:
-                merged[-1] = (prev_h, prev_c + "\n\n" + content)
+                step_counter = int(m.group(1))
+                heading_clean = m.group(2).strip() or heading_text
             else:
-                merged.append((heading, content))
-        return merged
+                step_counter += 1
+                heading_clean = heading_text
 
-    def enforce_hard_cap(self, sections: List[Tuple[Optional[str], str]]) -> List[Tuple[Optional[str], str]]:
-        enforced: List[Tuple[Optional[str], str]] = []
-        safety = 8
-        window = max(1, self.chunk_size_max - safety)
-        step = max(1, window - self.chunk_overlap)
-        for heading, txt in sections:
-            tcount = self.counter.count(txt)
-            if tcount <= self.chunk_size_max:
-                enforced.append((heading, txt))
-                continue
-            try:
-                tids = self.counter.encode(txt)
-                first = True
-                for start in range(0, len(tids), step):
-                    piece = tids[start:start + window]
-                    if not piece:
-                        continue
-                    try:
-                        ptxt = self.counter.decode(piece).strip()
-                    except Exception:
-                        ptxt = ' '.join(str(x) for x in piece)
-                    enforced.append((heading if first else None, ptxt))
-                    first = False
-            except Exception:
-                words = txt.split()
-                buf: List[str] = []
-                first_piece = True
-                for w in words:
-                    buf.append(w)
-                    if self.counter.count(" ".join(buf)) >= self.chunk_size_max:
-                        enforced.append((heading if first_piece else None, " ".join(buf).strip()))
-                        buf = []
-                        first_piece = False
-                if buf:
-                    enforced.append((heading if first_piece else None, " ".join(buf).strip()))
-        return enforced
+            current_section = {
+                "heading_raw": heading_text,
+                "heading": heading_clean,
+                "step_index": step_counter,
+                "lines": [],
+            }
 
-    def chunk_text(self, raw: str) -> List[Dict[str, Any]]:
-        txt = self.normalize_pdf_markdown(raw)
-        secs = self.split_by_headings(txt)
-        processed: List[Tuple[Optional[str], str]] = []
-        for h, c in secs:
-            if self.counter.count(c) > self.chunk_size_max:
-                processed.extend(self.split_large_section(c, h))
+        else:
+            if title is None:
+                intro_lines.append(line)
+            elif current_section is None:
+                intro_lines.append(line)
             else:
-                processed.append((h, c))
-        processed = self.combine_small_sections(processed)
-        processed = self.enforce_hard_cap(processed)
-        out: List[Dict[str, Any]] = []
-        for i, (h, c) in enumerate(processed):
-            out.append({
-                "chunk_index": i,
-                "heading": h,
-                "content": c,
-                "token_count": self.counter.count(c),
-                "char_count": len(c),
-                "word_count": len(c.split())
-            })
-        return out
+                current_section["lines"].append(line)
+
+    if current_section is not None:
+        sections.append(current_section)
+
+    if title is None:
+        title = "Untitled Guide"
+
+    intro_text = "\n".join(intro_lines).strip()
+    return title, intro_text, sections
+
+
+def derive_heading_from_body(body: str) -> str | None:
+    if not body:
+        return None
+    for line in body.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith(">"):
+            continue
+        stripped = re.sub(r"^[-*•]\s*", "", stripped)
+        if stripped:
+            return stripped[:80]
+    return None
+
+
+def chunk_sections(
+    title: str,
+    intro_text: str,
+    sections: List[Dict[str, Any]],
+    max_chars: int = 1200,
+    max_steps: int = 5,
+    step_overlap: int = 1,
+) -> List[Dict[str, Any]]:
+    items: List[Dict[str, Any]] = []
+    if intro_text:
+        items.append(
+            {
+                "kind": "intro",
+                "step_index": 0,
+                "heading": "Introduction",
+                "heading_display": "Introduction",
+                "body": intro_text,
+            }
+        )
+
+    for sec in sections:
+        body = normalize_section_body(sec["lines"])
+        if not body:
+            continue
+        heading = sec["heading"]
+        heading_display = heading
+        if re.match(r"(?i)^step\s*\d+$", heading):
+            derived = derive_heading_from_body(body)
+            if derived:
+                heading_display = derived
+        items.append(
+            {
+                "kind": "step",
+                "step_index": sec["step_index"],
+                "heading": heading,
+                "heading_display": heading_display,
+                "body": body,
+            }
+        )
+
+    if not items:
+        return []
+
+    segments: List[List[Dict[str, Any]]] = []
+    current_segment: List[Dict[str, Any]] = []
+    current_char = 0
+    current_steps = 0
+
+    for item in items:
+        approx_len = len(item["body"]) + len(item["heading_display"]) + 10
+        additional_steps = 1 if item["kind"] == "step" else 0
+
+        if current_segment and (
+            current_char + approx_len > max_chars
+            or current_steps + additional_steps > max_steps
+        ):
+            segments.append(current_segment)
+            current_segment = []
+            current_char = 0
+            current_steps = 0
+
+        current_segment.append(item)
+        current_char += approx_len
+        current_steps += additional_steps
+
+    if current_segment:
+        segments.append(current_segment)
+
+    chunks: List[Dict[str, Any]] = []
+    chunk_index = 0
+
+    for idx, seg in enumerate(segments):
+        overlap_items: List[Dict[str, Any]] = []
+        if idx > 0 and step_overlap > 0:
+            prev_seg = segments[idx - 1]
+            prev_step_items = [it for it in prev_seg if it["kind"] == "step"]
+            if prev_step_items:
+                overlap_items = prev_step_items[-step_overlap:]
+
+        ordered_items = overlap_items + seg
+
+        lines: List[str] = []
+        step_indices: List[int] = []
+        headings: List[str] = []
+        heading_seen = set()
+
+        lines.append(f"Guide: {title}")
+        lines.append("")
+
+        for item in ordered_items:
+            if item["kind"] == "intro":
+                heading_line = item["heading_display"]
+            else:
+                heading_line = f"Step {item['step_index']}: {item['heading_display']}"
+
+            lines.append(heading_line)
+            if item["body"]:
+                lines.append(item["body"])
+            lines.append("")
+
+            if item["kind"] == "step":
+                if item["step_index"] not in step_indices:
+                    step_indices.append(item["step_index"])
+
+            if item["heading_display"] not in heading_seen:
+                headings.append(item["heading_display"])
+                heading_seen.add(item["heading_display"])
+
+        content = "\n".join(lines).strip()
+
+        chunks.append(
+            {
+                "chunk_index": chunk_index,
+                "step_indices": step_indices,
+                "headings": headings,
+                "content": content,
+            }
+        )
+        chunk_index += 1
+
+    return chunks
+
+
+def extract_images_by_step(md_text: str) -> Dict[int, List[Dict[str, Any]]]:
+    images_by_step: Dict[int, List[Dict[str, Any]]] = {}
+    current_step_index = 0
+
+    lines = md_text.splitlines()
+
+    for line in lines:
+        stripped = line.strip()
+
+        if stripped.startswith("## "):
+            heading_text = stripped[3:].strip()
+            m = re.match(r"(\d+)\.\s*(.*)", heading_text)
+            if m:
+                current_step_index = int(m.group(1))
+            else:
+                current_step_index += 1
+
+        for m in re.finditer(r'!\[(.*?)\]\((.*?)\)', stripped):
+            alt = m.group(1).strip()
+            url = m.group(2).strip()
+            if not url:
+                continue
+            if current_step_index <= 0:
+                step_idx = 0
+            else:
+                step_idx = current_step_index
+
+            lst = images_by_step.setdefault(step_idx, [])
+            lst.append(
+                {
+                    "step_index": step_idx,
+                    "url": url,
+                    "alt": alt,
+                    "order": len(lst),
+                }
+            )
+
+        if stripped.startswith("<!--") and "http" in stripped:
+            url_match = re.search(r"https?://[^\s>]+", stripped)
+            if url_match:
+                url = url_match.group(0)
+                url = url.rstrip(".,]")
+                if current_step_index <= 0:
+                    step_idx = 0
+                else:
+                    step_idx = current_step_index
+                lst = images_by_step.setdefault(step_idx, [])
+                lst.append(
+                    {
+                        "step_index": step_idx,
+                        "url": url,
+                        "alt": "",
+                        "order": len(lst),
+                    }
+                )
+
+    return images_by_step
 
 
 def process_source(source_id: str, dry_run: bool = False, overwrite: bool = False) -> Dict[str, Any]:
@@ -239,8 +365,51 @@ def process_source(source_id: str, dry_run: bool = False, overwrite: bool = Fals
                 raise ValueError("raw_content is empty")
 
         counter = TokenCounter()
-        chunker = CustomChunking(counter)
-        chunks = chunker.chunk_text(raw)
+
+        # Use the in-file iFixit chunking functions
+        try:
+            title, intro_text, sections = parse_guide_sections(raw)
+            raw_chunks = chunk_sections(title, intro_text, sections)
+        except Exception as e:
+            raise ValueError(f"error while running chunker: {e}")
+
+        # Map raw_chunks to expected schema: add token/char/word counts and metadata
+        images_by_step = extract_images_by_step(raw)
+
+        chunks: List[Dict[str, Any]] = []
+        for c in raw_chunks:
+            content = c.get("content", "")
+            step_indices = c.get("step_indices", [])
+            headings = c.get("headings", [])
+            heading = headings[0] if headings else None
+            token_count = counter.count(content)
+
+            # collect images belonging to this chunk's steps (deduplicated)
+            chunk_images: List[Dict[str, Any]] = []
+            seen_keys = set()
+            for step_idx in step_indices:
+                for img in images_by_step.get(step_idx, []):
+                    key = (img.get("url"), img.get("step_index"), img.get("order"))
+                    if key in seen_keys:
+                        continue
+                    seen_keys.add(key)
+                    chunk_images.append(img)
+
+            metadata = {
+                "step_indices": step_indices,
+                "images": chunk_images,
+                "char_count": len(content),
+                "word_count": len(content.split()),
+                "chunker_version": "v1",
+            }
+
+            chunks.append({
+                "chunk_index": c.get("chunk_index", 0),
+                "heading": None,
+                "content": content,
+                "token_count": token_count,
+                "metadata": metadata,
+            })
 
         if dry_run:
             return {"source_id": source_id, "num_chunks": len(chunks), "chunks": chunks}
@@ -265,7 +434,7 @@ def process_source(source_id: str, dry_run: bool = False, overwrite: bool = Fals
                         c.get("heading"),
                         None,
                         c.get("token_count"),
-                        json.dumps({"char_count": c.get("char_count"), "word_count": c.get("word_count"), "chunker_version": "v1"})
+                        json.dumps(c.get("metadata", {"char_count": c.get("char_count"), "word_count": c.get("word_count"), "chunker_version": "v1"}))
                     ))
 
                 insert_sql = (

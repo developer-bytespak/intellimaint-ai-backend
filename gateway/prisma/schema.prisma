@@ -1,338 +1,288 @@
-// This is your Prisma schema file,
-  // learn more about it in the docs: https://pris.ly/d/prisma-schema
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
 
-  // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-  // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]
+}
 
-  // schema.prisma
+model User {
+  id              String            @id @default(uuid()) @db.Uuid
+  email           String            @unique @db.VarChar(255)
+  emailVerified   Boolean           @default(false) @map("email_verified")
+  passwordHash    String?           @map("password_hash") @db.VarChar(255)
+  firstName       String?           @map("first_name") @db.VarChar(255)
+  lastName        String?           @map("last_name") @db.VarChar(255)
+  company         String?           @db.VarChar(255)
+  role            UserRole
+  profileImageUrl String?           @map("profile_image_url")
+  createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt       DateTime          @updatedAt @map("updated_at") @db.Timestamp(6)
+  lastLoginAt     DateTime?         @map("last_login_at") @db.Timestamp(6)
+  status          UserStatus        @default(ACTIVE)
+  chatSessions    ChatSession[]
+  KnowledgeSource KnowledgeSource[]
+  oauthProviders  OAuthProvider[]
+  otps            OTP[]
+  repositories    Repository[]
+  sessions        Session[]
+  subscriptions   Subscription[]
+  userSettings    UserSettings?
 
-  generator client {
-    provider        = "prisma-client-js"
-    previewFeatures = ["postgresqlExtensions"]
-  }
+  @@map("users")
+}
 
-  datasource db {
-    provider          = "postgresql"
-    url               = env("DATABASE_URL")
-    extensions        = [pgvector(map: "vector")]
-  }
+model OAuthProvider {
+  id             String            @id @default(uuid()) @db.Uuid
+  userId         String            @map("user_id") @db.Uuid
+  provider       OAuthProviderType
+  providerUserId String            @map("provider_user_id") @db.VarChar(255)
+  refreshToken   String?           @map("refresh_token")
+  tokenExpiresAt DateTime?         @map("token_expires_at") @db.Timestamp(6)
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt      DateTime          @updatedAt @map("updated_at") @db.Timestamp(6)
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // ============================================
-  // 1. USERS & AUTHENTICATION
-  // ============================================
+  @@map("oauth_providers")
+}
 
-  enum UserRole {
-    civilian
-    military
-    student
-  }
+model OTP {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  code      String   @db.VarChar(6)
+  expiresAt DateTime @map("expires_at") @db.Timestamp(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  enum UserStatus {
-    ACTIVE
-    INACTIVE
-  }
+  @@map("otp")
+}
 
-  model User {
-    id              String     @id @default(uuid()) @db.Uuid
-    email           String     @unique @db.VarChar(255)
-    emailVerified   Boolean    @default(false) @map("email_verified")
-    passwordHash    String?    @map("password_hash") @db.VarChar(255)
-    firstName       String?    @map("first_name") @db.VarChar(255)
-    lastName        String?    @map("last_name") @db.VarChar(255)
-    company         String?    @db.VarChar(255)
-    role            UserRole
-    profileImageUrl String?    @map("profile_image_url") @db.Text
-    createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamp(6)
-    updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamp(6)
-    lastLoginAt     DateTime?  @map("last_login_at") @db.Timestamp(6)
-    status          UserStatus @default(ACTIVE)
+model Session {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  token      String   @unique @db.VarChar(255)
+  deviceInfo Json?    @map("device_info")
+  ipAddress  String?  @map("ip_address") @db.Inet
+  expiresAt  DateTime @map("expires_at") @db.Timestamp(6)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    // Relations
-    oauthProviders  OAuthProvider[]
-    otps            OTP[]
-    sessions        Session[]
-    chatSessions    ChatSession[]
-    subscriptions   Subscription[]
-    userSettings    UserSettings?
-    KnowledgeSource KnowledgeSource[]
-    repositories    Repository[] // Add this
+  @@map("sessions")
+}
 
-    @@map("users")
-  }
+model EquipmentFamily {
+  id          String           @id @default(uuid()) @db.Uuid
+  name        String           @db.VarChar(255)
+  description String?
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamp(6)
+  metadata    Json?
+  models      EquipmentModel[]
 
-  enum OAuthProviderType {
-    google
-    apple
-  }
+  @@map("equipment_families")
+}
 
-  model OAuthProvider {
-    id             String            @id @default(uuid()) @db.Uuid
-    userId         String            @map("user_id") @db.Uuid
-    provider       OAuthProviderType
-    providerUserId String            @map("provider_user_id") @db.VarChar(255)
-    refreshToken   String?           @map("refresh_token") @db.Text
-    tokenExpiresAt DateTime?         @map("token_expires_at") @db.Timestamp(6)
-    createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
-    updatedAt      DateTime          @updatedAt @map("updated_at") @db.Timestamp(6)
+model EquipmentModel {
+  id               String            @id @default(uuid()) @db.Uuid
+  familyId         String            @map("family_id") @db.Uuid
+  manufacturer     String?           @db.VarChar(255)
+  modelNumber      String?           @map("model_number") @db.VarChar(255)
+  modelName        String?           @map("model_name") @db.VarChar(255)
+  description      String?
+  imageUrls        Json?             @map("image_urls")
+  createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
+  metadata         Json?
+  family           EquipmentFamily   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  imageAnalyses    ImageAnalysis[]
+  knowledgeSources KnowledgeSource[]
 
-    // Relations
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("equipment_models")
+}
 
-    @@map("oauth_providers")
-  }
+model KnowledgeSource {
+  id         String           @id @default(uuid()) @db.Uuid
+  title      String
+  sourceType String           @map("source_type") @db.VarChar(50)
+  rawContent String           @map("raw_content")
+  modelId    String?          @map("model_id") @db.Uuid
+  wordCount  Int?             @map("word_count")
+  metadata   Json?
+  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt  DateTime         @updatedAt @map("updated_at") @db.Timestamp(6)
+  userId     String?          @map("user_id") @db.Uuid
+  chunks     KnowledgeChunk[]
+  model      EquipmentModel?  @relation(fields: [modelId], references: [id])
+  user       User?            @relation(fields: [userId], references: [id])
+  repository Repository?
 
-  model OTP {
-    id        String   @id @default(uuid()) @db.Uuid
-    userId    String   @map("user_id") @db.Uuid
-    code      String   @db.VarChar(6)
-    expiresAt DateTime @map("expires_at") @db.Timestamp(6)
-    createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  @@map("knowledge_sources")
+}
 
-    // Relations
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+model KnowledgeChunk {
+  id         String                @id @default(uuid()) @db.Uuid
+  sourceId   String                @map("source_id") @db.Uuid
+  chunkIndex Int                   @map("chunk_index")
+  content    String
+  heading    String?
+  embedding  Unsupported("vector")?
+  tokenCount Int?                  @map("token_count")
+  metadata   Json?
+  createdAt  DateTime              @default(now()) @map("created_at") @db.Timestamp(6)
+  source     KnowledgeSource       @relation(fields: [sourceId], references: [id], onDelete: Cascade)
 
-    @@map("otp")
-  }
+  @@map("knowledge_chunks")
+}
 
-  model Session {
-    id         String   @id @default(uuid()) @db.Uuid
-    userId     String   @map("user_id") @db.Uuid
-    token      String   @unique @db.VarChar(255)
-    deviceInfo Json?    @map("device_info") @db.JsonB
-    ipAddress  String?  @map("ip_address") @db.Inet
-    expiresAt  DateTime @map("expires_at") @db.Timestamp(6)
-    createdAt  DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+model ChatSession {
+  id               String            @id @default(uuid()) @db.Uuid
+  userId           String            @map("user_id") @db.Uuid
+  title            String?           @db.VarChar(500)
+  equipmentContext String[]          @map("equipment_context")
+  contextSummary   String?           @map("context_summary")
+  status           ChatSessionStatus @default(active)
+  createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt        DateTime          @updatedAt @map("updated_at") @db.Timestamp(6)
+  messages         ChatMessage[]
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    // Relations
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-    @@map("sessions")
-  }
-
-  // ============================================
-  // 2. EQUIPMENT & TAXONOMY
-  // ============================================
-
-  model EquipmentFamily {
-    id          String   @id @default(uuid()) @db.Uuid
-    name        String   @db.VarChar(255)
-    description String?  @db.Text
-    metadata    Json?    @db.JsonB
-    createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(6)
-
-    // Relations
-    models EquipmentModel[]
-
-    @@map("equipment_families")
-  }
-
-  model EquipmentModel {
-    id           String   @id @default(uuid()) @db.Uuid
-    familyId     String   @map("family_id") @db.Uuid
-    manufacturer String?  @db.VarChar(255)
-    modelNumber  String?  @map("model_number") @db.VarChar(255)
-    modelName    String?  @map("model_name") @db.VarChar(255)
-    description  String?  @db.Text
-    imageUrls    Json?    @map("image_urls") @db.JsonB
-    metadata     Json?    @db.JsonB
-    createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp(6)
-
-    // Relations
-    family           EquipmentFamily   @relation(fields: [familyId], references: [id], onDelete: Cascade)
-    knowledgeSources KnowledgeSource[]
-    imageAnalyses    ImageAnalysis[]
-
-    @@map("equipment_models")
-  }
-
-  // ============================================
-  // 3. KNOWLEDGE BASE & RAG
-  // ============================================
-
-  model KnowledgeSource {
-    id         String   @id @default(uuid()) @db.Uuid
-    title      String   @db.Text
-    sourceType String   @map("source_type") @db.VarChar(50)
-    rawContent String   @map("raw_content") @db.Text
-    modelId    String?  @map("model_id") @db.Uuid
-    userId     String?  @map("user_id") @db.Uuid
-    wordCount  Int?     @map("word_count")
-    metadata   Json?    @db.JsonB
-    createdAt  DateTime @default(now()) @map("created_at") @db.Timestamp(6)
-    updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
-
-    // Relations
-    model      EquipmentModel?  @relation(fields: [modelId], references: [id], onDelete: SetNull)
-    user       User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
-    chunks     KnowledgeChunk[]
-    repository Repository? // Add this
-
-    @@map("knowledge_sources")
-  }
-
-  model KnowledgeChunk {
-    id         String                      @id @default(uuid()) @db.Uuid
-    sourceId   String                      @map("source_id") @db.Uuid
-    chunkIndex Int                         @map("chunk_index")
-    content    String                      @db.Text
-    heading    String?                     @db.Text
-    embedding  Unsupported("vector(1536)")
-    tokenCount Int?                        @map("token_count")
-    metadata   Json?                       @db.JsonB
-    createdAt  DateTime                    @default(now()) @map("created_at") @db.Timestamp(6)
-
-    // Relations
-    source KnowledgeSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-
-    @@map("knowledge_chunks")
-  }
-
-  // ============================================
-  // 4. CHAT & CONVERSATIONS
-  // ============================================
-
-  enum ChatSessionStatus {
-    active
-    archived
-    deleted
-  }
-
-  model ChatSession {
-    id               String            @id @default(uuid()) @db.Uuid
-    userId           String            @map("user_id") @db.Uuid
-    title            String?           @db.VarChar(500)
-    equipmentContext String[]          @map("equipment_context")
-    contextSummary   String?           @map("context_summary") @db.Text
-    status           ChatSessionStatus @default(active)
-    createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
-    updatedAt        DateTime          @updatedAt @map("updated_at") @db.Timestamp(6)
-
-    // Relations
-    user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-    messages ChatMessage[]
-
-    @@map("chat_sessions")
-  }
-
-  enum MessageRole {
-    user
-    assistant
-    system
-  }
+  @@map("chat_sessions")
+}
 
 model ChatMessage {
-  id              String      @id @default(uuid()) @db.Uuid
-  sessionId       String      @map("session_id") @db.Uuid
-  role            MessageRole
-  content         String      @db.Text
-  model           String?     @db.VarChar(50)  // e.g., gpt-4o
-  promptTokens    Int?        @map("prompt_tokens")
-  completionTokens Int?       @map("completion_tokens")
-  cachedTokens    Int?        @map("cached_tokens")
-  totalTokens     Int?        @map("total_tokens")
-  feedbackRating  Int?        @map("feedback_rating")
-  feedbackComment String?     @map("feedback_comment") @db.Text
-  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamp(6)
-
-  // Relations
-  session     ChatSession         @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  attachments MessageAttachment[]
+  id               String              @id @default(uuid()) @db.Uuid
+  sessionId        String              @map("session_id") @db.Uuid
+  role             MessageRole
+  feedbackRating   Int?                @map("feedback_rating")
+  createdAt        DateTime            @default(now()) @map("created_at") @db.Timestamp(6)
+  cachedTokens     Int?                @map("cached_tokens")
+  completionTokens Int?                @map("completion_tokens")
+  content          String
+  feedbackComment  String?             @map("feedback_comment")
+  model            String?             @db.VarChar(50)
+  promptTokens     Int?                @map("prompt_tokens")
+  totalTokens      Int?                @map("total_tokens")
+  session          ChatSession         @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  attachments      MessageAttachment[]
 
   @@index([sessionId, createdAt])
   @@map("chat_messages")
 }
 
-  enum AttachmentType {
-    image
-    document
-  }
+model MessageAttachment {
+  id             String         @id @default(uuid()) @db.Uuid
+  messageId      String         @map("message_id") @db.Uuid
+  attachmentType AttachmentType @map("attachment_type")
+  fileUrl        String         @map("file_url")
+  fileName       String?        @map("file_name") @db.VarChar(500)
+  metadata       Json?
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamp(6)
+  imageAnalysis  ImageAnalysis?
+  message        ChatMessage    @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
-  model MessageAttachment {
-    id             String         @id @default(uuid()) @db.Uuid
-    messageId      String         @map("message_id") @db.Uuid
-    attachmentType AttachmentType @map("attachment_type")
-    fileUrl        String         @map("file_url") @db.Text
-    fileName       String?        @map("file_name") @db.VarChar(500)
-    metadata       Json?          @db.JsonB
-    createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamp(6)
+  @@map("message_attachments")
+}
 
-    // Relations
-    message       ChatMessage    @relation(fields: [messageId], references: [id], onDelete: Cascade)
-    imageAnalysis ImageAnalysis?
+model ImageAnalysis {
+  id                 String            @id @default(uuid()) @db.Uuid
+  attachmentId       String            @unique @map("attachment_id") @db.Uuid
+  modelId            String?           @map("model_id") @db.Uuid
+  detectedComponents Json?             @map("detected_components")
+  ocrResults         Json?             @map("ocr_results")
+  sceneDescription   Json?             @map("scene_description")
+  tokenCount         Int?              @map("token_count")
+  createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
+  attachment         MessageAttachment @relation(fields: [attachmentId], references: [id], onDelete: Cascade)
+  model              EquipmentModel?   @relation(fields: [modelId], references: [id])
 
-    @@map("message_attachments")
-  }
+  @@map("image_analysis")
+}
 
-  // ============================================
-  // 5. VISION & IMAGE ANALYSIS
-  // ============================================
+model Subscription {
+  id                   String             @id @default(uuid()) @db.Uuid
+  userId               String             @map("user_id") @db.Uuid
+  stripeCustomerId     String?            @unique @map("stripe_customer_id") @db.VarChar(255)
+  stripeSubscriptionId String?            @unique @map("stripe_subscription_id") @db.VarChar(255)
+  planName             String             @map("plan_name") @db.VarChar(100)
+  status               SubscriptionStatus
+  currentPeriodStart   DateTime?          @map("current_period_start") @db.Timestamp(6)
+  currentPeriodEnd     DateTime?          @map("current_period_end") @db.Timestamp(6)
+  createdAt            DateTime           @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt            DateTime           @updatedAt @map("updated_at") @db.Timestamp(6)
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  model ImageAnalysis {
-    id                 String   @id @default(uuid()) @db.Uuid
-    attachmentId       String   @unique @map("attachment_id") @db.Uuid
-    modelId            String?  @map("model_id") @db.Uuid
-    detectedComponents Json?    @map("detected_components") @db.JsonB
-    ocrResults         Json?    @map("ocr_results") @db.JsonB
-    sceneDescription   Json?    @map("scene_description") @db.JsonB
-    tokenCount         Int?     @map("token_count")
-    createdAt          DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  @@map("subscriptions")
+}
 
-    // Relations
-    attachment MessageAttachment @relation(fields: [attachmentId], references: [id], onDelete: Cascade)
-    model      EquipmentModel?   @relation(fields: [modelId], references: [id], onDelete: SetNull)
+model UserSettings {
+  userId             String   @id @map("user_id") @db.Uuid
+  emailNotifications Boolean  @default(true) @map("email_notifications")
+  theme              String   @default("light") @db.VarChar(20)
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@map("image_analysis")
-  }
+  @@map("user_settings")
+}
 
-  // ============================================
-  // 6. SUBSCRIPTIONS & BILLING
-  // ============================================
+model Repository {
+  id                String           @id @default(uuid()) @db.Uuid
+  userId            String           @map("user_id") @db.Uuid
+  fileName          String           @map("file_name") @db.VarChar(500)
+  fileUrl           String           @map("file_url")
+  fileSize          Int              @map("file_size")
+  status            RepositoryStatus @default(uploading)
+  knowledgeSourceId String?          @unique @map("knowledge_source_id") @db.Uuid
+  uploadedAt        DateTime         @default(now()) @map("uploaded_at") @db.Timestamp(6)
+  createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamp(6)
+  knowledgeSource   KnowledgeSource? @relation(fields: [knowledgeSourceId], references: [id])
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  enum SubscriptionStatus {
-    active
-    past_due
-    canceled
-    trialing
-  }
+  @@index([userId])
+  @@index([status])
+  @@map("repositories")
+}
 
-  model Subscription {
-    id                   String             @id @default(uuid()) @db.Uuid
-    userId               String             @map("user_id") @db.Uuid
-    stripeCustomerId     String?            @unique @map("stripe_customer_id") @db.VarChar(255)
-    stripeSubscriptionId String?            @unique @map("stripe_subscription_id") @db.VarChar(255)
-    planName             String             @map("plan_name") @db.VarChar(100)
-    status               SubscriptionStatus
-    currentPeriodStart   DateTime?          @map("current_period_start") @db.Timestamp(6)
-    currentPeriodEnd     DateTime?          @map("current_period_end") @db.Timestamp(6)
-    createdAt            DateTime           @default(now()) @map("created_at") @db.Timestamp(6)
-    updatedAt            DateTime           @updatedAt @map("updated_at") @db.Timestamp(6)
+enum UserRole {
+  civilian
+  military
+  student
+}
 
-    // Relations
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
 
-    @@map("subscriptions")
-  }
+enum OAuthProviderType {
+  google
+  apple
+}
 
-  // ============================================
-  // 7. NOTIFICATIONS & SETTINGS
-  // ============================================
+enum ChatSessionStatus {
+  active
+  archived
+  deleted
+}
 
-  model UserSettings {
-    userId             String   @id @map("user_id") @db.Uuid
-    emailNotifications Boolean  @default(true) @map("email_notifications")
-    theme              String   @default("light") @db.VarChar(20)
-    createdAt          DateTime @default(now()) @map("created_at") @db.Timestamp(6)
-    updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
+enum MessageRole {
+  user
+  system
+  assistant
+}
 
-    // Relations
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+enum AttachmentType {
+  image
+  document
+}
 
-    @@map("user_settings")
-  }
-
-  // ============================================
-  // 8. USER REPOSITORIES (SIMPLIFIED)
-  // ============================================
+enum SubscriptionStatus {
+  active
+  past_due
+  canceled
+  trialing
+}
 
 enum RepositoryStatus {
   uploading
