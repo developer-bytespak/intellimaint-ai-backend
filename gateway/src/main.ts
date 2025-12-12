@@ -7,30 +7,39 @@ import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
-  app.useGlobalPipes(new ValidationPipe({
-    transform: true,
-    transformOptions: {
-      enableImplicitConversion: true,
-    },
-  }));
-  app.setGlobalPrefix(appConfig.apiPrefix);
-  app.enableCors(
-    {
-      origin: process.env.FRONTEND_URL?.split(',') || ["http://localhost:3001"],
-      credentials: true,
-    }
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
   );
+  app.setGlobalPrefix(appConfig.apiPrefix);
+  // Normalize FRONTEND_URL env var (split, trim, strip trailing slashes)
+  const rawOrigins = process.env.FRONTEND_URL?.split(',') || [
+    'http://localhost:3001',
+  ];
+  const allowedOrigins = rawOrigins.map((o) =>
+    String(o).trim().replace(/\/+$/, ''),
+  );
+  console.log('CORS allowed origins:', allowedOrigins);
   
+  // Enhanced CORS configuration for authentication with credentials
+  app.enableCors({
+    origin: allowedOrigins,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Type', 'X-Total-Count'],
+    maxAge: 3600,
+  });
 
   app.use(cookieParser.default());
 
-
- 
   await app.listen(appConfig.port);
   console.log(`Application is running on: ${await app.getUrl()}`);
-
 }
 
 bootstrap();
-
