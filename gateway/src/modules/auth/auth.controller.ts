@@ -69,13 +69,13 @@ export class AuthController {
         res.clearCookie('google_access', {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
-          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+          sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
           path: '/',
         });
         res.clearCookie('local_access', {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
-          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+          sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
           path: '/',
         });
       }
@@ -153,7 +153,7 @@ export class AuthController {
       res.cookie('google_access', accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
         path: '/',
         maxAge: 1 * 60 * 60 * 1000, // 1 hours
       });
@@ -162,7 +162,7 @@ export class AuthController {
       res.cookie('google_user_email', user.email, {
         httpOnly: false, // Not httpOnly so guard can read it for refresh
         secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
         path: '/',
         maxAge: 1 * 60 * 60 * 1000, // 1 hours
       });
@@ -215,25 +215,25 @@ export class AuthController {
     res.clearCookie('local_access', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
       path: '/',
     });
     res.clearCookie('google_access', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
       path: '/',
     });
     res.clearCookie('refresh_token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
       path: '/',
     });
     res.clearCookie('google_user_email', {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
       path: '/',
     });
     res.redirect(`${process.env.FRONTEND_URL}/login`);

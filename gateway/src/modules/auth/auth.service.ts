@@ -282,14 +282,22 @@ export class AuthService {
         const accessToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret as string, { expiresIn: '1h' });
         const refreshToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret as string, { expiresIn: '7d' });
         
-        // Set access token cookie with proper CORS settings
-        res.cookie('local_access', accessToken, {
+        const cookieOptions = {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+            sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
             path: '/',
             maxAge: 60 * 60 * 1000, // 1 hour
+        };
+        
+        console.log('Setting local_access cookie with options:', {
+            ...cookieOptions,
+            nodeEnv: process.env.NODE_ENV,
+            forceSecure: process.env.FORCE_SECURE_COOKIES,
         });
+        
+        // Set access token cookie with proper CORS settings
+        res.cookie('local_access', accessToken, cookieOptions);
         
        
         
@@ -478,7 +486,7 @@ export class AuthService {
                     res.cookie('local_access', newAccessToken, {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
-                        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+                        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
                         path: '/',
                         maxAge: 60 * 60 * 1000, // 1 hour
                     });
@@ -542,8 +550,8 @@ export class AuthService {
                     // Update cookie with new access token
                     res.cookie('google_access', newAccessToken, {
                         httpOnly: true,
-                        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
                         secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+                        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
                         path: '/',
                         maxAge: 2 * 60 * 60 * 1000, // 2 hours
                     });

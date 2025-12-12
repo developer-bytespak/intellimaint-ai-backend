@@ -29,6 +29,15 @@ export class JwtAuthGuard implements CanActivate {
     const localToken = req.cookies?.local_access;
     const googleEmail = req.cookies?.google_user_email;
 
+    console.log('[JwtAuthGuard] Cookies received:', {
+      hasGoogleToken: !!googleToken,
+      hasLocalToken: !!localToken,
+      hasGoogleEmail: !!googleEmail,
+      allCookies: Object.keys(req.cookies || {}),
+      url: req.url,
+      method: req.method,
+    });
+
     // Check if this is an API request (not a browser redirect)
     const isApiRequest =
       req.method !== 'GET' || req.headers.accept?.includes('application/json');
@@ -103,8 +112,8 @@ export class JwtAuthGuard implements CanActivate {
           // Update cookie with new token from cron job
           res.cookie('local_access', pendingToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+            sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
             path: '/',
             maxAge: 60 * 60 * 1000, // 1 hour
           });
@@ -206,8 +215,8 @@ export class JwtAuthGuard implements CanActivate {
           // Update cookie
           res.cookie('google_access', newAccessToken, {
             httpOnly: true,
-            sameSite: 'lax',
-            secure: process.env.NODE_ENV === 'production',
+            secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+            sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
             path: '/',
             maxAge: 2 * 60 * 60 * 1000,
           });

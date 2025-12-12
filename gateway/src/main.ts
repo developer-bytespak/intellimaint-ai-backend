@@ -31,8 +31,8 @@ async function bootstrap() {
     origin: allowedOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['Content-Type', 'X-Total-Count'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    exposedHeaders: ['Content-Type', 'X-Total-Count', 'Set-Cookie'],
     maxAge: 3600,
   });
 
