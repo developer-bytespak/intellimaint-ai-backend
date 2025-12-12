@@ -3,6 +3,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routes import orchestrator, vision, rag, asr_tts, doc_extract
+from .shared.config import get_settings
+
+settings = get_settings()
 
 app = FastAPI(
     title="IntelliMaint AI Service",
@@ -10,12 +13,14 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Configure CORS from environment via Settings.allowed_origins.
+# Set ALLOWED_ORIGINS env var (comma-separated) to your frontend URL(s), e.g. https://myapp.onrender.com
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change "*" to your frontend URL in production
+    allow_origins=settings.allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all methods (GET, POST, PUT, DELETE, etc.)
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 # Include all routers with appropriate prefixes
 app.include_router(
