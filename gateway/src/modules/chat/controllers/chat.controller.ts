@@ -3,6 +3,7 @@ import {
   Post,
   Get,
   Put,
+  Patch,
   Delete,
   Param,
   Body,
@@ -11,6 +12,7 @@ import {
   UseGuards,
   Res,
   Sse,
+  Logger,
 } from '@nestjs/common';
 import { ChatService } from '../services/chat.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
@@ -25,6 +27,8 @@ import type { Response } from 'express';
 @Controller('chat')
 @UseGuards(JwtAuthGuard)
 export class ChatController {
+  private readonly logger = new Logger(ChatController.name);
+
   constructor(private chatService: ChatService) {}
 
   @Get('sessions')
@@ -218,6 +222,10 @@ export class ChatController {
     @Body() body: any,
     @Res() res: Response,
   ) {
+    // Generate unique request ID for this SSE stream
+    const requestId = `${sessionId}-${Date.now()}-${Math.random()}`;
+    const abortController = new AbortController();
+    
     try {
       const userId = req.user.id;
       const createDto = plainToInstance(CreateMessageDto, body);
@@ -235,28 +243,63 @@ export class ChatController {
       res.setHeader('Connection', 'keep-alive');
       res.setHeader('X-Accel-Buffering', 'no'); // Disable nginx buffering
 
+      // ⭐ CRITICAL: Detect client disconnect
+      // When client closes connection, this fires immediately
+      req.on('close', () => {
+        console.log(`Client disconnected for request ${requestId}`);
+        // Mark this request as aborted so backend stops processing
+        this.chatService.abortRequest(requestId);
+      });
+
+      // Register the request so it can be tracked
+      this.chatService.registerRequest(requestId, abortController);
+
       // Stream tokens as they arrive
       try {
-        for await (const chunk of this.chatService.streamMessage(userId, sessionId, createDto)) {
+        for await (const chunk of this.chatService.streamMessage(userId, sessionId, createDto, requestId)) {
+          // Only write if client is still connected
+          if (req.writableEnded) {
+            break;
+          }
+          
+          // Don't send event if this was an aborted request
+          if (chunk.aborted) {
+            console.log(`Skipping send for aborted request ${requestId}`);
+            break;
+          }
+          
           res.write(`data: ${JSON.stringify(chunk)}\n\n`);
         }
-        res.end();
+        
+        // Only end response if still writable
+        if (!req.writableEnded) {
+          res.end();
+        }
       } catch (streamError) {
         console.error('Error in stream:', streamError);
-        res.write(`data: ${JSON.stringify({ error: streamError.message, done: true })}\n\n`);
-        res.end();
+        if (!req.writableEnded) {
+          const errorMessage = streamError?.message || 'Stream error occurred';
+          res.write(`data: ${JSON.stringify({ error: errorMessage, done: true })}\n\n`);
+          res.end();
+        }
       }
     } catch (error) {
       console.error('Error starting stream:', error);
       if (!res.headersSent) {
-        res.status(error.status || 500).json({
-          statusCode: error.status || 500,
-          message: error.message || 'Internal server error',
+        const errorMessage = error?.message || 'Internal server error';
+        const statusCode = error?.status || 500;
+        res.status(statusCode).json({
+          statusCode,
+          message: errorMessage,
         });
-      } else {
-        res.write(`data: ${JSON.stringify({ error: error.message, done: true })}\n\n`);
+      } else if (!req.writableEnded) {
+        const errorMessage = error?.message || 'Internal server error';
+        res.write(`data: ${JSON.stringify({ error: errorMessage, done: true })}\n\n`);
         res.end();
       }
+    } finally {
+      // Always clean up the request from tracking
+      this.chatService.unregisterRequest(requestId);
     }
   }
 
@@ -268,6 +311,11 @@ export class ChatController {
   ) {
     try {
       const userId = req.user.id;
+      if (!userId) {
+        res.status(401).json({ statusCode: 401, message: 'Unauthorized' });
+        return;
+      }
+
       const createDto = plainToInstance(CreateMessageDto, body);
       const errors = await validate(createDto);
 
@@ -286,34 +334,170 @@ export class ChatController {
         return;
       }
 
+      // Generate unique request ID
+      const requestId = `new-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const abortController = new AbortController();
+
       // Set SSE headers
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
       res.setHeader('X-Accel-Buffering', 'no');
 
+      // Register request for lifecycle tracking
+      this.chatService.registerRequest(requestId, abortController);
+
+      // Detect client disconnect
+      req.on('close', () => {
+        this.logger.log(`Client disconnected from new session stream (request ${requestId})`);
+        this.chatService.abortRequest(requestId);
+      });
+
       // Stream tokens as they arrive
       try {
-        for await (const chunk of this.chatService.streamMessageWithSession(userId, createDto)) {
+        for await (const chunk of this.chatService.streamMessageWithSession(userId, createDto, requestId)) {
+          // Skip writing if client already disconnected
+          if (req.writableEnded) {
+            break;
+          }
+          // Skip events for aborted streams
+          if (chunk.aborted) {
+            this.logger.log(`Skipping write for aborted stream (request ${requestId})`);
+            break;
+          }
           res.write(`data: ${JSON.stringify(chunk)}\n\n`);
         }
         res.end();
       } catch (streamError) {
-        console.error('Error in stream:', streamError);
-        res.write(`data: ${JSON.stringify({ error: streamError.message, done: true })}\n\n`);
-        res.end();
+        this.logger.error(`Error in new session stream (request ${requestId}):`, streamError);
+        if (!req.writableEnded) {
+          const errorMessage = streamError?.message || 'Stream error occurred';
+          res.write(`data: ${JSON.stringify({ error: errorMessage, done: true })}\n\n`);
+          res.end();
+        }
+      } finally {
+        this.chatService.unregisterRequest(requestId);
       }
     } catch (error) {
-      console.error('Error starting stream:', error);
+      this.logger.error('Error starting new session stream:', error);
       if (!res.headersSent) {
-        res.status(error.status || 500).json({
-          statusCode: error.status || 500,
-          message: error.message || 'Internal server error',
+        const errorMessage = error?.message || 'Internal server error';
+        const statusCode = error?.status || 500;
+        res.status(statusCode).json({
+          statusCode,
+          message: errorMessage,
         });
       } else {
-        res.write(`data: ${JSON.stringify({ error: error.message, done: true })}\n\n`);
+        const errorMessage = error?.message || 'Internal server error';
+        res.write(`data: ${JSON.stringify({ error: errorMessage, done: true })}\n\n`);
         res.end();
       }
+    }
+  }
+
+  @Post('sessions/:sessionId/stop-stream')
+  async stopStreamPost(
+    @Req() req: any,
+    @Param('sessionId') sessionId: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.stopStreamHandler(req, sessionId, res);
+  }
+
+  @Delete('sessions/:sessionId/stop-stream')
+  async stopStream(
+    @Req() req: any,
+    @Param('sessionId') sessionId: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.stopStreamHandler(req, sessionId, res);
+  }
+
+  private async stopStreamHandler(
+    req: any,
+    sessionId: string,
+    res: Response,
+  ) {
+    try {
+      // Extract userId with multiple fallbacks
+      const userId = req.user?.id || req.user?.userId || req.user?.sub;
+      
+      if (!userId) {
+        this.logger.error('User not found in request');
+        return nestError(401, 'Unauthorized')(res);
+      }
+
+      // Abort the stream and cleanup
+      const result = await this.chatService.stopStream(userId, sessionId);
+      
+      // Return a safe JSON response without circular references
+      return res.status(200).json({
+        statusCode: 200,
+        message: 'Stream stopped successfully',
+        data: {
+          requestsAborted: Number(result.requestsAborted) || 0,
+          geminiAborted: Boolean(result.geminiAborted),
+          message: result.message || 'Stream stopped',
+        },
+      });
+    } catch (error) {
+      this.logger.error('Error stopping stream:', error);
+      
+      const statusCode = error?.status || 500;
+      const errorMessage = error?.message || 'Failed to stop stream';
+      
+      if (error.status === 404) {
+        return nestError(404, errorMessage)(res);
+      }
+      if (error.status === 403) {
+        return nestError(403, errorMessage)(res);
+      }
+      if (error.status === 401) {
+        return nestError(401, 'Unauthorized')(res);
+      }
+      
+      return res.status(statusCode).json({
+        statusCode,
+        message: errorMessage,
+        data: null,
+      });
+    }
+  }
+
+  @Patch('sessions/:sessionId/messages/:messageId')
+  async editMessage(
+    @Req() req: any,
+    @Param('sessionId') sessionId: string,
+    @Param('messageId') messageId: string,
+    @Body() body: { content: string },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    try {
+      const userId = req.user.id;
+
+      if (!body.content || body.content.trim() === '') {
+        return nestError(400, 'Message content cannot be empty')(res);
+      }
+
+      const updatedMessage = await this.chatService.editMessage(
+        userId,
+        sessionId,
+        messageId,
+        body.content.trim(),
+      );
+      return nestResponse(200, 'Message edited successfully', updatedMessage)(res);
+    } catch (error) {
+      if (error.status === 404) {
+        return nestError(404, error.message)(res);
+      }
+      if (error.status === 403) {
+        return nestError(403, error.message)(res);
+      }
+      if (error.status === 400) {
+        return nestError(400, error.message)(res);
+      }
+      console.error('Error editing message:', error);
+      return nestError(500, 'Failed to edit message', error.message || 'Internal server error')(res);
     }
   }
 
