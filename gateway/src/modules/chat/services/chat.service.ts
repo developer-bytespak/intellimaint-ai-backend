@@ -3,7 +3,7 @@ import { PrismaService } from 'prisma/prisma.service';
 import { UpdateSessionDto } from '../dto/update-session.dto';
 import { CreateMessageDto } from '../dto/create-message.dto';
 import { ListSessionsQueryDto } from '../dto/list-sessions-query.dto';
-import { ChatSessionStatus, MessageRole, AttachmentType } from '@prisma/client';
+import { ChatSessionStatus, MessageRole, AttachmentType, ChatMessage } from '@prisma/client';
 import { GeminiChatService } from './gemini-chat.service';
 import { ImageUtilService } from './image-util.service';
 import { VercelBlobService } from './vercel-blob.service';
@@ -11,6 +11,8 @@ import { VercelBlobService } from './vercel-blob.service';
 @Injectable()
 export class ChatService {
   private readonly logger = new Logger(ChatService.name);
+  // Track active SSE requests: requestId -> AbortController
+  private activeRequests: Map<string, AbortController> = new Map();
 
   constructor(
     private prisma: PrismaService,
@@ -18,6 +20,62 @@ export class ChatService {
     private imageUtilService: ImageUtilService,
     private vercelBlobService: VercelBlobService,
   ) {}
+
+  /**
+   * Register a new SSE request with an abort controller
+   * This allows the request to be cancelled if the client disconnects
+   */
+  registerRequest(requestId: string, abortController: AbortController): void {
+    this.activeRequests.set(requestId, abortController);
+    this.logger.debug(`Request registered: ${requestId}`);
+  }
+
+  /**
+   * Check if a request is still active
+   */
+  isRequestActive(requestId: string): boolean {
+    return this.activeRequests.has(requestId);
+  }
+
+  /**
+   * Unregister a request when it completes or is aborted
+   */
+  unregisterRequest(requestId: string): void {
+    this.activeRequests.delete(requestId);
+    this.logger.debug(`Request unregistered: ${requestId}`);
+  }
+
+  /**
+   * Abort a specific request (called when client disconnects)
+   */
+  abortRequest(requestId: string): boolean {
+    const controller = this.activeRequests.get(requestId);
+    if (controller) {
+      controller.abort();
+      this.logger.log(`Request aborted by client: ${requestId}`);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Abort all active requests for a session
+   */
+  abortSessionRequests(sessionId: string): number {
+    let abortedCount = 0;
+    for (const [requestId, controller] of this.activeRequests.entries()) {
+      // Request IDs for existing sessions start with sessionId
+      // Request IDs for new sessions start with "new-"
+      if (requestId.startsWith(sessionId) || requestId.includes(sessionId)) {
+        if (!controller.signal.aborted) {
+          controller.abort();
+          this.logger.log(`Request aborted for session ${sessionId}: ${requestId}`);
+          abortedCount++;
+        }
+      }
+    }
+    return abortedCount;
+  }
 
   /**
    * Helper method to verify session exists and ownership
@@ -507,12 +565,14 @@ export class ChatService {
   /**
    * Stream message creation with real-time token streaming
    * Returns an async generator that yields tokens as they arrive
+   * Implements proper SSE behavior with abort handling
    */
   async *streamMessage(
     userId: string,
     sessionId: string,
     dto: CreateMessageDto,
-  ): AsyncGenerator<{ token: string; done: boolean; fullText?: string; messageId?: string; tokenUsage?: any }> {
+    requestId: string,
+  ): AsyncGenerator<{ token: string; done?: boolean; fullText?: string; messageId?: string; tokenUsage?: any; aborted?: boolean }> {
     // Validate that we have either content or images
     if ((!dto.content || dto.content.trim().length === 0) && (!dto.images || dto.images.length === 0)) {
       throw new BadRequestException('Message must have either content or images');
@@ -624,47 +684,112 @@ export class ChatService {
     let assistantMessageId: string | undefined;
     let finalFullText = '';
     let finalTokenUsage: any = null;
+    let isAborted = false;
+    
+    // Create AbortController for this stream and register BEFORE starting
+    const streamAbortController = new AbortController();
+    this.geminiChatService.registerStream(sessionId, streamAbortController);
 
     try {
-      // Stream tokens from Gemini
+      // Check if request was already aborted before starting stream
+      if (!this.isRequestActive(requestId)) {
+        this.logger.log(`Request ${requestId} already aborted before stream start`);
+        isAborted = true;
+        yield {
+          token: '',
+          done: false,
+          aborted: true,
+        };
+        return;
+      }
+
+      // Stream tokens from Gemini with abort signal
       for await (const chunk of this.geminiChatService.streamChatResponse(
         sessionId,
         prompt,
         messages,
         imageDataList.length > 0 ? imageDataList : undefined,
         contextSummary,
+        streamAbortController.signal,
       )) {
-        if (chunk.done) {
-          // Final chunk - create assistant message in database
-          finalFullText = chunk.fullText || '';
-          finalTokenUsage = chunk.tokenUsage;
-          
-          assistantMessageId = (await this.prisma.chatMessage.create({
-            data: {
-              sessionId,
-              role: MessageRole.assistant,
-              content: finalFullText,
-              model: 'gemini-2.5-flash',
-              promptTokens: finalTokenUsage?.promptTokens,
-              completionTokens: finalTokenUsage?.completionTokens,
-              totalTokens: finalTokenUsage?.totalTokens,
-            },
-          })).id;
-
-          // Update session updatedAt
-          await this.prisma.chatSession.update({
-            where: { id: sessionId },
-            data: { updatedAt: new Date() },
-          });
-
-          // Yield final chunk
+        // ⭐ CRITICAL: Check abort status at START of every iteration
+        if (!this.isRequestActive(requestId) || streamAbortController.signal.aborted) {
+          this.logger.log(`Request ${requestId} aborted during streaming`);
+          streamAbortController.abort();
+          isAborted = true;
           yield {
             token: '',
-            done: true,
-            fullText: finalFullText,
-            messageId: assistantMessageId,
-            tokenUsage: finalTokenUsage,
+            done: false,
+            aborted: true,
           };
+          return;
+        }
+
+        if (chunk.aborted) {
+          // Stream was aborted - don't save
+          this.logger.log(`Stream aborted for session ${sessionId}`);
+          isAborted = true;
+          yield {
+            token: '',
+            done: false,
+            aborted: true,
+          };
+          return;
+        }
+
+        if (chunk.done) {
+          // Final check before saving
+          if (!this.isRequestActive(requestId) || streamAbortController.signal.aborted) {
+            this.logger.log(`Request ${requestId} aborted before final save`);
+            isAborted = true;
+            yield {
+              token: '',
+              done: false,
+              aborted: true,
+            };
+            return;
+          }
+
+          // Only save final message if request was NOT aborted
+          if (!isAborted) {
+            finalFullText = chunk.fullText || '';
+            finalTokenUsage = chunk.tokenUsage;
+            
+            assistantMessageId = (await this.prisma.chatMessage.create({
+              data: {
+                sessionId,
+                role: MessageRole.assistant,
+                content: finalFullText,
+                model: 'gemini-2.5-flash',
+                promptTokens: finalTokenUsage?.promptTokens,
+                completionTokens: finalTokenUsage?.completionTokens,
+                totalTokens: finalTokenUsage?.totalTokens,
+              },
+            })).id;
+
+            // Update session updatedAt
+            await this.prisma.chatSession.update({
+              where: { id: sessionId },
+              data: { updatedAt: new Date() },
+            });
+
+            // Yield final chunk
+            yield {
+              token: '',
+              done: true,
+              fullText: finalFullText,
+              messageId: assistantMessageId,
+              tokenUsage: finalTokenUsage,
+            };
+          } else {
+            // Request was aborted - don't send done event
+            this.logger.log(`Aborted generation will not be stored for session ${sessionId}`);
+            yield {
+              token: '',
+              done: false,
+              aborted: true,
+            };
+          }
         } else {
           // Yield token chunk
           yield {
@@ -675,8 +800,34 @@ export class ChatService {
         }
       }
     } catch (error) {
+      // Check if this was an abort error
+      if (error?.name === 'AbortError' || streamAbortController.signal.aborted) {
+        this.logger.log(`Stream aborted for session ${sessionId}`);
+        isAborted = true;
+        yield {
+          token: '',
+          done: false,
+          aborted: true,
+        };
+        return;
+      }
       this.logger.error('Error streaming message:', error);
       throw error;
+    } finally {
+      // Clean up: unregister stream and clear cache
+      this.geminiChatService.unregisterStream(sessionId);
+      
+      // If stream was aborted and a message was created, delete it
+      if (isAborted && assistantMessageId) {
+        try {
+          await this.prisma.chatMessage.delete({
+            where: { id: assistantMessageId },
+          });
+          this.logger.log(`Deleted aborted assistant message ${assistantMessageId} from session ${sessionId}`);
+        } catch (deleteError) {
+          this.logger.warn(`Failed to delete aborted message ${assistantMessageId}:`, deleteError);
+        }
+      }
     }
   }
 
@@ -686,7 +837,8 @@ export class ChatService {
   async *streamMessageWithSession(
     userId: string,
     dto: CreateMessageDto,
-  ): AsyncGenerator<{ token: string; done: boolean; fullText?: string; sessionId?: string; messageId?: string; tokenUsage?: any }> {
+    requestId: string,
+  ): AsyncGenerator<{ token: string; done: boolean; fullText?: string; sessionId?: string; messageId?: string; tokenUsage?: any; aborted?: boolean }> {
     // Validate
     if ((!dto.content || dto.content.trim().length === 0) && (!dto.images || dto.images.length === 0)) {
       throw new BadRequestException('Message must have either content or images');
@@ -762,44 +914,110 @@ export class ChatService {
     let assistantMessageId: string | undefined;
     let finalFullText = '';
     let finalTokenUsage: any = null;
+    let isAborted = false;
+    
+    // Create AbortController for this stream and register BEFORE starting
+    const streamAbortController = new AbortController();
+    this.geminiChatService.registerStream(session.id, streamAbortController);
 
     try {
+      // Check if request was already aborted before starting stream
+      if (!this.isRequestActive(requestId)) {
+        this.logger.log(`Request ${requestId} already aborted before stream start`);
+        isAborted = true;
+        yield {
+          token: '',
+          done: false,
+          aborted: true,
+        };
+        return;
+      }
+
       for await (const chunk of this.geminiChatService.streamChatResponse(
         session.id,
         prompt,
         [],
         imageDataList.length > 0 ? imageDataList : undefined,
         null,
+        streamAbortController.signal,
       )) {
+        // Check abort status at START of every iteration
+        if (!this.isRequestActive(requestId) || streamAbortController.signal.aborted) {
+          this.logger.log(`Request ${requestId} aborted during streaming for new session`);
+          streamAbortController.abort();
+          isAborted = true;
+          yield {
+            token: '',
+            done: false,
+            aborted: true,
+          };
+          return;
+        }
+
+        if (chunk.aborted) {
+          // Stream was aborted - don't save
+          this.logger.log(`Stream aborted for new session ${session.id}`);
+          isAborted = true;
+          yield {
+            token: '',
+            done: false,
+            aborted: true,
+          };
+          return;
+        }
+
         if (chunk.done) {
+          // Final check before saving
+          if (!this.isRequestActive(requestId) || streamAbortController.signal.aborted) {
+            this.logger.log(`Request ${requestId} aborted before final save for new session`);
+            isAborted = true;
+            yield {
+              token: '',
+              done: false,
+              aborted: true,
+            };
+            return;
+          }
+
           finalFullText = chunk.fullText || '';
           finalTokenUsage = chunk.tokenUsage;
           
-          assistantMessageId = (await this.prisma.chatMessage.create({
-            data: {
+          // Only create message if NOT aborted
+          if (!isAborted) {
+            assistantMessageId = (await this.prisma.chatMessage.create({
+              data: {
+                sessionId: session.id,
+                role: MessageRole.assistant,
+                content: finalFullText,
+                model: 'gemini-2.5-flash',
+                promptTokens: finalTokenUsage?.promptTokens,
+                completionTokens: finalTokenUsage?.completionTokens,
+                totalTokens: finalTokenUsage?.totalTokens,
+              },
+            })).id;
+
+            await this.prisma.chatSession.update({
+              where: { id: session.id },
+              data: { updatedAt: new Date() },
+            });
+
+            yield {
+              token: '',
+              done: true,
+              fullText: finalFullText,
               sessionId: session.id,
-              role: MessageRole.assistant,
-              content: finalFullText,
-              model: 'gemini-2.5-flash',
-              promptTokens: finalTokenUsage?.promptTokens,
-              completionTokens: finalTokenUsage?.completionTokens,
-              totalTokens: finalTokenUsage?.totalTokens,
-            },
-          })).id;
-
-          await this.prisma.chatSession.update({
-            where: { id: session.id },
-            data: { updatedAt: new Date() },
-          });
-
-          yield {
-            token: '',
-            done: true,
-            fullText: finalFullText,
-            sessionId: session.id,
-            messageId: assistantMessageId,
-            tokenUsage: finalTokenUsage,
-          };
+              messageId: assistantMessageId,
+              tokenUsage: finalTokenUsage,
+            };
+          } else {
+            // Request was aborted - don't send done event
+            this.logger.log(`Aborted generation will not be stored for new session ${session.id}`);
+            yield {
+              token: '',
+              done: false,
+              aborted: true,
+            };
+          }
         } else {
           yield {
             token: chunk.token,
@@ -810,9 +1028,234 @@ export class ChatService {
         }
       }
     } catch (error) {
+      // Check if this was an abort error
+      if (error?.name === 'AbortError' || streamAbortController.signal.aborted) {
+        this.logger.log(`Stream aborted for new session ${session.id}`);
+        isAborted = true;
+        yield {
+          token: '',
+          done: false,
+          aborted: true,
+        };
+        return;
+      }
       this.logger.error('Error streaming message with session:', error);
       throw error;
+    } finally {
+      // Clean up: unregister stream
+      this.geminiChatService.unregisterStream(session.id);
+      
+      // If stream was aborted and a message was created, delete it
+      if (isAborted && assistantMessageId) {
+        try {
+          await this.prisma.chatMessage.delete({
+            where: { id: assistantMessageId },
+          });
+          this.logger.log(`Deleted aborted assistant message ${assistantMessageId} from new session ${session.id}`);
+        } catch (deleteError) {
+          this.logger.warn(`Failed to delete aborted message ${assistantMessageId}:`, deleteError);
+        }
+      }
     }
+  }
+
+  /**
+   * Delete incomplete assistant messages (those with empty or no content)
+   * Called when a stream is stopped to clean up partial responses
+   */
+  /**
+   * Stop an active stream for a session
+   * This aborts the stream immediately without throwing if no stream is active
+   */
+  async stopStream(userId: string, sessionId: string) {
+    try {
+      // Verify session belongs to user
+      await this.verifySessionAccess(userId, sessionId);
+      
+      // Abort the Gemini stream FIRST (most important for stopping token usage)
+      const geminiAborted = this.geminiChatService.abortStream(sessionId);
+      
+      // Then abort any active requests for this session (request-based tracking)
+      const requestsAborted = this.abortSessionRequests(sessionId);
+      
+      const wasStreaming = requestsAborted > 0 || geminiAborted;
+      
+      // Clean up any recent assistant messages that might be from aborted streams
+      // Only delete messages from the last 60 seconds to avoid deleting legitimate messages
+      if (wasStreaming) {
+        try {
+          const recentMessages = await this.prisma.chatMessage.findMany({
+            where: {
+              sessionId,
+              role: MessageRole.assistant,
+              createdAt: {
+                gte: new Date(Date.now() - 60000), // Last 60 seconds
+              },
+            },
+            orderBy: {
+              createdAt: 'desc',
+            },
+            take: 1,
+          });
+
+          if (recentMessages.length > 0) {
+            await this.prisma.chatMessage.delete({
+              where: { id: recentMessages[0].id },
+            });
+            this.logger.log(
+              `Deleted orphaned message ${recentMessages[0].id} from stopped stream in session ${sessionId}`,
+            );
+          }
+        } catch (cleanupError) {
+          this.logger.warn(
+            `Failed to clean up orphaned messages for session ${sessionId}:`,
+            cleanupError,
+          );
+        }
+      }
+      
+      this.logger.log(`Stop stream called for session ${sessionId}, requests aborted: ${requestsAborted}, gemini aborted: ${geminiAborted}`);
+      
+      return {
+        requestsAborted,
+        geminiAborted,
+        message: wasStreaming ? 'Stream aborted' : 'No active stream',
+      };
+    } catch (error) {
+      this.logger.error(`Error stopping stream for session ${sessionId}:`, error);
+      throw error;
+    }
+  }
+
+  async deleteIncompleteMessages(userId: string, sessionId: string) {
+    try {
+      // Verify session belongs to user
+      const session = await this.verifySessionAccess(userId, sessionId);
+      
+      // First, abort any active stream for this session
+      const wasStreaming = this.geminiChatService.abortStream(sessionId);
+      if (wasStreaming) {
+        // Wait a bit for the stream to fully abort
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+      this.logger.debug(`Cleaning up incomplete messages for session ${sessionId}`);
+      
+      // Find and delete assistant messages with empty or null content
+      const deletedMessages = await this.prisma.chatMessage.deleteMany({
+        where: {
+          sessionId,
+          role: MessageRole.assistant,
+          OR: [
+            { content: '' },
+            { content: null },
+          ],
+        },
+      });
+      
+      this.logger.log(`Deleted ${deletedMessages.count} incomplete messages for session ${sessionId}`);
+      
+      return {
+        message: `Successfully deleted ${deletedMessages.count} incomplete messages`,
+        count: deletedMessages.count,
+        streamAborted: wasStreaming,
+      };
+    } catch (error) {
+      this.logger.error(`Error deleting incomplete messages for session ${sessionId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Edit a user message and delete all subsequent messages
+   */
+  async editMessage(
+    userId: string,
+    sessionId: string,
+    messageId: string,
+    newContent: string,
+  ): Promise<ChatMessage> {
+    // Verify session belongs to user
+    await this.verifySessionAccess(userId, sessionId);
+
+    // Get the message to edit
+    const messageToEdit = await this.prisma.chatMessage.findUnique({
+      where: { id: messageId },
+      include: { attachments: true },
+    });
+
+    if (!messageToEdit) {
+      throw new NotFoundException('Message not found');
+    }
+
+    if (messageToEdit.sessionId !== sessionId) {
+      throw new ForbiddenException('Message does not belong to this session');
+    }
+
+    if (messageToEdit.role !== MessageRole.user) {
+      throw new BadRequestException('Can only edit user messages');
+    }
+
+    // Update the message content
+    const updatedMessage = await this.prisma.chatMessage.update({
+      where: { id: messageId },
+      data: {
+        content: newContent,
+      },
+      include: {
+        attachments: true,
+      },
+    });
+
+    // Delete all messages that came after this one
+    await this.prisma.chatMessage.deleteMany({
+      where: {
+        sessionId,
+        createdAt: {
+          gt: messageToEdit.createdAt,
+        },
+      },
+    });
+
+    // Update session timestamp
+    await this.prisma.chatSession.update({
+      where: { id: sessionId },
+      data: { updatedAt: new Date() },
+    });
+
+    this.logger.log(`Message ${messageId} edited and subsequent messages deleted`);
+
+    return this.mapPrismaMessageToDTO(updatedMessage);
+  }
+
+  /**
+   * Map a Prisma ChatMessage record to a plain DTO expected by the API
+   */
+  private mapPrismaMessageToDTO(message: any) {
+    if (!message) return null;
+
+    return {
+      id: message.id,
+      sessionId: message.sessionId,
+      role: message.role,
+      content: message.content,
+      model: message.model || null,
+      promptTokens: message.promptTokens || null,
+      completionTokens: message.completionTokens || null,
+      cachedTokens: message.cachedTokens || null,
+      totalTokens: message.totalTokens || null,
+      feedbackRating: message.feedbackRating || null,
+      feedbackComment: message.feedbackComment || null,
+      createdAt: message.createdAt,
+      attachments: (message.attachments || []).map((a: any) => ({
+        id: a.id,
+        attachmentType: a.attachmentType,
+        fileUrl: a.fileUrl,
+        fileName: a.fileName || null,
+        metadata: a.metadata || null,
+        createdAt: a.createdAt,
+      })),
+    };
   }
 
   async deleteMessage(userId: string, sessionId: string, messageId: string) {
