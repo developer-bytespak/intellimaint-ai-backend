@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import orchestrator, vision, rag, asr_tts, doc_extract
+from .routes import orchestrator, vision, rag, asr_tts, doc_extract, stream
 
 app = FastAPI(
     title="IntelliMaint AI Service",
@@ -43,20 +43,24 @@ app.include_router(
 )
 
 app.include_router(
+    stream.router,
+    prefix="/api/v1",
+    tags=["stream"]
+)
+
+app.include_router(
     doc_extract.router,
     prefix="/api/v1/extract",
     tags=["doc_extract"]
 )
+
+
 # app.include_router(
 #     voice_agent.router,
 #     prefix="/api/v1/upload_audio",
 #     tags=["voice_agent"]
 # )
-# app.include_router(
-#     stream.router,
-#     prefix="/api/v1",
-#     tags=["stream"]
-# )
+
 
 @app.get("/")
 async def root():
