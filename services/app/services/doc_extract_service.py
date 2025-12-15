@@ -1,5 +1,5 @@
 import os
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional, Callable
 
 import fitz  # PyMuPDF
 import pdfplumber
@@ -65,10 +65,17 @@ class DocumentService:
     # ------------------------------------
     
     @staticmethod
-    def extract_text_with_image_markers(file_path: str, output_dir: str) -> Tuple[str, List[str]]:
+    def extract_text_with_image_markers(
+        file_path: str, 
+        output_dir: str,
+        progress_callback: Optional[Callable[[int, int], None]] = None
+    ) -> Tuple[str, List[str]]:
         """
         Extract text in reading order, skip table-like blocks,
         avoid duplicate text blocks, and save images with markers.
+        
+        Args:
+            progress_callback: Optional callback function(current_page, total_pages) to track progress
         """
 
         full_text = ""
@@ -79,6 +86,12 @@ class DocumentService:
         image_seen = {}          # Prevent duplicate image extraction
 
         with fitz.open(file_path) as pdf:
+            total_pages = len(pdf)
+            
+            # Call progress callback at start
+            if progress_callback:
+                progress_callback(0, total_pages)
+            
             for page_index, page in enumerate(pdf):
                 blocks = page.get_text("dict")["blocks"]
                 page_num = page_index + 1
@@ -157,7 +170,7 @@ class DocumentService:
 
                     # If image already extracted → reuse same number
                     if xref in image_seen:
-                        page_output_lines.append(f"IMAGE:{image_seen[xref]}")
+                        page_output_lines.append(f"[IMAGE:{image_seen[xref]}]")
                         page_output_lines.append("")
                         continue
 
@@ -168,14 +181,14 @@ class DocumentService:
                         continue
 
                     try:
-                        # FIX: Safe handling when pix.colorspace is None
+                        # Safe handling when pix.colorspace is None
                         if pix.colorspace is None:
                             try:
                                 pix = fitz.Pixmap(fitz.csRGB, pix)
                             except:
                                 continue  # skip images we can't convert
 
-                        # FIX: Convert CMYK, Indexed, Alpha → RGB
+                        # Convert CMYK, Indexed, Alpha → RGB
                         elif pix.colorspace and (pix.colorspace.n not in (1, 3) or pix.alpha):
                             try:
                                 pix = pix.copy(colorspace=fitz.csRGB, alpha=False)
@@ -189,7 +202,8 @@ class DocumentService:
                         image_files.append(img_path)
                         image_seen[xref] = image_counter
 
-                        page_output_lines.append(f"IMAGE:{image_counter}")
+                        # Use compact marker form
+                        page_output_lines.append(f"[IMAGE:{image_counter}]")
                         page_output_lines.append("")
 
                         image_counter += 1
@@ -198,9 +212,13 @@ class DocumentService:
                         pix = None
 
                 # -------------------------
-                # SAVE PAGE OUTPUT
+                # NORMALIZE PAGE OUTPUT
                 # -------------------------
                 full_text += "\n".join(page_output_lines) + "\n\n"
+                
+                # Update progress after each page
+                if progress_callback:
+                    progress_callback(page_num, total_pages)
 
         return full_text, image_files
 
@@ -210,11 +228,24 @@ class DocumentService:
     # Extract Tables
     # ------------------------------------
     @staticmethod
-    def extract_and_format_tables_from_pdf(file_path: str) -> List[Dict]:
-        """Extract tables using pdfplumber."""
+    def extract_and_format_tables_from_pdf(
+        file_path: str,
+        progress_callback: Optional[Callable[[int, int], None]] = None
+    ) -> List[Dict]:
+        """Extract tables using pdfplumber.
+        
+        Args:
+            progress_callback: Optional callback function(current_page, total_pages) to track progress
+        """
         output: List[Dict] = []
 
         with pdfplumber.open(file_path) as pdf:
+            total_pages = len(pdf.pages)
+            
+            # Call progress callback at start
+            if progress_callback:
+                progress_callback(0, total_pages)
+            
             for page_index, page in enumerate(pdf.pages, start=1):
                 tables = page.extract_tables()
 
@@ -234,6 +265,10 @@ class DocumentService:
                         "columns": list(df.columns),
                         "rows": df.values.tolist(),
                     })
+                
+                # Update progress after each page
+                if progress_callback:
+                    progress_callback(page_index, total_pages)
 
         return output
 
@@ -243,11 +278,21 @@ class DocumentService:
     @staticmethod
     def upload_images_to_supabase(
         image_paths: List[str],
-        bucket_name: str = "pics"
+        bucket_name: str = "pics",
+        progress_callback: Optional[Callable[[int, int], None]] = None
     ) -> List[Dict[str, str]]:
-        """Upload images to Supabase storage."""
+        """Upload images to Supabase storage.
+        
+        Args:
+            progress_callback: Optional callback function(current_image, total_images) to track progress
+        """
         db = get_db()
         uploaded: List[Dict[str, str]] = []
+        total_images = len(image_paths)
+        
+        # Call progress callback at start
+        if progress_callback:
+            progress_callback(0, total_images)
 
         for idx, img_path in enumerate(image_paths, start=1):
             file_name = os.path.basename(img_path)
@@ -278,6 +323,10 @@ class DocumentService:
                     "filename": file_name,
                     "error": str(e),
                 })
+            
+            # Update progress after each image upload
+            if progress_callback:
+                progress_callback(idx, total_images)
 
         return uploaded
 
@@ -286,11 +335,19 @@ class DocumentService:
     # ------------------------------------
     @staticmethod
     def replace_placeholders_with_urls(text: str, images: List[Dict]) -> str:
-        """Replace IMAGE:n markers with formatted image references."""
+        """
+        Replace IMAGE:n and [IMAGE:n] markers with a readable block including URL.
+        Accepts both formats to remain backward compatible.
+        """
+        # Replace both 'IMAGE:3' and '[IMAGE:3]' tokens
         for img in images:
-            marker = f"IMAGE:{img['image_number']}"
+            # accept either format when searching
+            marker_plain = f"IMAGE:{img['image_number']}"
+            marker_bracket = f"[IMAGE:{img['image_number']}]"
             replacement = f"\nimage: {img['image_number']}\nurl: {img['url']}\n"
-            text = text.replace(marker, replacement)
+            # Prefer replacing bracketed first, then plain
+            text = text.replace(marker_bracket, replacement)
+            text = text.replace(marker_plain, replacement)
         return text
 
     # ------------------------------------
@@ -382,3 +439,90 @@ class DocumentService:
             "deleted": deleted,
             "failed": failed,
         }
+
+    # ------------------------------------
+    # Normalize page lines
+    # ------------------------------------
+    @staticmethod
+    def normalize_page_lines(lines: List[str]) -> List[str]:
+        """
+        Normalize page output lines:
+        - Remove '# Page N' lines
+        - Collapse sequences of short lines into a single paragraph
+        - Preserve heading lines (starting with '#')
+        - Normalize image markers to '[IMAGE:n]'
+        - Preserve '[TABLE_PLACEHOLDER]'
+        """
+        out: List[str] = []
+        buffer: List[str] = []
+
+        def flush_buffer():
+            nonlocal buffer
+            if buffer:
+                joined = " ".join(l for l in buffer if l)
+                if joined.strip():
+                    out.append(joined.strip())
+                buffer = []
+
+        for raw in lines:
+            line = raw.strip()
+
+            # Skip page markers
+            if re.match(r'^#\s*Page\s+\d+', line, re.IGNORECASE):
+                flush_buffer()
+                continue
+
+            # Heading lines: flush buffer, keep heading as a line
+            if line.startswith("#"):
+                flush_buffer()
+                out.append(line)
+                continue
+
+            # Table placeholder: flush and keep
+            if line.startswith("[TABLE_PLACEHOLDER]"):
+                flush_buffer()
+                out.append("[TABLE_PLACEHOLDER]")
+                continue
+
+            # Normalize image markers (either "IMAGE:1" or "[IMAGE:1]" -> "[IMAGE:1]")
+            m = re.match(r'^\[?IMAGE:?\s*([0-9]+)\]?$', line, re.IGNORECASE)
+            if m:
+                flush_buffer()
+                out.append(f"[IMAGE:{int(m.group(1))}]")
+                continue
+
+            # Blank line: flush buffer and preserve a single blank
+            if line == "":
+                flush_buffer()
+                out.append("")
+                continue
+
+            # Short-line accumulation heuristic
+            words = line.split()
+            if len(words) <= 6:
+                # accumulate short lines; likely soft-wrapped
+                buffer.append(line)
+            else:
+                # longer lines: attach to buffer if any, otherwise emit directly
+                if buffer:
+                    buffer.append(line)
+                    flush_buffer()
+                else:
+                    out.append(line)
+
+        # flush remaining
+        flush_buffer()
+
+        # Collapse multiple blank lines into single blank
+        final: List[str] = []
+        prev_blank = False
+        for l in out:
+            if l == "":
+                if not prev_blank:
+                    final.append("")
+                    prev_blank = True
+            else:
+                final.append(l)
+                prev_blank = False
+
+        return final

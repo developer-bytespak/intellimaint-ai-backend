@@ -8,8 +8,6 @@ let redis: Redis;
 
 
 redis = new Redis(appConfig.redisUrl, {
-    username: "default",
-    password: appConfig.redisPassword || "",
     retryStrategy: (times) => {
         if (times > 3) {
             console.error('Redis connection failed after 3 attempts.');

@@ -76,7 +76,7 @@
               appConfig.jwtSecret as string,
               { expiresIn: '1h' }
             );
-            console.log("newAccessToken ==>", newAccessToken);
+            // console.log("newAccessToken ==>", newAccessToken);
 
             // Generate new refresh token (7 days expiry)
             const newRefreshToken = jwt.sign(
