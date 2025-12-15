@@ -137,6 +137,7 @@ def call_chunk_api(api_base: str, source_id: str, dry_run: bool = True, overwrit
 def main(argv: List[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run chunking API for a family of equipment models")
     parser.add_argument("--family", type=str, help="equipment_family id (overrides script constant)")
+    parser.add_argument("--source-id", type=str, help="Process a single knowledge_source id (skips family lookup)")
     parser.add_argument("--db-url", type=str, default=DEFAULT_DB_URL, help="Postgres DSN (or set DATABASE_URL)")
     parser.add_argument("--api-url", type=str, default=API_URL, help="Base API URL")
     parser.add_argument("--dry-run", dest="dry_run", action="store_true", help="Run dry-run (no DB writes)")
@@ -147,22 +148,28 @@ def main(argv: List[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     family_id = args.family or os.environ.get("FAMILY_ID") or FAMILY_ID
-    if not family_id or family_id == "PUT_FAMILY_ID_HERE":
-        logger.error("FAMILY_ID must be provided via --family, env FAMILY_ID, or by editing the script constant.")
-        return 2
 
-    if not args.db_url:
-        logger.error("DATABASE_URL must be set in the environment or passed with --db-url")
-        return 2
+    # If a single source id is provided, skip family/model lookup
+    if args.source_id:
+        source_ids = [args.source_id]
+        logger.info("Using single source_id override: %s", args.source_id)
+    else:
+        if not family_id or family_id == "PUT_FAMILY_ID_HERE":
+            logger.error("FAMILY_ID must be provided via --family, env FAMILY_ID, or by editing the script constant.")
+            return 2
 
-    logger.info("Running chunking for family=%s dry_run=%s overwrite=%s", family_id, args.dry_run, args.overwrite)
+        if not args.db_url:
+            logger.error("DATABASE_URL must be set in the environment or passed with --db-url")
+            return 2
 
-    # Lookup models -> sources
-    model_ids = get_model_ids_for_family(args.db_url, family_id)
-    logger.info("Found %d models for family %s", len(model_ids), family_id)
+        logger.info("Running chunking for family=%s dry_run=%s overwrite=%s", family_id, args.dry_run, args.overwrite)
 
-    source_ids = get_source_ids_for_models(args.db_url, model_ids)
-    logger.info("Found %d knowledge sources for family %s", len(source_ids), family_id)
+        # Lookup models -> sources
+        model_ids = get_model_ids_for_family(args.db_url, family_id)
+        logger.info("Found %d models for family %s", len(model_ids), family_id)
+
+        source_ids = get_source_ids_for_models(args.db_url, model_ids)
+        logger.info("Found %d knowledge sources for family %s", len(source_ids), family_id)
 
     failed = []
     success = 0
