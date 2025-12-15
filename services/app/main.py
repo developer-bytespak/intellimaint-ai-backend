@@ -13,14 +13,24 @@ app = FastAPI(
 import os
 
 # Get allowed origins from environment variable
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3001").split(",")
+# Format: comma-separated URLs, e.g., "https://app1.com,https://app2.com"
+allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "http://localhost:3001,http://localhost:3000")
+allowed_origins = [origin.strip() for origin in allowed_origins_str.split(",")]
+
+# Add production frontend if not already in the list
+production_frontend = "https://intellimaint-ai.vercel.app"
+if production_frontend not in allowed_origins:
+    allowed_origins.append(production_frontend)
+
+print(f"CORS enabled for origins: {allowed_origins}")
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 # Include all routers with appropriate prefixes
 app.include_router(

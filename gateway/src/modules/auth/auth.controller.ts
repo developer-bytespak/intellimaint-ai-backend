@@ -451,16 +451,6 @@ export class AuthController {
       lastName: body.lastName,
       company: body.company,
     });
-    // Map custom input to RegisterDto
-    const registerDto = plainToInstance(RegisterDto, {
-      email: body.email,
-      password: body.password,
-      confirmPassword: body.confirmPassword,
-      role: body.role,
-      firstName: body.firstName,
-      lastName: body.lastName,
-      company: body.company,
-    });
 
     // Validate the DTO manually
     const errors = await validate(registerDto);
