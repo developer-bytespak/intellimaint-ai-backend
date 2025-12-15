@@ -7,52 +7,35 @@ from .routes import orchestrator, vision, rag, asr_tts, doc_extract, stream
 app = FastAPI(
     title="IntelliMaint AI Service",
     description="Combined AI service for vision, RAG, ASR/TTS, and orchestration",
-    version="1.0.0"
+    version="1.0.0",
 )
+
+import os
+
+# Get allowed origins from environment variable
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3001").split(",")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3001"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 # Include all routers with appropriate prefixes
 app.include_router(
-    orchestrator.router,
-    prefix="/api/v1/orchestrate",
-    tags=["orchestrator"]
+    orchestrator.router, prefix="/api/v1/orchestrate", tags=["orchestrator"]
 )
 
-app.include_router(
-    vision.router,
-    prefix="/api/v1/vision",
-    tags=["vision"]
-)
+app.include_router(vision.router, prefix="/api/v1/vision", tags=["vision"])
 
-app.include_router(
-    rag.router,
-    prefix="/api/v1/rag",
-    tags=["rag"]
-)
+app.include_router(rag.router, prefix="/api/v1/rag", tags=["rag"])
 
-app.include_router(
-    asr_tts.router,
-    prefix="/api/v1/asr",
-    tags=["asr-tts"]
-)
+app.include_router(asr_tts.router, prefix="/api/v1/asr", tags=["asr-tts"])
 
-app.include_router(
-    stream.router,
-    prefix="/api/v1",
-    tags=["stream"]
-)
+app.include_router(stream.router, prefix="/api/v1", tags=["stream"])
 
-app.include_router(
-    doc_extract.router,
-    prefix="/api/v1/extract",
-    tags=["doc_extract"]
-)
+app.include_router(doc_extract.router, prefix="/api/v1/extract", tags=["doc_extract"])
 
 
 # app.include_router(
@@ -68,11 +51,11 @@ async def root():
     return {
         "status": "healthy",
         "service": "IntelliMaint AI Service",
-        "version": "1.0.0"
+        "version": "1.0.0",
     }
+
 
 @app.get("/health")
 async def health():
     """Health check endpoint"""
     return {"status": "healthy"}
-
