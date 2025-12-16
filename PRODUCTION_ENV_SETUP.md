@@ -134,6 +134,7 @@ Open your browser console on `https://intellimaint-ai.vercel.app` and check:
 
 - [ ] Updated `services/app/main.py` with CORS fix
 - [ ] Updated `gateway/src/main.ts` with CORS fix
+- [ ] **Fixed** `services/app/shared/config.py` - API keys now masked in logs
 - [ ] Set `ALLOWED_ORIGINS` on Railway
 - [ ] Set `FRONTEND_URL` on Render
 - [ ] Pushed code changes to repository
@@ -141,6 +142,7 @@ Open your browser console on `https://intellimaint-ai.vercel.app` and check:
 - [ ] Render auto-deployed successfully
 - [ ] Tested frontend - no CORS errors
 - [ ] WebSocket streaming works
+- [ ] API keys are NOT visible in production logs
 
 ---
 

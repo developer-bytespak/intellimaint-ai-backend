@@ -14,7 +14,9 @@ import os
 
 # Get allowed origins from environment variable
 # Format: comma-separated URLs, e.g., "https://app1.com,https://app2.com"
-allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "http://localhost:3001,http://localhost:3000")
+allowed_origins_str = os.getenv(
+    "ALLOWED_ORIGINS", "http://localhost:3001,http://localhost:3000"
+)
 allowed_origins = [origin.strip() for origin in allowed_origins_str.split(",")]
 
 # Add production frontend if not already in the list
