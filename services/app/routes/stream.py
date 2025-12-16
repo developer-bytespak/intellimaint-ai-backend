@@ -1,92 +1,84 @@
-# from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
-# from app.services.stream_service import StreamService
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from app.services.stream_service import StreamService
+import traceback
 
-# router = APIRouter()
+router = APIRouter()
 
-# @router.websocket("/stream")
-# async def websocket_endpoint(
-#     websocket: WebSocket,
-#     format: str = Query(default="audio/webm", description="Audio format (audio/webm, audio/wav, audio/opus, audio/mp3)")
-# ):
-#     await websocket.accept()
+DEBUG = True  # Set to False in production
 
-#     # Format ko query param se le kar service ko pass karo
-#     service = StreamService(default_format=format)
+@router.websocket("/stream")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    service = StreamService()
     
-#     # Agar format explicitly set ho, to service ko inform karo
-#     if format:
-#         service.set_audio_format(format)
-#         print(f"[WebSocket] Connection accepted with format: {format}")
+    if DEBUG:
+        print("\n" + "="*50)
+        print("[WebSocket] ✅ Connection accepted")
+        print("="*50 + "\n")
 
-#     # Response callback function define karo jo silence detect hone par response send kare
-#     async def send_response(response):
-#         """Response send karne ka callback function"""
-#         if isinstance(response, bytes):
-#             await websocket.send_bytes(response)
-#         else:
-#             await websocket.send_text(str(response))
-    
-#     # Silence checker start karo with callback
-#     service.start_silence_checker(response_callback=send_response)
+    try:
+        while True:
+            if DEBUG:
+                print("[WebSocket] ⏳ Waiting for data...")
+            
+            data = await websocket.receive()
+            
+            if DEBUG:
+                print(f"[WebSocket] 📨 RECEIVED → Keys: {list(data.keys())}")
+                
+                # Log data sizes
+                if "bytes" in data:
+                    print(f"[WebSocket] 📦 Audio bytes: {len(data['bytes'])} bytes")
+                if "text" in data:
+                    print(f"[WebSocket] 📝 Text message: {data['text'][:100]}")
 
-#     try:
-#         while True:
-#             try:
-#                 data = await websocket.receive()
+            # ✅ Process incoming data
+            response = await service.handle_stream(data)
 
-#                 response = await service.handle_stream(data)
+            # ✅ Send response if generated
+            if response is not None:
+                if isinstance(response, bytes):
+                    if DEBUG:
+                        print(f"[WebSocket] 📤 Sending AUDIO → {len(response)} bytes")
+                    await websocket.send_bytes(response)
+                    if DEBUG:
+                        print("[WebSocket] ✅ Audio sent successfully")
+                        
+                else:
+                    if DEBUG:
+                        print(f"[WebSocket] 📤 Sending TEXT → {response}")
+                    await websocket.send_text(str(response))
+                    if DEBUG:
+                        print("[WebSocket] ✅ Text sent successfully")
 
-#                 # agar service ne koi response bhejne ko kaha ho
-#                 if response is not None:
-#                     # Check if response is bytes (audio) or string (text)
-#                     if isinstance(response, bytes):
-#                         # Audio response ko binary format mein bhejo
-#                         await websocket.send_bytes(response)
-#                     else:
-#                         # Text response ko text format mein bhejo
-#                         await websocket.send_text(str(response))
+    except WebSocketDisconnect:
+        if DEBUG:
+            print("\n" + "="*50)
+            print("[WebSocket] 🔌 Client disconnected gracefully")
+            print("="*50 + "\n")
 
-#             except WebSocketDisconnect:
-#                 print("Client disconnected")
-#                 break
+    except Exception as e:
+        print("\n" + "="*50)
+        print("[WebSocket] ❌ ERROR occurred:")
+        print(f"Error type: {type(e).__name__}")
+        print(f"Error message: {str(e)}")
+        print("\nFull traceback:")
+        print(traceback.format_exc())
+        print("="*50 + "\n")
+        
+        # ✅ Try to send error message to client
+        try:
+            error_msg = {
+                "type": "error",
+                "message": str(e),
+                "error_type": type(e).__name__
+            }
+            await websocket.send_text(str(error_msg))
+        except:
+            pass  # Client might already be disconnected
 
-#             except Exception as e:
-#                 print(f"Error: {e}")
-#                 await websocket.close(code=1000)
-#                 break
-#     finally:
-#         # Cleanup: silence checker task ko stop karo
-#         service.stop_silence_checker()
-
-
-# # from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-# # from app.services.stream_service import StreamService
-
-# # router = APIRouter()
-
-# # @router.websocket("/stream")
-# # async def websocket_endpoint(websocket: WebSocket):
-# #     await websocket.accept()
-
-# #     service = StreamService()   # service ka object
-
-# #     while True:
-# #         try:
-# #             data = await websocket.receive()  # WebSocket se data receive karna
-
-# #             response = await service.handle_stream(data)  # Audio chunk process karna
-
-# #             if response is not None:
-# #                 # Audio response ko binary format mein bhejo
-# #                 print(f"Sending AUDIO response: {len(response)} bytes")
-# #                 await websocket.send_bytes(response)
-
-# #         except WebSocketDisconnect:
-# #             print("Client disconnected")
-# #             break
-
-# #         except Exception as e:
-# #             print(f"Error: {e}")
-# #             await websocket.close(code=1000)
-# #             break
-
+    finally:
+        if DEBUG:
+            print("\n" + "="*50)
+            print("[WebSocket] 🏁 Connection closed - cleanup complete")
+            print("="*50 + "\n")

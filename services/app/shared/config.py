@@ -12,6 +12,7 @@ else:
     # Try loading from current directory or parent directories
     load_dotenv()
 
+
 class Settings:
     def __init__(self):
         self.environment = os.getenv("ENVIRONMENT", "development")
@@ -19,9 +20,13 @@ class Settings:
         self.database_url = os.getenv("DATABASE_URL")
         self.redis_url = os.getenv("REDIS_URL")
         self.deepgram_api_key = os.getenv("DEEPGRAM_API_KEY")
-        print(f"Deepgram API Key: {self.deepgram_api_key}")  # Debugging line
+        # Security: Never log API keys
+        if self.deepgram_api_key:
+            print(f"Deepgram API Key: {'*' * 8}{self.deepgram_api_key[-4:]}")
+        else:
+            print("Warning: DEEPGRAM_API_KEY not set")
+
 
 @lru_cache()
 def get_settings():
     return Settings()
-

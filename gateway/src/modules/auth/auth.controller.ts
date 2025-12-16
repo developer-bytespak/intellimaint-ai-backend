@@ -1,18 +1,5 @@
-
-
-// import { Controller, Get, UseGuards, Req, UnauthorizedException, Post, Res, Next, Body } from '@nestjs/common';
-// import { AuthGuard } from '@nestjs/passport';
+// import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 // import { AuthService } from './auth.service';
-// import type { Response, Request } from 'express';
-// import { JwtAuthGuard } from './jwt-auth.guard';
-// import { nestError, nestResponse } from 'src/common/helpers/responseHelpers';
-// import { GoogleAuthGuard } from './google-auth.guard';
-// import { RegisterDto } from './dto/login.dto';
-// import { plainToInstance } from 'class-transformer';
-// import { validate } from 'class-validator';
-// import { redisDeleteKey } from 'src/common/lib/redis';
-
-// // AuthController;
 
 // @Controller('auth')
 // export class AuthController {
@@ -216,49 +203,25 @@
 
 //     return this.authService.register(registerDto, res as any);
 //   }
-
-//   // Verify OTP
-//   // This is the function that is called when the user clicks the Verify OTP button
-//   @Post('verify-otp')
-//   async verifyOtp(@Body() body: any, @Res({ passthrough: true }) res: Response) {
-//     return this.authService.verifyOtp(body, res as any);
-//   }
-
-//   // Resend OTP
-//   // This is the function that is called when the user clicks the Resend OTP button
-
-//   @Post('resend-otp')
-//   async resendOtp(@Body() body: any, @Res({ passthrough: true }) res: Response) {
-//     return this.authService.resendOtp(body, res as any);
-//   }
-
-//   // Login
-//   @Post('login')
-//   async login(@Body() body: any, @Res({ passthrough: true }) res: Response) {
-//     console.log("login called successfully", body);
-//     return  this.authService.login(body, res as any);
-    
-//   }
-
-//   // Forgot Password
-//   // This is the endpoint that is called when the user clicks the Forgot Password button
-//   @Post('forgot-password')
-//   async forgotPassword(@Body() body: any, @Res({ passthrough: true }) res: Response) {
-//     return this.authService.forgotPassword(body, res as any);
-//   }
-
-//   // reset password
-//   // This is the endpoint that is called when the user clicks the Reset Password button
-//   @Post('reset-password')
-//   async resetPassword(@Body() body: any, @Res({ passthrough: true }) res: Response) {
-//     return this.authService.resetPassword(body, res as any);
-//   }
-
-
-
-
 // }
-import { Controller, Get, UseGuards, Req, UnauthorizedException, Post, Res, Next, Body } from '@nestjs/common';
+
+/* eslint-disable @typescript-eslint/no-unsafe-assignment,
+                  @typescript-eslint/no-unsafe-member-access,
+                  @typescript-eslint/no-unsafe-call,
+                  @typescript-eslint/no-unsafe-return,
+                  @typescript-eslint/no-unsafe-argument */
+
+import {
+  Controller,
+  Get,
+  UseGuards,
+  Req,
+  UnauthorizedException,
+  Post,
+  Res,
+  Next,
+  Body,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import type { Response, Request } from 'express';
@@ -272,7 +235,7 @@ import { redisDeleteKey } from 'src/common/lib/redis';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   // Google Login
   @Get('google')
@@ -281,7 +244,7 @@ export class AuthController {
     const localToken = req.cookies?.local_access;
     const role = (req as any).query.role as string;
     const company = (req as any).query.company as string;
-    
+
     // If user already has a valid token, redirect to chat
     if (googleToken || localToken) {
       try {
@@ -302,7 +265,8 @@ export class AuthController {
         });
       }
     }
-    const passportInstance = (req as any)._passport?.instance || require('passport');
+    const passportInstance =
+      (req as any)._passport?.instance || require('passport');
 
     return passportInstance.authenticate('google', {
       scope: ['email', 'profile'],
@@ -314,7 +278,7 @@ export class AuthController {
 
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
-    async googleRedirect(@Req() req, @Res({ passthrough: true }) res: Response) {
+  async googleRedirect(@Req() req, @Res({ passthrough: true }) res: Response) {
     try {
       let { role, company } = JSON.parse(req.query.state as string);
       // console.log("role", role);
@@ -322,36 +286,54 @@ export class AuthController {
 
       const email = req.user.email;
 
-      if(role === ""){
+      if (role === '') {
         const existingUser = await this.authService.checkUserEmail(email);
-        if(!existingUser){
-          return res.redirect(`${process.env.FRONTEND_URL}/callback?error=No user found with this email`);
+        if (!existingUser) {
+          return res.redirect(
+            `${process.env.FRONTEND_URL}/callback?error=No user found with this email`,
+          );
         }
-  
+
         role = existingUser.role;
       }
-      console.log("role", role);
+      console.log('role', role);
 
       if (email.endsWith('.com')) {
         if (role !== 'civilian') {
-          return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
+          return res.redirect(
+            `${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`,
+          );
         }
       } else if (email.endsWith('.edu')) {
         if (role !== 'student') {
-          return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
+          return res.redirect(
+            `${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`,
+          );
         }
       } else if (email.endsWith('.mil')) {
         if (role !== 'military') {
-          return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
+          return res.redirect(
+            `${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`,
+          );
         }
       } else {
-        return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
+        return res.redirect(
+          `${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`,
+        );
       }
 
+      const authResult = await this.authService.googleLogin(
+        req.user,
+        role,
+        company,
+        res as any,
+      );
+      const { accessToken, isNewUser, user } = authResult as {
+        accessToken: string;
+        isNewUser: boolean;
+        user: any;
+      };
 
-      const authResult = await this.authService.googleLogin(req.user, role, company, res as any);
-      const { accessToken, isNewUser, user } = authResult as { accessToken: string, isNewUser: boolean, user: any };
-      
       // Set Google access token cookie
       res.cookie('google_access', accessToken, {
         httpOnly: true,
@@ -360,7 +342,7 @@ export class AuthController {
         path: '/',
         maxAge: 1 * 60 * 60 * 1000, // 1 hours
       });
-      
+
       // Set user email cookie for refresh token logic
       res.cookie('google_user_email', user.email, {
         httpOnly: false, // Not httpOnly so guard can read it for refresh
@@ -377,9 +359,13 @@ export class AuthController {
       return res.redirect(`${process.env.FRONTEND_URL}/chat`);
     } catch (error) {
       if (error.status === 400) {
-        return res.redirect(`${process.env.FRONTEND_URL}/callback?error=${encodeURIComponent(error.message || 'Account has been deleted')}`);
+        return res.redirect(
+          `${process.env.FRONTEND_URL}/callback?error=${encodeURIComponent(error.message || 'Account has been deleted')}`,
+        );
       }
-      return res.redirect(`${process.env.FRONTEND_URL}/callback?error=${encodeURIComponent('Authentication failed')}`);
+      return res.redirect(
+        `${process.env.FRONTEND_URL}/callback?error=${encodeURIComponent('Authentication failed')}`,
+      );
     }
   }
   @Post('refresh')
@@ -401,17 +387,34 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('logout')
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    console.log("logout called successfully");
+    console.log('logout called successfully');
+    // Clear all auth cookie
     const userId = (req as any).user?.id;
-    if(!userId){
+    if (!userId) {
       return nestError(400, 'User not found')(res);
     }
     await redisDeleteKey(`user_active:${userId}`);
-    
-    res.clearCookie('local_access', { httpOnly: true, sameSite: 'lax', path: '/' });
-    res.clearCookie('google_access', { httpOnly: true, sameSite: 'lax', path: '/' });
-    res.clearCookie('refresh_token', { httpOnly: true, sameSite: 'lax', path: '/' });
-    res.clearCookie('google_user_email', { httpOnly: false, sameSite: 'lax', path: '/' });
+
+    res.clearCookie('local_access', {
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+    });
+    res.clearCookie('google_access', {
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+    });
+    res.clearCookie('refresh_token', {
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+    });
+    res.clearCookie('google_user_email', {
+      httpOnly: false,
+      sameSite: 'lax',
+      path: '/',
+    });
     res.redirect(`${process.env.FRONTEND_URL}/login`);
     return { message: 'Logged out successfully' };
   }
@@ -419,23 +422,23 @@ export class AuthController {
   // Register
   @Post('register')
   async register(@Body() body: any, @Res({ passthrough: true }) res: Response) {
-    console.log("register called successfully", body);
+    console.log('register called successfully', body);
     const email = body.email;
     const role = body.role;
     if (email.endsWith('.com')) {
       if (role !== 'civilian') {
-        return nestError(400,"your email is not fit in your role")(res);
+        return nestError(400, 'your email is not fit in your role')(res);
       }
     } else if (email.endsWith('.edu')) {
       if (role !== 'student') {
-        return nestError(400,"your email is not fit in your role")(res);
+        return nestError(400, 'your email is not fit in your role')(res);
       }
     } else if (email.endsWith('.mil')) {
       if (role !== 'military') {
-        return nestError(400,"your email is not fit in your role")(res);
+        return nestError(400, 'your email is not fit in your role')(res);
       }
     } else {
-      return nestError(400,"your email is not fit in your role")(res);
+      return nestError(400, 'your email is not fit in your role')(res);
     }
 
     // Map custom input to RegisterDto
@@ -453,11 +456,13 @@ export class AuthController {
     const errors = await validate(registerDto);
     if (errors.length > 0) {
       // Convert class-validator errors to readable messages
-      const messages = errors.map(err => Object.values(err.constraints || {})).flat();
+      const messages = errors
+        .map((err) => Object.values(err.constraints || {}))
+        .flat();
       return nestError(400, 'Validation failed', messages);
     }
 
-    if(registerDto.password !== registerDto.confirmPassword){
+    if (registerDto.password !== registerDto.confirmPassword) {
       return nestError(400, 'Password and confirm password do not match');
     }
 
@@ -466,37 +471,44 @@ export class AuthController {
 
   // Verify OTP
   @Post('verify-otp')
-  async verifyOtp(@Body() body: any, @Res({ passthrough: true }) res: Response) {
+  async verifyOtp(
+    @Body() body: any,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     return this.authService.verifyOtp(body, res as any);
   }
 
   // Resend OTP
   @Post('resend-otp')
-  async resendOtp(@Body() body: any, @Res({ passthrough: true }) res: Response) {
+  async resendOtp(
+    @Body() body: any,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     return this.authService.resendOtp(body, res as any);
   }
 
   // Login
   @Post('login')
   async login(@Body() body: any, @Res({ passthrough: true }) res: Response) {
-    console.log("login called successfully", body);
+    console.log('login called successfully', body);
     return this.authService.login(body, res as any);
   }
 
   // Forgot Password
   @Post('forgot-password')
-  async forgotPassword(@Body() body: any, @Res({ passthrough: true }) res: Response) {
+  async forgotPassword(
+    @Body() body: any,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     return this.authService.forgotPassword(body, res as any);
   }
 
   // Reset password
   @Post('reset-password')
-  async resetPassword(@Body() body: any, @Res({ passthrough: true }) res: Response) {
+  async resetPassword(
+    @Body() body: any,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     return this.authService.resetPassword(body, res as any);
   }
 }
-
-
-
-
-
