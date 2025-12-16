@@ -14,7 +14,7 @@
 //     const localToken = req.cookies?.local_access;
 //     const role = (req as any).query.role as string;
 //     const company = (req as any).query.company as string;
-    
+
 //     // If user already has a valid token, redirect to chat
 //     if (googleToken || localToken) {
 //       try {
@@ -59,7 +59,7 @@
 //       if(!existingUser){
 //         return res.redirect(`${process.env.FRONTEND_URL}/callback?error=No user found with this email`);
 //       }
-  
+
 //       role = existingUser.role;
 //     }
 //     console.log("role", role);
@@ -80,10 +80,9 @@
 //       return res.redirect(`${process.env.FRONTEND_URL}/callback?error=Your Email is not fit in your role`);
 //     }
 
-
 //     const authResult = await this.authService.googleLogin(req.user, role, company, res as any);
 //     const { accessToken, isNewUser, user } = authResult as { accessToken: string, isNewUser: boolean, user: any };
-    
+
 //     // Set Google access token cookie
 //     res.cookie('google_access', accessToken, {
 //       httpOnly: true,
@@ -92,7 +91,7 @@
 //       path: '/',
 //       maxAge: 1 * 60 * 60 * 1000, // 1 hours
 //     });
-    
+
 //     // Set user email cookie for refresh token logic
 //     res.cookie('google_user_email', user.email, {
 //       httpOnly: false, // Not httpOnly so guard can read it for refresh
@@ -122,7 +121,6 @@
 
 //     return this.authService.refreshAccessToken(res as any);
 
-    
 //   }
 
 //   @UseGuards(JwtAuthGuard)
@@ -146,7 +144,7 @@
 //       return nestError(400, 'User not found')(res);
 //     }
 //     await redisDeleteKey(`user_active:${userId}`);
-    
+
 //     res.clearCookie('local_access', { httpOnly: true, sameSite: 'lax', path: '/' });
 //     res.clearCookie('google_access', { httpOnly: true, sameSite: 'lax', path: '/' });
 //     res.clearCookie('refresh_token', { httpOnly: true, sameSite: 'lax', path: '/' });
