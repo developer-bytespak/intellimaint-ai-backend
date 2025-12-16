@@ -5,6 +5,7 @@ import { GeminiChatService } from './services/gemini-chat.service';
 import { ImageUtilService } from './services/image-util.service';
 import { VercelBlobService } from './services/vercel-blob.service';
 import { ChatGateway } from './gateway/chat.gateway';
+import { SocketChatGateway } from './gateway/socket-chat.gateway';
 import { PrismaService } from 'prisma/prisma.service';
 
 @Module({
@@ -15,6 +16,7 @@ import { PrismaService } from 'prisma/prisma.service';
     ImageUtilService,
     VercelBlobService,
     ChatGateway,
+    SocketChatGateway,
     PrismaService,
   ],
   exports: [ChatService],
