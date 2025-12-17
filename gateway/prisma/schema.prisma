@@ -121,16 +121,16 @@ model KnowledgeSource {
 }
 
 model KnowledgeChunk {
-  id         String                @id @default(uuid()) @db.Uuid
-  sourceId   String                @map("source_id") @db.Uuid
-  chunkIndex Int                   @map("chunk_index")
+  id         String                 @id @default(uuid()) @db.Uuid
+  sourceId   String                 @map("source_id") @db.Uuid
+  chunkIndex Int                    @map("chunk_index")
   content    String
   heading    String?
   embedding  Unsupported("vector")?
-  tokenCount Int?                  @map("token_count")
+  tokenCount Int?                   @map("token_count")
   metadata   Json?
-  createdAt  DateTime              @default(now()) @map("created_at") @db.Timestamp(6)
-  source     KnowledgeSource       @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  createdAt  DateTime               @default(now()) @map("created_at") @db.Timestamp(6)
+  source     KnowledgeSource        @relation(fields: [sourceId], references: [id], onDelete: Cascade)
 
   @@map("knowledge_chunks")
 }
