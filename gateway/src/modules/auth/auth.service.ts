@@ -11,6 +11,7 @@ import { generateOTP } from 'src/common/helpers/generateOtp';
 import { safeGet, safeSet } from 'src/common/lib/redis';
 import { sendEmailOTP } from 'src/common/lib/nodemailer';
 import { appConfig } from 'src/config/app.config';
+import path from 'path';
 // import { UserRole, AgentStatus } from '../../generated/prisma/enums';
 dotenv.config();
 
@@ -94,11 +95,6 @@ export class AuthService {
         secure: process.env.NODE_ENV === 'production',
         path: '/',
         maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
-        /* The code is setting the value of `maxAge` to be equal to 14 days in milliseconds. This is
-        achieved by multiplying the number of days (14) by the number of hours in a day (24), by the
-        number of minutes in an hour (60), by the number of seconds in a minute (60), and finally by
-        the number of milliseconds in a second (1000). */
-        // maxAge: 4 * 60 * 1000, // 4 minutes
       });
 
       const existingSession = await this.prisma.session.findFirst({
@@ -511,13 +507,13 @@ export class AuthService {
           });
 
           if (!session) {
-            res.clearCookie('local_refreshToken');
+            res.clearCookie('local_refreshToken', { path: '/auth/refresh' });
             return nestError(401, 'Session not found or expired')(res);
           }
 
           if (session.token !== local_refreshToken) {
             console.log('Invalid session token');
-            res.clearCookie('local_refreshToken');
+            res.clearCookie('local_refreshToken', { path: '/auth/refresh' });
             return nestError(401, 'Invalid session token')(res);
           }
 
@@ -545,7 +541,7 @@ export class AuthService {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
-            path: '/',
+            path: "/",
             maxAge: 60 * 60 * 1000, // 1 hour
             // maxAge: 2 * 60 * 1000, // 2 minutes
           });
@@ -554,7 +550,7 @@ export class AuthService {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
-            path: '/',
+            path: '/auth/refresh',
             maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
             // maxAge: 7 * 60 * 1000, // 7 minutes
           });
@@ -575,7 +571,7 @@ export class AuthService {
             refreshed: true,
           })(res);
         } catch (error) {
-          res.clearCookie('local_refreshToken');
+          res.clearCookie('local_refreshToken', { path: '/auth/refresh' });
           return nestError(401, 'Invalid or expired token')(res);
         }
       }
@@ -597,12 +593,12 @@ export class AuthService {
           });
 
           if (!session) {
-            res.clearCookie('google_refreshToken');
+            res.clearCookie('google_refreshToken',{ path: '/auth/refresh' });
             return nestError(401, 'Session not found or expired')(res);
           }
 
           if (session.token !== google_refreshToken) {
-            res.clearCookie('google_refreshToken');
+            res.clearCookie('google_refreshToken',{ path: '/auth/refresh' });
             return nestError(401, 'Invalid session token')(res);
           }
 
@@ -640,7 +636,7 @@ export class AuthService {
             httpOnly: true,
             sameSite: 'lax',
             secure: process.env.NODE_ENV === 'production',
-            path: '/',
+            path: '/auth/refresh',
             maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
             // maxAge: 4 * 60 * 1000, // 4 minutes
           });
@@ -663,7 +659,7 @@ export class AuthService {
           })(res);
         } catch (error) {
           console.error('Google token refresh failed:', error.message);
-          res.clearCookie('google_refreshToken');
+          res.clearCookie('google_refreshToken',{ path: '/auth/refresh' });
           return nestError(401, 'Failed to refresh token')(res);
         }
       }

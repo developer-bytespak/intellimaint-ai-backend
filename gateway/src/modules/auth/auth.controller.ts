@@ -35,13 +35,13 @@ export class AuthController {
         return res.redirect(`${process.env.FRONTEND_URL}/chat`);
       } catch (e) {
         // Clear cookies if there's an error
-        res.clearCookie('google_access', {
+        res.clearCookie('google_accessToken', {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',
           path: '/',
         });
-        res.clearCookie('local_access', {
+        res.clearCookie('local_accessToken', {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',
@@ -162,7 +162,7 @@ export class AuthController {
       sameSite: 'lax',
       path: '/',
     });
-    res.clearCookie('google_access', {
+    res.clearCookie('google_accessToken', {
       httpOnly: true,
       sameSite: 'lax',
       path: '/',
@@ -172,8 +172,8 @@ export class AuthController {
       sameSite: 'lax',
       path: '/',
     });
-    res.clearCookie('google_user_email', {
-      httpOnly: false,
+    res.clearCookie('google_refreshToken', {
+      httpOnly: true,
       sameSite: 'lax',
       path: '/',
     });
