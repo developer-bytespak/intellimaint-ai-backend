@@ -1174,58 +1174,65 @@ export class ChatService {
     sessionId: string,
     messageId: string,
     newContent: string,
-  ): Promise<ChatMessage> {
-    // Verify session belongs to user
+  ): Promise<any> {
+    // Make edit + cleanup + placeholder creation atomic
     await this.verifySessionAccess(userId, sessionId);
 
-    // Get the message to edit
-    const messageToEdit = await this.prisma.chatMessage.findUnique({
-      where: { id: messageId },
-      include: { attachments: true },
-    });
-
+    const messageToEdit = await this.prisma.chatMessage.findUnique({ where: { id: messageId } });
     if (!messageToEdit) {
       throw new NotFoundException('Message not found');
     }
-
     if (messageToEdit.sessionId !== sessionId) {
       throw new ForbiddenException('Message does not belong to this session');
     }
-
     if (messageToEdit.role !== MessageRole.user) {
       throw new BadRequestException('Can only edit user messages');
     }
 
-    // Update the message content
-    const updatedMessage = await this.prisma.chatMessage.update({
-      where: { id: messageId },
-      data: {
-        content: newContent,
-      },
-      include: {
-        attachments: true,
-      },
-    });
-
-    // Delete all messages that came after this one
-    await this.prisma.chatMessage.deleteMany({
-      where: {
-        sessionId,
-        createdAt: {
-          gt: messageToEdit.createdAt,
+    const result = await this.prisma.$transaction(async (tx) => {
+      // Update the user message content and clear stopped flag
+      const updatedMessage = await tx.chatMessage.update({
+        where: { id: messageId },
+        data: {
+          content: newContent,
+          isStopped: false,
+          stoppedAt: null,
         },
-      },
+        include: { attachments: true },
+      });
+
+      // Delete assistant messages that came after this user message
+      await tx.chatMessage.deleteMany({
+        where: {
+          sessionId,
+          role: MessageRole.assistant,
+          createdAt: { gt: messageToEdit.createdAt },
+        },
+      });
+
+      // Create an assistant placeholder message for the upcoming regenerated response
+      const assistantPlaceholder = await tx.chatMessage.create({
+        data: {
+          sessionId,
+          role: MessageRole.assistant,
+          content: '',
+          model: 'gemini-2.5-flash',
+          isStopped: false,
+        },
+      });
+
+      // Update session timestamp
+      await tx.chatSession.update({ where: { id: sessionId }, data: { updatedAt: new Date() } });
+
+      return {
+        editedMessage: updatedMessage,
+        assistantMessageId: assistantPlaceholder.id,
+      };
     });
 
-    // Update session timestamp
-    await this.prisma.chatSession.update({
-      where: { id: sessionId },
-      data: { updatedAt: new Date() },
-    });
+    this.logger.log(`Message ${messageId} edited and subsequent assistant messages deleted; placeholder ${result.assistantMessageId} created`);
 
-    this.logger.log(`Message ${messageId} edited and subsequent messages deleted`);
-
-    return this.mapPrismaMessageToDTO(updatedMessage);
+    return result;
   }
 
   /**
@@ -1292,5 +1299,155 @@ export class ChatService {
     });
 
     return { message: 'Message deleted successfully', messageId };
+  }
+
+  /**
+   * Save a partial assistant response when streaming is stopped
+   * This allows the user to see what was generated and edit/resend if needed
+   */
+  async savePartialResponse(params: {
+    sessionId?: string;
+    messageId?: string;
+    userId: string;
+    partialContent: string;
+    tokenUsage: { totalTokens: number };
+    stoppedAt: Date;
+    durationMs: number;
+  }): Promise<{ messageId: string; sessionId?: string }> {
+    const { sessionId, messageId, userId, partialContent, tokenUsage, stoppedAt } = params;
+
+    // If we have a messageId, update the existing message
+    if (messageId) {
+      try {
+        await this.prisma.chatMessage.update({
+          where: { id: messageId },
+          data: {
+            content: partialContent,
+            isStopped: true,
+            stoppedAt,
+            totalTokens: tokenUsage.totalTokens,
+          },
+        });
+
+        // Mark the triggering user message as stopped so edit button shows
+        if (sessionId) {
+          await this.markLastUserMessageStopped(sessionId);
+        }
+
+        return { messageId, sessionId };
+      } catch (error) {
+        this.logger.error(`Failed to update message ${messageId} with partial content:`, error);
+        // Continue to create a new message if update fails
+      }
+    }
+
+    // Otherwise, create a new assistant message with the partial content
+    if (!sessionId) {
+      this.logger.warn('Cannot save partial without sessionId');
+      return { messageId: '', sessionId: '' };
+    }
+
+    const assistantMessage = await this.prisma.chatMessage.create({
+      data: {
+        sessionId,
+        role: MessageRole.assistant,
+        content: partialContent,
+        model: 'gemini-2.5-flash',
+        totalTokens: tokenUsage.totalTokens,
+        isStopped: true,
+        stoppedAt,
+      },
+    });
+
+    // Mark the triggering user message as stopped
+    await this.markLastUserMessageStopped(sessionId);
+
+    this.logger.log(`Partial response saved for session ${sessionId}: ${assistantMessage.id}`);
+    return { messageId: assistantMessage.id, sessionId };
+  }
+
+  /**
+   * Mark the last user message in a session as stopped
+   * This allows the frontend to show an edit button on the user's prompt
+   */
+  private async markLastUserMessageStopped(sessionId: string): Promise<void> {
+    try {
+      const lastUserMessage = await this.prisma.chatMessage.findFirst({
+        where: {
+          sessionId,
+          role: MessageRole.user,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      if (lastUserMessage) {
+        await this.prisma.chatMessage.update({
+          where: { id: lastUserMessage.id },
+          data: { isStopped: true, stoppedAt: new Date() },
+        });
+      }
+    } catch (error) {
+      this.logger.error(`Failed to mark user message as stopped:`, error);
+    }
+  }
+
+  /**
+   * Clean up stopped messages that were not edited
+   * Called when the user reloads the page to remove abandoned partial responses
+   */
+  async cleanupStoppedMessages(userId: string): Promise<{ deletedCount: number; messageIds: string[] }> {
+    try {
+      // Find all sessions for this user
+      const sessions = await this.prisma.chatSession.findMany({
+        where: { userId },
+        select: { id: true },
+      });
+
+      const sessionIds = sessions.map(s => s.id);
+      const deletedMessageIds: string[] = [];
+
+      // For each session, find stopped assistant messages and their preceding user messages
+      for (const sessionId of sessionIds) {
+        const stoppedMessages = await this.prisma.chatMessage.findMany({
+          where: {
+            sessionId,
+            isStopped: true,
+            role: MessageRole.assistant,
+          },
+          orderBy: { createdAt: 'asc' },
+        });
+
+        for (const stoppedMsg of stoppedMessages) {
+          // Find the user message that triggered this assistant response
+          const userMessage = await this.prisma.chatMessage.findFirst({
+            where: {
+              sessionId,
+              role: MessageRole.user,
+              createdAt: { lt: stoppedMsg.createdAt },
+            },
+            orderBy: { createdAt: 'desc' },
+          });
+
+          // Delete both the stopped assistant message and the triggering user message
+          if (stoppedMsg.id) {
+            await this.prisma.chatMessage.delete({ where: { id: stoppedMsg.id } });
+            deletedMessageIds.push(stoppedMsg.id);
+          }
+
+          if (userMessage?.id && userMessage.isStopped) {
+            await this.prisma.chatMessage.delete({ where: { id: userMessage.id } });
+            deletedMessageIds.push(userMessage.id);
+          }
+        }
+      }
+
+      this.logger.log(`Cleaned up ${deletedMessageIds.length} stopped messages for user ${userId}`);
+      return { deletedCount: deletedMessageIds.length, messageIds: deletedMessageIds };
+    } catch (error) {
+      this.logger.error('Error cleaning up stopped messages:', error);
+      return { deletedCount: 0, messageIds: [] };
+    }
   }
 }
