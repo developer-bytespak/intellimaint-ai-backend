@@ -1,18 +1,10 @@
 import { IsString, IsNumber, IsArray, ValidateNested, IsNotEmpty, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class DocumentMetadataDto {
-  @IsString()
-  @IsNotEmpty()
-  fileId!: string;
-
+export class FileMetadataDto {
   @IsString()
   @IsNotEmpty()
   fileName!: string;
-
-  @IsString()
-  @IsNotEmpty()
-  fileUrl!: string;
 
   @IsNumber()
   @Min(1)
@@ -20,13 +12,13 @@ export class DocumentMetadataDto {
 
   @IsString()
   @IsNotEmpty()
-  blobPath!: string;
+  contentType!: string;
 }
 
-export class CreateDocumentsRequestDto {
+export class UploadUrlsRequestDto {
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => DocumentMetadataDto)
-  documents!: DocumentMetadataDto[];
+  @Type(() => FileMetadataDto)
+  files!: FileMetadataDto[];
 }
 

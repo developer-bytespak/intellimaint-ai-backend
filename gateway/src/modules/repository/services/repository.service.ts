@@ -4,10 +4,39 @@ import { del } from '@vercel/blob';
 import { DocumentMetadataDto } from '../dto/create-document.dto';
 import { ListDocumentsQueryDto } from '../dto/list-documents.dto';
 import { RepositoryStatus } from '@prisma/client';
+import { FileMetadataDto } from '../dto/upload-urls.dto';
+import { appConfig } from 'src/config/app.config';
 
 @Injectable()
 export class RepositoryService {
   constructor(private prisma: PrismaService) {}
+
+  async generateUploadUrls(userId: string, files: FileMetadataDto[]) {
+    if (!appConfig.token) {
+      throw new BadRequestException('Blob storage not configured');
+    }
+
+    // Generate unique filenames and return upload URLs
+    // Vercel Blob doesn't support presigned URLs like S3, so we return URLs
+    // that can be used with their client SDK or server-side upload endpoint
+    const uploadUrls = files.map((file) => {
+      const timestamp = Date.now();
+      const randomSuffix = Math.random().toString(36).substring(7);
+      const fileExtension = file.fileName.includes('.')
+        ? file.fileName.substring(file.fileName.lastIndexOf('.'))
+        : '';
+      const uniqueFileName = `${userId}/${timestamp}-${randomSuffix}${fileExtension}`;
+
+      return {
+        fileName: file.fileName,
+        uploadUrl: uniqueFileName, // This will be used as the pathname for Vercel Blob
+        contentType: file.contentType,
+        fileSize: file.fileSize,
+      };
+    });
+
+    return uploadUrls;
+  }
 
   async createDocuments(userId: string, documents: DocumentMetadataDto[]) {
     const createdDocuments = await Promise.all(

@@ -38,6 +38,11 @@ python-dotenv>=1.0.0
 # Audio processing for format conversion
 pydub>=0.25.1
 
+
+# Timezone handling
+pytz>=2024.1
+
+
 # PDF processing
 PyMuPDF>=1.23.0  # Provides 'fitz' module
 pdfplumber>=0.10.0

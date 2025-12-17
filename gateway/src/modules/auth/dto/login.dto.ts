@@ -3,25 +3,25 @@ import { IsEmail, IsEnum, IsIn, IsOptional, IsString, MaxLength, MinLength } fro
 
 export class LoginDto {
   @IsEmail()
-  email: string;
+  email!: string;
 
   @IsString()
-  password: string;
+  password!: string;
 }
 export class RegisterDto {
   @IsEmail({},{message: 'Invalid email address'})
-  email: string;
+  email!: string;
 
   @IsString({message: 'Password must be a string'})
   @MinLength(8,{message: 'Password must be at least 8 characters long'})
-  password: string;
+  password!: string;
 
   @IsString({message: 'Confirm password must be a string'})
   @MinLength(8,{message: 'Password must be at least 8 characters long'})
-  confirmPassword: string;
+  confirmPassword!: string;
 
   @IsEnum(UserRole,{message: 'Invalid role'})
-  role: UserRole;
+  role!: UserRole;
 
   @IsString({message: 'First name must be a string'})
   @IsOptional()
@@ -38,11 +38,11 @@ export class RegisterDto {
 
 export class VerifyOtpDto{
   @IsEmail()
-  email: string;
+  email!: string;
 
   @IsString()
   @MinLength(6)
   @MinLength(6)
-  code: string; // 6 digit OTP
+  code!: string; // 6 digit OTP
 }
 

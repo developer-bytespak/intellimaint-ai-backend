@@ -2,9 +2,9 @@ import { IsString } from 'class-validator';
 
 export class MessageDto {
   @IsString()
-  content: string;
+  content!: string;
 
   @IsString()
-  sessionId: string;
+  sessionId!: string;
 }
 

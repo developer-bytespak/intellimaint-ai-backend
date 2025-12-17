@@ -16,25 +16,60 @@ async function bootstrap() {
       },
     }),
   );
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
+
   app.setGlobalPrefix(appConfig.apiPrefix);
 
-  // Get allowed origins from environment variable
+  /**
+   * CORS CONFIGURATION
+   * - Works on Render
+   * - Supports cookies
+   * - Allows multiple frontends
+   * - Strict in production, relaxed in development
+   */
+
   const allowedOriginsStr =
-    process.env.FRONTEND_URL || 'http://localhost:3001,http://localhost:3000';
+    process.env.FRONTEND_URL ||
+    'http://localhost:3001,http://localhost:3000';
+
   const allowedOrigins = allowedOriginsStr
     .split(',')
     .map((origin) => origin.trim());
 
-  // Add production frontend if not already in the list
+  // Ensure Vercel frontend is always allowed
   const productionFrontend = 'https://intellimaint-ai.vercel.app';
   if (!allowedOrigins.includes(productionFrontend)) {
     allowedOrigins.push(productionFrontend);
   }
 
-  console.log('CORS enabled for origins:', allowedOrigins);
+  console.log('Allowed CORS origins:', allowedOrigins);
 
   app.enableCors({
-    origin: allowedOrigins,
+    origin: (origin: string | undefined, callback) => {
+      // Allow server-to-server, Postman, mobile apps
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      if (process.env.NODE_ENV === 'development') {
+        return callback(null, true);
+      }
+
+      console.warn('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: [
@@ -46,6 +81,7 @@ async function bootstrap() {
       'X-Requested-With',
     ],
     exposedHeaders: ['Set-Cookie'],
+    optionsSuccessStatus: 204,
   });
 
   app.use(cookieParser.default());

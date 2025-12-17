@@ -9,7 +9,7 @@ import { Server } from 'socket.io';
 @WebSocketGateway()
 export class ChatGateway {
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
   @SubscribeMessage('message')
   handleMessage(@MessageBody() data: any) {
