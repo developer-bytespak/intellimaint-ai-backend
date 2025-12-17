@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 
 from ..services.doc_extract_service import DocumentService
 from ..services.progress_tracker import ProgressTracker
+from ..services.knowledge_store_service import KnowledgeStoreService
 
 router = APIRouter()
 
@@ -16,23 +17,26 @@ UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
-def process_pdf_extraction(job_id: str, file_path: str, image_dir: str):
-    """Background task to process PDF extraction with progress tracking"""
+def process_pdf_extraction(
+    job_id: str, 
+    file_path: str, 
+    image_dir: str,
+    fileName: str = None, # Isko main identifier banayein
+    model_id: str = None,
+    user_id: str = None
+):
+    print(f"Started background PDF extraction for job_id: {fileName}")
     try:
-        # ============================================
-        # STEP 1: Text + Images Extraction (60%)
-        # ============================================
-        def update_text_progress(current_page: int, total_pages: int):
+        # STEP 1: Text + Images Extraction
+        def update_text_progress(current_page, total_pages):
             ProgressTracker.update_text_extraction_progress(job_id, current_page, total_pages)
         
         text_with_placeholders, extracted_images = DocumentService.extract_text_with_image_markers(
             file_path, image_dir, progress_callback=update_text_progress
         )
 
-        # ============================================
-        # STEP 2: Table Extraction (20%)
-        # ============================================
-        def update_table_progress(current_page: int, total_pages: int):
+        # STEP 2: Table Extraction
+        def update_table_progress(current_page, total_pages):
             step_progress = int((current_page / total_pages) * 100) if total_pages > 0 else 0
             ProgressTracker.update_step_progress(job_id, "table_extraction", step_progress)
         
@@ -40,30 +44,39 @@ def process_pdf_extraction(job_id: str, file_path: str, image_dir: str):
             file_path, progress_callback=update_table_progress
         )
 
-        # ============================================
-        # STEP 3: Image Upload (15%)
-        # ============================================
-        def update_upload_progress(current_img: int, total_imgs: int):
+        # STEP 3: Image Upload
+        def update_upload_progress(current_img, total_imgs):
             step_progress = int((current_img / total_imgs) * 100) if total_imgs > 0 else 0
             ProgressTracker.update_step_progress(job_id, "image_upload", step_progress)
         
         image_urls = DocumentService.upload_images_to_supabase(
             extracted_images, progress_callback=update_upload_progress
         )
-        print(f"Image URLs: {image_urls}")
 
-        # ============================================
-        # STEP 4: Unified Content (5%)
-        # ============================================
+        # STEP 4: Unified Content
         ProgressTracker.update_step_progress(job_id, "unified_content", 50)
-        
         text_with_urls = DocumentService.replace_placeholders_with_urls(text_with_placeholders, image_urls)
         unified_content = DocumentService.create_unified_content(text_with_urls, extracted_tables)
-        
         ProgressTracker.update_step_progress(job_id, "unified_content", 100)
 
         # ============================================
-        # Mark as completed
+        # NEW STEP: Background DB Storage
+        # ============================================
+        # Hum completion mark karne se pehle save karenge taaki data miss na ho
+        try:
+            print("Attempting to log knowledge source to DB...",fileName)
+            KnowledgeStoreService.create_knowledge_source(
+                title=fileName or "Untitled Document",
+                raw_content=unified_content,
+                source_type="pdf",
+                model_id=model_id,
+                user_id=user_id
+            )
+        except Exception as db_err:
+            print(f"DB Logging Error (Extraction still succeeds): {db_err}")
+
+        # ============================================
+        # Final Mark (Returns Plain Text in GET call)
         # ============================================
         ProgressTracker.mark_completed(job_id, unified_content)
 
@@ -71,17 +84,11 @@ def process_pdf_extraction(job_id: str, file_path: str, image_dir: str):
         print(f"Error processing PDF: {str(e)}")
         ProgressTracker.mark_failed(job_id, str(e))
     finally:
-        # Cleanup – wrap deletes to avoid crashing if file is locked
+        # Cleanup
         if os.path.exists(file_path):
-            try:
-                os.remove(file_path)
-            except PermissionError:
-                print(f"Could not delete file {file_path} due to PermissionError.")
+            os.remove(file_path)
         if os.path.exists(image_dir):
-            try:
-                shutil.rmtree(image_dir)
-            except PermissionError:
-                print(f"Could not delete image dir {image_dir} due to PermissionError.")
+            shutil.rmtree(image_dir)
 
 
 @router.post("/extract/full")
@@ -124,7 +131,15 @@ async def extract_text_and_images(
     job_id = ProgressTracker.create_job(total_pages=total_pages)
 
     # Start background processing
-    background_tasks.add_task(process_pdf_extraction, job_id, file_path, image_dir)
+    background_tasks.add_task(
+    process_pdf_extraction, 
+    job_id=job_id, 
+    file_path=file_path, 
+    image_dir=image_dir,
+    fileName=file.filename,  # Named argument use karein
+    # model_id=model_id,       # Agar endpoint par receive ho raha hai
+    # user_id=user_id          # Agar endpoint par receive ho raha hai
+)
 
     # Return job_id immediately
     return JSONResponse({
@@ -156,7 +171,7 @@ async def get_extraction_progress(job_id: str):
         
         # If completed, return data as plain text
         if progress["status"] == "completed":
-            print(f"Progress: {progress['data']}")
+            # print(f"Progress: {progress['data']}")
             return PlainTextResponse(
                 content=progress["data"],
                 media_type="text/plain"
