@@ -11,7 +11,7 @@ export const appConfig = {
   token: process.env.BLOB_READ_WRITE_TOKEN,
   aiServicesUrl: process.env.AI_SERVICES_URL || 'http://localhost:8000',
   gemini: {
-    apiKey: process.env.GEMINI_API_KEY,
+    apiKey: process.env.GEMINI_API_KEY || "d",
     modelName: process.env.GEMINI_MODEL_NAME || 'gemini-2.5-flash',
   },
 };

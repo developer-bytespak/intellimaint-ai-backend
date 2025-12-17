@@ -19,7 +19,6 @@ import { AuthService } from './auth.service';
 import { GoogleStrategy } from './google.strategy'; 
 import { PrismaService } from 'prisma/prisma.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { TokenRefreshCronService } from './token-refresh-cron.service';
 console.log("googleStrategyEnabled");
 
 const googleStrategyEnabled =
@@ -34,7 +33,6 @@ const googleStrategyEnabled =
     AuthService,
     PrismaService,
     JwtAuthGuard,
-    TokenRefreshCronService,
     ...(googleStrategyEnabled ? [GoogleStrategy] : []),
   ],
   exports: [JwtAuthGuard],
