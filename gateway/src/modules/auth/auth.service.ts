@@ -66,25 +66,21 @@ export class AuthService {
         },
       });
 
-      if (newUser) {
-        return {
-          user: newUser,
-          accessToken: user.accessToken,
-          isNewUser: false,
-        };
-      }
-      return nestError(500, 'Failed to create user', null)(res);
-    }
-    await this.prisma.oAuthProvider.updateMany({
-      where: {
-        provider: OAuthProviderType.google,
-        userId: existingUser.id,
-      },
-      data: {
-        refreshToken: user.refreshToken,
-        tokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 60), // 60 days expiry
-      },
-    });
+            if (!newUser) {
+                throw new BadRequestException('Failed to create user');
+            }
+            return { user: newUser, accessToken: user.accessToken, isNewUser: false };
+        }
+        await this.prisma.oAuthProvider.updateMany({
+            where: {
+                provider: OAuthProviderType.google,
+                userId: existingUser.id,
+            },
+            data: {
+                refreshToken: user.refreshToken,
+                tokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 60), // 60 days expiry
+            }
+        });
 
     return {
       user: existingUser,
@@ -116,122 +112,137 @@ export class AuthService {
       status: UserStatus.INACTIVE, // Inactive until OTP verified
     };
 
-    if (existingUser) {
-      // If user exists and is emailVerified, they already have an account
-      if (existingUser.emailVerified) {
-        return nestError(400, 'User with this email already exists')(res);
-      }
-      // Update existing unverified user
-      const updatedUser = await this.prisma.user.update({
-        where: { email: registerDto.email },
-        data: payload,
-      });
-      if (!updatedUser) {
-        return nestError(500, 'Failed to update user')(res);
-      }
-    } else {
-      // Create new user
-      const newUser = await this.prisma.user.create({
-        data: payload,
-      });
-      if (!newUser) {
-        return nestError(500, 'Failed to create user')(res);
-      }
-    }
+        if (existingUser) {
+            // If user exists and is emailVerified, they already have an account
+            if (existingUser.emailVerified) {
+                nestError(400, 'User with this email already exists')(res);
+                return;
+            }
+            // Update existing unverified user
+            const updatedUser = await this.prisma.user.update({
+                where: { email: registerDto.email },
+                data: payload
+            });
+            if (!updatedUser) {
+                nestError(500, 'Failed to update user')(res);
+                return;
+            }
+        } else {
+            // Create new user
+            const newUser = await this.prisma.user.create({
+                data: payload
+            });
+            if (!newUser) {
+                nestError(500, 'Failed to create user')(res);
+                return;
+            }
+        }
 
-    // Generate and send OTP (for both new and updated unverified users)
-    const rediskey = `otp:${registerDto.email}`;
-    if (!rediskey) {
-      return nestError(400, 'OTP not found')(res);
-    }
-    const otpCode = generateOTP();
-    const { success, error } = await safeSet(rediskey, otpCode, 300); // 5 minutes
-    if (!success) {
-      return nestError(500, 'Failed to generate OTP', error)(res);
-    }
+        // Generate and send OTP (for both new and updated unverified users)
+        const rediskey = `otp:${registerDto.email}`;
+        if(!rediskey){
+            nestError(400, 'OTP not found')(res);
+            return;
+        }
+        const otpCode = generateOTP();
+        const {success,error} = await safeSet(rediskey, otpCode, 300); // 5 minutes
+        if(!success){
+            nestError(500, 'Failed to generate OTP', error)(res);
+            return;
+        }
 
-    try {
-      const result = await sendEmailOTP(registerDto.email, otpCode);
-      console.log('result', result);
-      if (!result.success) {
-        return nestError(500, 'Failed to send OTP', result.message)(res);
-      }
-      return nestResponse(
-        200,
-        `OTP sent successfully to this ${payload.email}`,
-      )(res);
-    } catch (error) {
-      return nestError(500, 'Failed to send OTP', error)(res);
+        try {
+          const result = await sendEmailOTP(registerDto.email, otpCode);
+          console.log("result", result);
+          if(!result.success){
+            nestError(500, 'Failed to send OTP', result.message)(res);
+            return;
+          }
+          nestResponse(200, `OTP sent successfully to this ${payload.email}`)(res);
+          return;
+        } catch (error) {
+            nestError(500, 'Failed to send OTP', error)(res);
+        }
+
+
     }
-  }
 
   // Verify OTP
   // This is the function that is called when the user clicks the Verify OTP button
 
-  async verifyOtp(body: any, res: any) {
-    const { email, otp } = body;
-    const rediskey = `otp:${email}`;
-    if (!rediskey) {
-      return nestError(400, 'OTP not found')(res);
-    }
-    const otpCode = await safeGet(rediskey);
-    if (!otpCode) {
-      return nestError(400, 'OTP expired')(res);
-    }
-    if (otpCode.toString() !== otp.toString()) {
-      return nestError(400, 'Invalid OTP')(res);
-    }
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-    });
-    if (!user) {
-      return nestError(400, 'User not found');
-    }
-    const refreshToken = jwt.sign(
-      { userId: user.id },
-      appConfig.jwtSecret as string,
-      { expiresIn: '7d' },
-    );
-    user.emailVerified = true;
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { emailVerified: true },
-    });
+    async verifyOtp(body: any, res: any) {
+        const { email, otp } = body;
+        const rediskey = `otp:${email}`;
+        if(!rediskey){
+            nestError(400, 'OTP not found')(res);
+            return;
+        }
+        const otpCode = await safeGet(rediskey);
+        if(!otpCode){
+            nestError(400, 'OTP expired')(res);
+            return;
+        }
+        if(otpCode.toString() !== otp.toString()){
+            nestError(400, 'Invalid OTP')(res);
+            return;
+        }
+        const user = await this.prisma.user.findUnique({
+            where: { email }
+        });
+        if(!user){
+            nestError(400, 'User not found')(res);
+            return;
+        }
+        const refreshToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret as string, { expiresIn: '7d' });
+        user.emailVerified = true;
+        await this.prisma.user.update({
+            where: { id: user.id },
+            data: { 
+                emailVerified: true,
+                status: UserStatus.ACTIVE  // Set status to ACTIVE when OTP is verified
+            }
+        });
 
-    await this.prisma.session.create({
-      data: {
-        userId: user.id,
-        token: refreshToken,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-      },
-    });
-    return nestResponse(200, 'OTP verified successfully')(res);
-  }
+        await this.prisma.session.create({
+            data: {
+                userId: user.id,
+                token: refreshToken,
+                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+            }
+        });
+        nestResponse(200, 'OTP verified successfully')(res);
+        return;
+    }
 
-  // Resend OTP
-  // This is the function that is called when the user clicks the Resend OTP button
-  async resendOtp(body: any, res: any) {
-    const { email } = body;
-    const rediskey = `otp:${email}`;
-    if (!rediskey) {
-      return nestError(400, 'OTP not found')(res);
-    }
-    const otpCode = generateOTP();
-    const { success, error } = await safeSet(rediskey, otpCode as string, 300); // 5 minutes
-    if (!success) {
-      return nestError(500, 'Failed to generate OTP', error)(res);
-    }
-    try {
-      const result = await sendEmailOTP(email, otpCode as string);
-      if (!result.success) {
-        return nestError(500, 'Failed to send OTP', result.message)(res);
-      }
+    // Resend OTP
+    // This is the function that is called when the user clicks the Resend OTP button
+    async resendOtp(body: any, res: any) {
+        const { email } = body;
+        const rediskey = `otp:${email}`;
+        if(!rediskey){
+            nestError(400, 'OTP not found')(res);
+            return;
+        }
+        const otpCode = generateOTP();
+        const {success,error} = await safeSet(rediskey, otpCode as string, 300); // 5 minutes
+        if(!success){
+            nestError(500, 'Failed to generate OTP', error)(res);
+            return;
+        }
+        try {
+            const result = await sendEmailOTP(email, otpCode as string);
+            if(!result.success){
+              nestError(500, 'Failed to send OTP', result.message)(res);
+              return;
+            }
 
-      return nestResponse(200, `OTP sent successfully to this ${email}`)(res);
-    } catch (error) {
-      return nestError(500, 'Failed to send OTP', error)(res);
+            nestResponse(200, `OTP sent successfully to this ${email}`)(res);
+            return;
+          } catch (error) {
+
+              nestError(500, 'Failed to send OTP', error)(res);
+          }
     }
-  }
 
     // Login
     // This is the function that is called when the user clicks the Login button
@@ -242,40 +253,45 @@ export class AuthService {
         });
         console.log("user", user);
         if(!user){
-            return nestError(400, 'User not found')(res);
+            nestError(400, 'User not found')(res);
+            return;
         }
         if(!user.emailVerified){
-            return nestError(400, 'User not verified')(res);
+            nestError(400, 'User not verified')(res);
+            return;
+        }
+        if(user.status !== UserStatus.ACTIVE){
+            nestError(400, 'User account is not active. Please contact support.')(res);
+            return;
         }
         if (!user || !user.passwordHash) {
-            return nestError(400, 'Invalid password or user not found')(res);
+            nestError(400, 'Invalid password or user not found')(res);
+            return;
           }
         const isPasswordValid = await bcrypt.compare(password, user?.passwordHash);
         if(!isPasswordValid){
-            return nestError(400, 'Invalid password')(res);
+            nestError(400, 'Invalid password')(res);
+            return;
         }
         const accessToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret as string, { expiresIn: '1h' });
         const refreshToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret as string, { expiresIn: '7d' });
         
-        // Set access token cookie
-        // For cross-domain cookies (Vercel frontend <-> Render backend), use sameSite: 'none' and secure: true
-        const isProduction = process.env.NODE_ENV === 'production';
-        res.cookie('local_access', accessToken, {
+        const cookieOptions = {
             httpOnly: true,
-            secure: isProduction, // Must be true in production for cross-domain cookies
-            sameSite: isProduction ? 'none' : 'lax', // 'none' for cross-domain, 'lax' for same-domain
+            secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+            sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
             path: '/',
             maxAge: 60 * 60 * 1000, // 1 hour
+        };
+        
+        console.log('Setting local_access cookie with options:', {
+            ...cookieOptions,
+            nodeEnv: process.env.NODE_ENV,
+            forceSecure: process.env.FORCE_SECURE_COOKIES,
         });
         
-        // Set refresh token cookie
-        res.cookie('refresh_token', refreshToken, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: isProduction ? 'none' : 'lax',
-            path: '/',
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        });
+        // Set access token cookie with proper CORS settings
+        res.cookie('local_access', accessToken, cookieOptions);
         
        
         
@@ -304,80 +320,84 @@ export class AuthService {
         const userId = user.id;
        const {success,error} = await safeSet(`user_active:${userId}`, "1", 3600); // 1 hour TTL
        if(!success){
-        return nestError(500, 'Failed to set user active', error)(res);
+        nestError(500, 'Failed to set user active', error)(res);
+        return;
        }
 
         
-        // Return user data along with success message for frontend to use
-        const { passwordHash, ...userWithoutPassword } = user;
-        return nestResponse(200, 'Login successful', {
-            user: userWithoutPassword,
-            accessToken: accessToken, // Also return in response body for client-side use if needed
-        })(res);
+        nestResponse(200, 'Login successful')(res);
+        return;
     }
 
-  // Forgot Password
-  // This is the function that is called when the user clicks the Forgot Password button
-  async forgotPassword(body: any, res: any) {
-    try {
-      const { email } = body;
-      if (!email) {
-        return nestError(400, 'Email is required')(res);
-      }
-      const user = await this.prisma.user.findUnique({
-        where: { email },
-      });
-      if (!user) {
-        return nestError(400, 'User not found')(res);
-      }
-      if (!user.emailVerified) {
-        return nestError(400, 'User not verified')(res);
-      }
-      const otpCode = generateOTP();
-      const rediskey = `otp:${email}`;
-      const { success, error } = await safeSet(
-        rediskey,
-        otpCode as string,
-        300,
-      ); // 5 minutes
-      if (!success) {
-        return nestError(500, 'Failed to generate OTP', error)(res);
-      }
-      const result = await sendEmailOTP(email, otpCode as string);
-      if (!result.success) {
-        return nestError(500, 'Failed to send OTP', result.message)(res);
-      }
-      return nestResponse(200, 'OTP sent successfully')(res);
-    } catch (error) {
-      return nestError(500, 'Failed to send OTP', error)(res);
+    // Forgot Password
+    // This is the function that is called when the user clicks the Forgot Password button
+    async forgotPassword(body: any, res: any) {
+        try {
+        const { email } = body;
+        if(!email){
+            nestError(400, 'Email is required')(res);
+            return;
+        }
+        const user = await this.prisma.user.findUnique({
+            where: { email }
+        });
+        if(!user){
+            nestError(400, 'User not found')(res);
+            return;
+        }
+        if(!user.emailVerified){
+            nestError(400, 'User not verified')(res);
+            return;
+        }
+        const otpCode = generateOTP();
+        const rediskey = `otp:${email}`;
+        const {success,error} = await safeSet(rediskey, otpCode as string, 300); // 5 minutes
+        if(!success){
+            nestError(500, 'Failed to generate OTP', error)(res);
+            return;
+        }
+            const result = await sendEmailOTP(email, otpCode as string);
+            if(!result.success){
+                nestError(500, 'Failed to send OTP', result.message)(res);
+                return;
+            }
+        nestResponse(200, 'OTP sent successfully')(res);
+        return;
+        } catch (error) {
+            nestError(500, 'Failed to send OTP', error)(res);
+        }
     }
-  }
 
   // reset password
   // This is the function that is called when the user clicks the Reset Password button
   async resetPassword(body: any, res: any) {
     const { email, newPassword } = body;
 
-    if (!email || !newPassword) {
-      return nestError(400, 'Email and new password are required')(res);
-    }
+        if(!email || !newPassword){
+            nestError(400, 'Email and new password are required')(res);
+            return;
+        }
 
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-    });
-    if (!user) {
-      return nestError(400, 'User not found')(res);
+        const user = await this.prisma.user.findUnique({
+            where: { email }
+        });
+        if(!user){
+            nestError(400, 'User not found')(res);
+            return;
+        }
+        if(!user.emailVerified){
+            nestError(400, 'User not verified')(res);
+            return;
+        }
+        const password = await hashPassword(newPassword);
+        await this.prisma.user.update({
+            where: { id: user.id },
+            data: { passwordHash: password, emailVerified: true }
+        });
+        nestResponse(200, 'Password reset successfully')(res);
+        return;
+       
     }
-    if (!user.emailVerified) {
-      return nestError(400, 'User not verified')(res);
-    }
-    const password = await hashPassword(newPassword);
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { passwordHash: password, emailVerified: true },
-    });
-    return nestResponse(200, 'Password reset successfully')(res);
-  }
 
   // refresh access token
   // This function handles token refresh for both local JWT tokens and Google OAuth tokens
@@ -387,65 +407,67 @@ export class AuthService {
       const googleToken = req.cookies?.google_access;
       const googleEmail = req.cookies?.google_user_email;
 
-      // ==============================
-      // CASE 1: LOCAL TOKEN REFRESH
-      // ==============================
-      if (localToken) {
-        try {
-          let userId: string;
+            // ==============================
+            // CASE 1: LOCAL TOKEN REFRESH
+            // ==============================
+            if (localToken) {
+                try {
+                    let userId: string;
+                    
+                    // Try to decode token (even if expired) to get userId
+                    try {
+                        const decoded = jwt.verify(localToken, appConfig.jwtSecret as string) as any;
+                        userId = decoded.userId;
+                    } catch (error) {
+                        // Token is expired or invalid, try to decode without verification to get userId
+                        const decoded = jwt.decode(localToken) as any;
+                        if (!decoded || !decoded.userId) {
+                            res.clearCookie('local_access');
+                            nestError(401, 'Invalid token format')(res);
+                            return;
+                        }
+                        userId = decoded.userId;
+                    }
+                    
+                    // Find user's session with refresh token
+                    const session = await this.prisma.session.findFirst({
+                        where: {
+                            userId: userId,
+                            expiresAt: { gt: new Date() } // Session must still be valid
+                        },
+                    });
 
-          // Try to decode token (even if expired) to get userId
-          try {
-            const decoded = jwt.verify(
-              localToken,
-              appConfig.jwtSecret as string,
-            ) as any;
-            userId = decoded.userId;
-          } catch (error) {
-            // Token is expired or invalid, try to decode without verification to get userId
-            const decoded = jwt.decode(localToken) as any;
-            if (!decoded || !decoded.userId) {
-              res.clearCookie('local_access');
-              return nestError(401, 'Invalid token format')(res);
-            }
-            userId = decoded.userId;
-          }
+                    if (!session) {
+                        res.clearCookie('local_access');
+                        nestError(401, 'Session not found or expired')(res);
+                        return;
+                    }
 
-          // Find user's session with refresh token
-          const session = await this.prisma.session.findFirst({
-            where: {
-              userId: userId,
-              expiresAt: { gt: new Date() }, // Session must still be valid
-            },
-          });
-
-          if (!session) {
-            res.clearCookie('local_access');
-            return nestError(401, 'Session not found or expired')(res);
-          }
-
-          // Verify refresh token
-          try {
-            jwt.verify(session.token, appConfig.jwtSecret as string);
-          } catch (error) {
-            // Refresh token expired
-            res.clearCookie('local_access');
-            return nestError(401, 'Refresh token expired')(res);
-          }
+                    // Verify refresh token
+                    try {
+                        jwt.verify(session.token, appConfig.jwtSecret as string);
+                    } catch (error) {
+                        // Refresh token expired
+                        res.clearCookie('local_access');
+                        nestError(401, 'Refresh token expired')(res);
+                        return;
+                    }
 
           // Get user to verify they still exist and are verified
           const user = await this.prisma.user.findUnique({
             where: { id: userId },
           });
 
-          if (!user) {
-            res.clearCookie('local_access');
-            return nestError(401, 'User not found')(res);
-          }
+                    if (!user) {
+                        res.clearCookie('local_access');
+                        nestError(401, 'User not found')(res);
+                        return;
+                    }
 
-          if (!user.emailVerified) {
-            return nestError(403, 'User not verified')(res);
-          }
+                    if (!user.emailVerified) {
+                        nestError(403, 'User not verified')(res);
+                        return;
+                    }
 
           // Generate new access token
           const newAccessToken = jwt.sign(
@@ -454,27 +476,27 @@ export class AuthService {
             { expiresIn: '1h' },
           );
 
-          // Update cookie with new access token
-          res.cookie('local_access', newAccessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            path: '/',
-            maxAge: 60 * 60 * 1000, // 1 hour
-          });
+                    // Update cookie with new access token
+                    res.cookie('local_access', newAccessToken, {
+                        httpOnly: true,
+                        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+                        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
+                        path: '/',
+                        maxAge: 60 * 60 * 1000, // 1 hour
+                    });
 
           // Mark user as active in Redis
           const activeUserKey = `user_active:${user.id}`;
           await safeSet(activeUserKey, '1', 900); // 15 minutes TTL
 
-          return nestResponse(200, 'Token refreshed successfully', {
-            refreshed: true,
-          })(res);
-        } catch (error) {
-          res.clearCookie('local_access');
-          return nestError(401, 'Invalid or expired token')(res);
-        }
-      }
+                    nestResponse(200, 'Token refreshed successfully', { refreshed: true })(res);
+                    return;
+                } catch (error) {
+                    res.clearCookie('local_access');
+                    nestError(401, 'Invalid or expired token')(res);
+                    return;
+                }
+            }
 
       // ==============================
       // CASE 2: GOOGLE TOKEN REFRESH
@@ -491,18 +513,20 @@ export class AuthService {
             },
           });
 
-          if (!user) {
-            res.clearCookie('google_access');
-            res.clearCookie('google_user_email');
-            return nestError(401, 'User not found')(res);
-          }
+                    if (!user) {
+                        res.clearCookie('google_access');
+                        res.clearCookie('google_user_email');
+                        nestError(401, 'User not found')(res);
+                        return;
+                    }
 
-          const provider = user.oauthProviders?.[0];
-          if (!provider?.refreshToken) {
-            res.clearCookie('google_access');
-            res.clearCookie('google_user_email');
-            return nestError(401, 'Refresh token not found')(res);
-          }
+                    const provider = user.oauthProviders?.[0];
+                    if (!provider?.refreshToken) {
+                        res.clearCookie('google_access');
+                        res.clearCookie('google_user_email');
+                        nestError(401, 'Refresh token not found')(res);
+                        return;
+                    }
 
           // Call Google API to refresh access token
           const refreshRes = await axios.post(
@@ -517,37 +541,38 @@ export class AuthService {
 
           const newAccessToken = refreshRes.data.access_token;
 
-          // Update cookie with new access token
-          res.cookie('google_access', newAccessToken, {
-            httpOnly: true,
-            sameSite: 'lax',
-            secure: process.env.NODE_ENV === 'production',
-            path: '/',
-            maxAge: 2 * 60 * 60 * 1000, // 2 hours
-          });
+                    // Update cookie with new access token
+                    res.cookie('google_access', newAccessToken, {
+                        httpOnly: true,
+                        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+                        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
+                        path: '/',
+                        maxAge: 2 * 60 * 60 * 1000, // 2 hours
+                    });
 
           // Mark user as active in Redis
           const activeUserKey = `user_active:${user.id}`;
           await safeSet(activeUserKey, '1', 900); // 15 minutes TTL
 
-          return nestResponse(200, 'Token refreshed successfully', {
-            refreshed: true,
-          })(res);
-        } catch (error) {
-          console.error('Google token refresh failed:', error.message);
-          res.clearCookie('google_access');
-          res.clearCookie('google_user_email');
-          return nestError(401, 'Failed to refresh token')(res);
-        }
-      }
+                    nestResponse(200, 'Token refreshed successfully', { refreshed: true })(res);
+                    return;
+                } catch (error) {
+                    console.error('Google token refresh failed:', error.message);
+                    res.clearCookie('google_access');
+                    res.clearCookie('google_user_email');
+                    nestError(401, 'Failed to refresh token')(res);
+                    return;
+                }
+            }
 
-      // ==============================
-      // NO TOKEN FOUND
-      // ==============================
-      return nestError(401, 'No valid token found')(res);
-    } catch (error) {
-      console.error('Token refresh error:', error);
-      return nestError(500, 'Internal server error during token refresh')(res);
+            // ==============================
+            // NO TOKEN FOUND
+            // ==============================
+            nestError(401, 'No valid token found')(res);
+        } catch (error) {
+            console.error('Token refresh error:', error);
+            nestError(500, 'Internal server error during token refresh')(res);
+        }
     }
-  }
+
 }

@@ -1,11 +1,21 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unsafe-assignment,
+                  @typescript-eslint/no-unsafe-member-access,
+                  @typescript-eslint/no-unsafe-call,
+                  @typescript-eslint/no-unsafe-return,
+                  @typescript-eslint/no-unsafe-argument */
+
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import axios from 'axios';
 import { Response } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { PrismaService } from 'prisma/prisma.service';
 import { appConfig } from 'src/config/app.config';
 import { safeGet, redisDeleteKey, safeSet } from 'src/common/lib/redis';
-
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -19,45 +29,95 @@ export class JwtAuthGuard implements CanActivate {
     const localToken = req.cookies?.local_access;
     const googleEmail = req.cookies?.google_user_email;
 
+    console.log('[JwtAuthGuard] Cookies received:', {
+      hasGoogleToken: !!googleToken,
+      hasLocalToken: !!localToken,
+      hasGoogleEmail: !!googleEmail,
+      allCookies: Object.keys(req.cookies || {}),
+      url: req.url,
+      method: req.method,
+    });
+
     // Check if this is an API request (not a browser redirect)
-    const isApiRequest = req.method !== 'GET' || req.headers.accept?.includes('application/json');
+    const isApiRequest =
+      req.method !== 'GET' || req.headers.accept?.includes('application/json');
 
     // ==============================
-    // CASE 1: LOCAL TOKEN
+    // CASE 0: BEARER TOKEN (Authorization header)
+    // ==============================
+    const authHeader = req.headers.authorization;
+    if (authHeader?.startsWith('Bearer ')) {
+      const bearerToken = authHeader.slice(7); // Remove "Bearer " prefix
+      try {
+        const data = jwt.verify(
+          bearerToken,
+          appConfig.jwtSecret as string,
+        ) as any;
+
+        const user = await this.prisma.user.findUnique({
+          where: { id: data.userId },
+        });
+
+        if (!user) throw new Error('User not found');
+
+        // Mark user as active in Redis (15 minutes TTL)
+        const activeUserKey = `user_active:${user.id}`;
+        const { success, error } = await safeSet(activeUserKey, '1', 900);
+        if (!success) {
+          console.log('Error marking user as active:', error);
+        }
+
+        req.user = user;
+        return true;
+      } catch (e) {
+        console.log('Bearer token validation failed:', e.message);
+        if (isApiRequest) {
+          throw new UnauthorizedException('Invalid or expired token');
+        }
+        res.redirect(`${process.env.FRONTEND_URL}/login`);
+        return false;
+      }
+    }
+
+    // ==============================
+    // CASE 1: LOCAL TOKEN (Cookie)
     // ==============================
     if (localToken) {
       try {
-        const data = jwt.verify(localToken, appConfig.jwtSecret as string) as any;
+        const data = jwt.verify(
+          localToken,
+          appConfig.jwtSecret as string,
+        ) as any;
 
         const user = await this.prisma.user.findUnique({
           where: { id: data.userId },
         });
         // console.log("user ==>", user);
 
-        if (!user) throw new Error("User not found");
+        if (!user) throw new Error('User not found');
 
         // Mark user as active in Redis (15 minutes TTL)
         // This is used by the cron job to only refresh tokens for online users
         const activeUserKey = `user_active:${user.id}`;
-       const {success,error}= await safeSet(activeUserKey, '1', 900); // 15 minutes TTL
-       if(!success){
-        console.log("Error marking user as active:", error);
-       }
+        const { success, error } = await safeSet(activeUserKey, '1', 900); // 15 minutes TTL
+        if (!success) {
+          console.log('Error marking user as active:', error);
+        }
 
         // Check if there's a pending access token in Redis (from cron job)
         const pendingTokenKey = `pending_access_token:${user.id}`;
         const pendingToken = await safeGet(pendingTokenKey);
-        
+
         if (pendingToken && typeof pendingToken === 'string') {
           // Update cookie with new token from cron job
           res.cookie('local_access', pendingToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+            sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
             path: '/',
             maxAge: 60 * 60 * 1000, // 1 hour
           });
-          
+
           // Delete the pending token from Redis after using it
           await redisDeleteKey(pendingTokenKey);
         }
@@ -65,7 +125,7 @@ export class JwtAuthGuard implements CanActivate {
         req.user = user;
         return true;
       } catch (e) {
-        res.clearCookie("local_access");
+        res.clearCookie('local_access');
         if (isApiRequest) {
           throw new UnauthorizedException('Invalid or expired token');
         }
@@ -81,7 +141,7 @@ export class JwtAuthGuard implements CanActivate {
       try {
         // Token info from Google
         await axios.get(
-          `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${googleToken}`
+          `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${googleToken}`,
         );
 
         // Valid token → fetch user
@@ -89,27 +149,27 @@ export class JwtAuthGuard implements CanActivate {
           where: { email: googleEmail },
         });
 
-        if (!user) throw new Error("User not found");
+        if (!user) throw new Error('User not found');
 
         // Mark user as active in Redis (15 minutes TTL)
         // This is used by the cron job to only refresh tokens for online users
         const activeUserKey = `user_active:${user.id}`;
-        const {success,error}= await safeSet(activeUserKey, '1', 900); // 15 minutes TTL
-        if(!success){
-          console.log("Error marking user as active:", error);
+        const { success, error } = await safeSet(activeUserKey, '1', 900); // 15 minutes TTL
+        if (!success) {
+          console.log('Error marking user as active:', error);
         }
 
         req.user = user;
         return true;
       } catch (e) {
-        console.log("Google token expired → trying refresh...");
+        console.log('Google token expired → trying refresh...');
 
         // ==============================
         // TRY GOOGLE REFRESH TOKEN
         // ==============================
 
         if (!googleEmail) {
-          res.clearCookie("google_access");
+          res.clearCookie('google_access');
           if (isApiRequest) {
             throw new UnauthorizedException('Invalid or expired token');
           }
@@ -121,14 +181,14 @@ export class JwtAuthGuard implements CanActivate {
           where: { email: googleEmail },
           include: {
             oauthProviders: {
-              where: { provider: "google" },
+              where: { provider: 'google' },
             },
           },
         });
 
         const provider = user?.oauthProviders?.[0];
         if (!provider?.refreshToken) {
-          res.clearCookie("google_access");
+          res.clearCookie('google_access');
           if (isApiRequest) {
             throw new UnauthorizedException('Invalid or expired token');
           }
@@ -141,23 +201,23 @@ export class JwtAuthGuard implements CanActivate {
         // ==============================
         try {
           const refreshRes = await axios.post(
-            "https://oauth2.googleapis.com/token",
+            'https://oauth2.googleapis.com/token',
             {
               client_id: process.env.GOOGLE_CLIENT_ID,
               client_secret: process.env.GOOGLE_CLIENT_SECRET,
               refresh_token: provider.refreshToken,
-              grant_type: "refresh_token",
-            }
+              grant_type: 'refresh_token',
+            },
           );
 
           const newAccessToken = refreshRes.data.access_token;
 
           // Update cookie
-          res.cookie("google_access", newAccessToken, {
+          res.cookie('google_access', newAccessToken, {
             httpOnly: true,
-            sameSite: "lax",
-            secure: process.env.NODE_ENV === "production",
-            path: "/",
+            secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+            sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
+            path: '/',
             maxAge: 2 * 60 * 60 * 1000,
           });
 
@@ -165,15 +225,15 @@ export class JwtAuthGuard implements CanActivate {
           // This is used by the cron job to only refresh tokens for online users
           if (user) {
             const activeUserKey = `user_active:${user.id}`;
-            const {success,error}= await safeSet(activeUserKey, '1', 900); // 5 minutes TTL
-            if(!success){
-              console.log("Error marking user as active:", error);
+            const { success, error } = await safeSet(activeUserKey, '1', 900); // 5 minutes TTL
+            if (!success) {
+              console.log('Error marking user as active:', error);
             }
           }
 
           if (!user) {
-            res.clearCookie("google_access");
-            res.clearCookie("google_user_email");
+            res.clearCookie('google_access');
+            res.clearCookie('google_user_email');
             if (isApiRequest) {
               throw new UnauthorizedException('User not found');
             }
@@ -188,8 +248,8 @@ export class JwtAuthGuard implements CanActivate {
           console.log("Google refresh failed:", err.message || 'Unknown error');
 
           // clear cookies
-          res.clearCookie("google_access");
-          res.clearCookie("google_user_email");
+          res.clearCookie('google_access');
+          res.clearCookie('google_user_email');
           if (isApiRequest) {
             throw new UnauthorizedException('Invalid or expired token');
           }
@@ -207,5 +267,3 @@ export class JwtAuthGuard implements CanActivate {
     return false;
   }
 }
-
-

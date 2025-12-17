@@ -251,14 +251,14 @@ export class AuthController {
         // Clear cookies if there's an error
         res.clearCookie('google_access', {
           httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
+          secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+          sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
           path: '/',
         });
         res.clearCookie('local_access', {
           httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
+          secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+          sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
           path: '/',
         });
       }
@@ -332,11 +332,11 @@ export class AuthController {
         user: any;
       };
 
-      // Set Google access token cookie
+      // Set Google access token cookie with proper CORS settings
       res.cookie('google_access', accessToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
         path: '/',
         maxAge: 1 * 60 * 60 * 1000, // 1 hours
       });
@@ -344,8 +344,8 @@ export class AuthController {
       // Set user email cookie for refresh token logic
       res.cookie('google_user_email', user.email, {
         httpOnly: false, // Not httpOnly so guard can read it for refresh
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
         path: '/',
         maxAge: 1 * 60 * 60 * 1000, // 1 hours
       });
@@ -367,9 +367,9 @@ export class AuthController {
     }
   }
   @Post('refresh')
-  refreshAccessToken(@Req() req, @Res({ passthrough: true }) res: Response) {
+  async refreshAccessToken(@Req() req, @Res({ passthrough: true }) res: Response) {
     // Validate refreshToken and generate new access token
-    return this.authService.refreshAccessToken(req, res);
+    await this.authService.refreshAccessToken(req, res);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -389,32 +389,36 @@ export class AuthController {
     // Clear all auth cookie
     const userId = (req as any).user?.id;
     if (!userId) {
-      return nestError(400, 'User not found')(res);
+      nestError(400, 'User not found')(res);
+      return;
     }
     await redisDeleteKey(`user_active:${userId}`);
 
     res.clearCookie('local_access', {
       httpOnly: true,
-      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
       path: '/',
     });
     res.clearCookie('google_access', {
       httpOnly: true,
-      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
       path: '/',
     });
     res.clearCookie('refresh_token', {
       httpOnly: true,
-      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
       path: '/',
     });
     res.clearCookie('google_user_email', {
       httpOnly: false,
-      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
       path: '/',
     });
     res.redirect(`${process.env.FRONTEND_URL}/login`);
-    return { message: 'Logged out successfully' };
   }
 
   // Register
@@ -425,18 +429,22 @@ export class AuthController {
     const role = body.role;
     if (email.endsWith('.com')) {
       if (role !== 'civilian') {
-        return nestError(400, 'your email is not fit in your role')(res);
+        nestError(400, 'your email is not fit in your role')(res);
+        return;
       }
     } else if (email.endsWith('.edu')) {
       if (role !== 'student') {
-        return nestError(400, 'your email is not fit in your role')(res);
+        nestError(400, 'your email is not fit in your role')(res);
+        return;
       }
     } else if (email.endsWith('.mil')) {
       if (role !== 'military') {
-        return nestError(400, 'your email is not fit in your role')(res);
+        nestError(400, 'your email is not fit in your role')(res);
+        return;
       }
     } else {
-      return nestError(400, 'your email is not fit in your role')(res);
+      nestError(400, 'your email is not fit in your role')(res);
+      return;
     }
 
     // Map custom input to RegisterDto
@@ -457,14 +465,16 @@ export class AuthController {
       const messages = errors
         .map((err) => Object.values(err.constraints || {}))
         .flat();
-      return nestError(400, 'Validation failed', messages);
+      nestError(400, 'Validation failed', messages)(res);
+      return;
     }
 
     if (registerDto.password !== registerDto.confirmPassword) {
-      return nestError(400, 'Password and confirm password do not match');
+      nestError(400, 'Password and confirm password do not match')(res);
+      return;
     }
 
-    return this.authService.register(registerDto, res as any);
+    await this.authService.register(registerDto, res as any);
   }
 
   // Verify OTP
@@ -473,7 +483,7 @@ export class AuthController {
     @Body() body: any,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return this.authService.verifyOtp(body, res as any);
+    await this.authService.verifyOtp(body, res as any);
   }
 
   // Resend OTP
@@ -482,14 +492,14 @@ export class AuthController {
     @Body() body: any,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return this.authService.resendOtp(body, res as any);
+    await this.authService.resendOtp(body, res as any);
   }
 
   // Login
   @Post('login')
   async login(@Body() body: any, @Res({ passthrough: true }) res: Response) {
     console.log('login called successfully', body);
-    return this.authService.login(body, res as any);
+    await this.authService.login(body, res as any);
   }
 
   // Forgot Password
@@ -498,7 +508,7 @@ export class AuthController {
     @Body() body: any,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return this.authService.forgotPassword(body, res as any);
+    await this.authService.forgotPassword(body, res as any);
   }
 
   // Reset password
@@ -507,6 +517,6 @@ export class AuthController {
     @Body() body: any,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return this.authService.resetPassword(body, res as any);
+    await this.authService.resetPassword(body, res as any);
   }
 }
