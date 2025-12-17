@@ -121,16 +121,16 @@ model KnowledgeSource {
 }
 
 model KnowledgeChunk {
-  id         String                @id @default(uuid()) @db.Uuid
-  sourceId   String                @map("source_id") @db.Uuid
-  chunkIndex Int                   @map("chunk_index")
+  id         String                 @id @default(uuid()) @db.Uuid
+  sourceId   String                 @map("source_id") @db.Uuid
+  chunkIndex Int                    @map("chunk_index")
   content    String
   heading    String?
-  embedding  Unsupported("vector")
-  tokenCount Int?                  @map("token_count")
+  embedding  Unsupported("vector")?
+  tokenCount Int?                   @map("token_count")
   metadata   Json?
-  createdAt  DateTime              @default(now()) @map("created_at") @db.Timestamp(6)
-  source     KnowledgeSource       @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  createdAt  DateTime               @default(now()) @map("created_at") @db.Timestamp(6)
+  source     KnowledgeSource        @relation(fields: [sourceId], references: [id], onDelete: Cascade)
 
   @@map("knowledge_chunks")
 }
@@ -163,6 +163,8 @@ model ChatMessage {
   model            String?             @db.VarChar(50)
   promptTokens     Int?                @map("prompt_tokens")
   totalTokens      Int?                @map("total_tokens")
+  isStopped        Boolean?            @default(false) @map("is_stopped")
+  stoppedAt        DateTime?           @map("stopped_at") @db.Timestamp(6)
   session          ChatSession         @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   attachments      MessageAttachment[]
 

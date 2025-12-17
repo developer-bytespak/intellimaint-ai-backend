@@ -138,6 +138,21 @@ export class ChatController {
     }
   }
 
+  @Post('cleanup-stopped')
+  async cleanupStoppedMessages(
+    @Req() req: any,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    try {
+      const userId = req.user.id;
+      const result = await this.chatService.cleanupStoppedMessages(userId);
+      return nestResponse(200, 'Stopped messages cleaned up successfully', result)(res);
+    } catch (error) {
+      this.logger.error('Error cleaning up stopped messages:', error);
+      return nestError(500, 'Failed to cleanup stopped messages', error.message || 'Internal server error')(res);
+    }
+  }
+
   @Post('messages')
   async createMessageWithSession(
     @Req() req: any,
@@ -215,6 +230,15 @@ export class ChatController {
     }
   }
 
+  // ============================================================================
+  // SSE ENDPOINTS - COMMENTED OUT (Migrated to Socket.IO)
+  // ============================================================================
+  // These endpoints have been replaced by Socket.IO streaming via SocketChatGateway
+  // Socket.IO provides better bidirectional communication and instant abort support
+  // See: gateway/src/modules/chat/gateway/socket-chat.gateway.ts
+  // ============================================================================
+
+  /*
   @Post('sessions/:sessionId/messages/stream')
   async streamMessage(
     @Req() req: any,
@@ -302,7 +326,10 @@ export class ChatController {
       this.chatService.unregisterRequest(requestId);
     }
   }
+  */
 
+  /*
+  /*
   @Post('messages/stream')
   async streamMessageWithSession(
     @Req() req: any,
@@ -394,6 +421,11 @@ export class ChatController {
       }
     }
   }
+  */
+
+  // ============================================================================
+  // END SSE ENDPOINTS
+  // ============================================================================
 
   @Post('sessions/:sessionId/stop-stream')
   async stopStreamPost(
