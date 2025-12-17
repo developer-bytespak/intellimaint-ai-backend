@@ -42,3 +42,12 @@ Notes
 - The script will write any failed source ids to `failed_sources.txt` in this folder.
 - The script attempts to load `scripts/.env` automatically (via `python-dotenv` or a fallback parser) so you can keep credentials out of the command line.
 - Run sequentially for easier debugging; consider adding concurrency if you need higher throughput.
+
+- New: `--skip-existing-check`:
+	- Adds a fast pre-check that queries `knowledge_chunks` for each `source_id` and skips calling the chunking API when any chunk row already exists for that source.
+	- Use this for brand-new families to avoid the tiny per-source DB query overhead when you know no chunks exist yet. The flag is ignored when `--overwrite` is used.
+	- Example (real run, skipping the DB existence check):
+
+		```bash
+		python run_chunk_for_family.py --family <FAMILY_ID> --no-dry-run --skip-existing-check
+		```

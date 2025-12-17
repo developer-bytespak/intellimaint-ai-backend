@@ -107,6 +107,17 @@ def get_source_ids_for_models(conn_dsn: str, model_ids: List[str]) -> List[str]:
         conn.close()
 
 
+def source_has_chunks(conn_dsn: str, source_id: str) -> bool:
+    """Return True if at least one chunk exists for the given source_id."""
+    conn = psycopg2.connect(conn_dsn, sslmode="require")
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1 FROM knowledge_chunks WHERE source_id = %s LIMIT 1", (source_id,))
+            return cur.fetchone() is not None
+    finally:
+        conn.close()
+
+
 def call_chunk_api(api_base: str, source_id: str, dry_run: bool = True, overwrite: bool = False) -> dict:
     if requests is None:
         raise RuntimeError("requests library is required. install with `pip install requests`")
@@ -143,7 +154,9 @@ def main(argv: List[str] | None = None) -> int:
     parser.add_argument("--dry-run", dest="dry_run", action="store_true", help="Run dry-run (no DB writes)")
     parser.add_argument("--no-dry-run", dest="dry_run", action="store_false", help="Perform real run (writes to DB via API)")
     parser.add_argument("--overwrite", action="store_true", help="Pass overwrite=true to chunking API to replace existing chunks")
-    parser.set_defaults(dry_run=True)
+    parser.add_argument("--skip-existing-check", dest="skip_existing_check", action="store_true",
+                        help="Skip DB check for existing chunks (faster for new families)")
+    parser.set_defaults(dry_run=True, skip_existing_check=False)
 
     args = parser.parse_args(argv)
 
@@ -162,7 +175,8 @@ def main(argv: List[str] | None = None) -> int:
             logger.error("DATABASE_URL must be set in the environment or passed with --db-url")
             return 2
 
-        logger.info("Running chunking for family=%s dry_run=%s overwrite=%s", family_id, args.dry_run, args.overwrite)
+        logger.info("Running chunking for family=%s dry_run=%s overwrite=%s skip_existing_check=%s",
+                family_id, args.dry_run, args.overwrite, args.skip_existing_check)
 
         # Lookup models -> sources
         model_ids = get_model_ids_for_family(args.db_url, family_id)
@@ -174,8 +188,24 @@ def main(argv: List[str] | None = None) -> int:
     failed = []
     success = 0
 
+    total = len(source_ids)
+    processed = 0
+    skipped = 0
+
     for sid in source_ids:
-        logger.info("Processing source_id=%s", sid)
+        processed += 1
+        # Optionally skip sources that already have chunks (unless overwrite requested)
+        if not args.overwrite and not args.skip_existing_check:
+            try:
+                if source_has_chunks(args.db_url, sid):
+                    skipped += 1
+                    logger.info("Skipping source_id=%s (chunks already exist). Progress %d/%d done, %d left.",
+                                sid, processed, total, total - processed)
+                    continue
+            except Exception:
+                logger.warning("Failed to check existing chunks for %s; proceeding to process.", sid)
+
+        logger.info("Processing source_id=%s (%d/%d done, %d left)", sid, processed, total, total - processed)
         res = call_chunk_api(args.api_url, sid, dry_run=args.dry_run, overwrite=args.overwrite)
         if res is None:
             logger.error("No response for %s", sid)
@@ -204,6 +234,8 @@ def main(argv: List[str] | None = None) -> int:
                 f.write(s + "\n")
         logger.info("Wrote %d failed source ids to %s", len(failed), out_path)
 
+    logger.info("Chunking run complete: processed=%d skipped=%d succeeded=%d failed=%d total=%d",
+                processed, skipped, success, len(failed), total)
     logger.info("Done: success=%d failed=%d", success, len(failed))
     return 0 if not failed else 3
 
