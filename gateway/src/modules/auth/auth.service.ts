@@ -83,16 +83,16 @@ export class AuthService {
 
       res.cookie('google_accessToken', accessToken, {
         httpOnly: true,
-        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') ,
         secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
         path: '/',
         maxAge: 1 * 60 * 60 * 1000, // 1 hour
         // maxAge: 1 * 60 * 1000, // 1 minute
       });
       res.cookie('google_refreshToken', refreshToken, {
         httpOnly: true,
-        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') ,
         secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
         path: '/',
         maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
       });
@@ -139,8 +139,8 @@ export class AuthService {
 
       res.cookie('google_accessToken', accessToken, {
         httpOnly: true,
-        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax'),
         secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
         path: '/',
         maxAge: 1 * 60 * 60 * 1000, // 1 hour
         // maxAge: 1 * 60 * 1000, // 1 minute
