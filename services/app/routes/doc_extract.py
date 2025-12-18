@@ -18,6 +18,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 def process_pdf_extraction(
+    user: dict,
     job_id: str, 
     file_path: str, 
     image_dir: str,
@@ -70,7 +71,10 @@ def process_pdf_extraction(
                 raw_content=unified_content,
                 source_type="pdf",
                 model_id=model_id,
-                user_id=user_id
+                user_id=user.get("userId"),
+                email=user.get("email"),
+                role=user.get("role"),
+                name=user.get("name")
             )
         except Exception as db_err:
             print(f"DB Logging Error (Extraction still succeeds): {db_err}")
@@ -93,6 +97,10 @@ def process_pdf_extraction(
 
 @router.post("/extract/full")
 async def extract_text_and_images(
+    userId: str, # Query param 1
+    name: str = None, # Query param 2 (optional)
+    role: str = None, # Query param 3
+    email: str = None, # Query param 4
     file: UploadFile = File(...),
     background_tasks: BackgroundTasks = BackgroundTasks()
 ):
@@ -130,9 +138,17 @@ async def extract_text_and_images(
     # Create job and get job_id
     job_id = ProgressTracker.create_job(total_pages=total_pages)
 
+    user={
+        "userId": userId,
+        "name": name,
+        "role": role,
+        "email": email
+    }
+
     # Start background processing
     background_tasks.add_task(
     process_pdf_extraction, 
+    user=user,
     job_id=job_id, 
     file_path=file_path, 
     image_dir=image_dir,
