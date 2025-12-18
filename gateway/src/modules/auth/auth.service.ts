@@ -369,6 +369,15 @@ export class AuthService {
 
     });
 
+    // Set a non-httpOnly cookie that frontend can read for auth status
+    res.cookie('auth_status', 'authenticated', {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 1000, // 1 hour
+    });
+
     // Create or update session
     const existingSession = await this.prisma.session.findFirst({
       where: { userId: user.id },

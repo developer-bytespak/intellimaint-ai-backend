@@ -143,6 +143,15 @@ export class AuthController {
         maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
       });
 
+      // Set a non-httpOnly cookie that frontend can read for auth status
+      res.cookie('auth_status', 'authenticated', {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
+        path: '/',
+        maxAge: 1 * 60 * 60 * 1000, // 1 hour
+      });
+
       // if (!isNewUser) {
       //   return nestResponse(201, 'User created successfully', user)(res);
       // }
@@ -207,6 +216,12 @@ export class AuthController {
     });
     res.clearCookie('google_refreshToken', {
       httpOnly: true,
+      secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
+      path: '/',
+    });
+    res.clearCookie('auth_status', {
+      httpOnly: false,
       secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
       sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
       path: '/',
