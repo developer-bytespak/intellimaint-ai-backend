@@ -16,72 +16,24 @@ async function bootstrap() {
       },
     }),
   );
-
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      transformOptions: {
-        enableImplicitConversion: true,
-      },
-    }),
-  );
-
   app.setGlobalPrefix(appConfig.apiPrefix);
-
-  /**
-   * CORS CONFIGURATION
-   * - Works on Render
-   * - Supports cookies
-   * - Allows multiple frontends
-   * - Strict in production, relaxed in development
-   */
-
-  const allowedOriginsStr =
-    process.env.FRONTEND_URL ||
-    'http://localhost:3001,http://localhost:3000';
-
-  const allowedOrigins = allowedOriginsStr
-    .split(',')
-    .map((origin) => origin.trim());
-
-  // Ensure Vercel frontend is always allowed
-  const productionFrontend = 'https://intellimaint-ai.vercel.app';
-  if (!allowedOrigins.includes(productionFrontend)) {
-    allowedOrigins.push(productionFrontend);
-  }
-
-  console.log('Allowed CORS origins:', allowedOrigins);
-
+  // Normalize FRONTEND_URL env var (split, trim, strip trailing slashes)
+  const rawOrigins = process.env.FRONTEND_URL?.split(',') || [
+    'http://localhost:3001',
+  ];
+  const allowedOrigins = rawOrigins.map((o) =>
+    String(o).trim().replace(/\/+$/, ''),
+  );
+  console.log('CORS allowed origins:', allowedOrigins);
+  
+  // Enhanced CORS configuration for authentication with credentials
   app.enableCors({
-    origin: (origin: string | undefined, callback) => {
-      // Allow server-to-server, Postman, mobile apps
-      if (!origin) {
-        return callback(null, true);
-      }
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      if (process.env.NODE_ENV === 'development') {
-        return callback(null, true);
-      }
-
-      console.warn('CORS blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
-    },
+    origin: allowedOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'Cookie',
-      'Accept',
-      'Origin',
-      'X-Requested-With',
-    ],
-    exposedHeaders: ['Set-Cookie'],
-    optionsSuccessStatus: 204,
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    exposedHeaders: ['Content-Type', 'X-Total-Count', 'Set-Cookie'],
+    maxAge: 3600,
   });
 
   app.use(cookieParser.default());
