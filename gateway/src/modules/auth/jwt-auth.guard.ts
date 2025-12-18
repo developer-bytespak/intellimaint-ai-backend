@@ -19,15 +19,14 @@ import { safeGet, redisDeleteKey, safeSet } from 'src/common/lib/redis';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
     const res: Response = context.switchToHttp().getResponse();
 
-    const googleToken = req.cookies?.google_access;
-    const localToken = req.cookies?.local_access;
-    const googleEmail = req.cookies?.google_user_email;
+    const googleToken = req.cookies?.google_accessToken;
+    const localToken = req.cookies?.local_accessToken;
 
     console.log('[JwtAuthGuard] Cookies received:', {
       hasGoogleToken: !!googleToken,
@@ -94,42 +93,15 @@ export class JwtAuthGuard implements CanActivate {
         });
         // console.log("user ==>", user);
 
-        if (!user) throw new Error('User not found');
-
-        // Mark user as active in Redis (15 minutes TTL)
-        // This is used by the cron job to only refresh tokens for online users
-        const activeUserKey = `user_active:${user.id}`;
-        const { success, error } = await safeSet(activeUserKey, '1', 900); // 15 minutes TTL
-        if (!success) {
-          console.log('Error marking user as active:', error);
-        }
-
-        // Check if there's a pending access token in Redis (from cron job)
-        const pendingTokenKey = `pending_access_token:${user.id}`;
-        const pendingToken = await safeGet(pendingTokenKey);
-
-        if (pendingToken && typeof pendingToken === 'string') {
-          // Update cookie with new token from cron job
-          res.cookie('local_access', pendingToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
-            sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
-            path: '/',
-            maxAge: 60 * 60 * 1000, // 1 hour
-          });
-
-          // Delete the pending token from Redis after using it
-          await redisDeleteKey(pendingTokenKey);
-        }
+        if (!user) throw new Error("User not found");
 
         req.user = user;
         return true;
       } catch (e) {
-        res.clearCookie('local_access');
+        res.clearCookie("local_accessToken");
         if (isApiRequest) {
           throw new UnauthorizedException('Invalid or expired token');
         }
-        res.redirect(`${process.env.FRONTEND_URL}/login`);
         return false;
       }
     }
@@ -146,18 +118,10 @@ export class JwtAuthGuard implements CanActivate {
 
         // Valid token → fetch user
         const user = await this.prisma.user.findUnique({
-          where: { email: googleEmail },
+          where: { id: userId },
         });
 
-        if (!user) throw new Error('User not found');
-
-        // Mark user as active in Redis (15 minutes TTL)
-        // This is used by the cron job to only refresh tokens for online users
-        const activeUserKey = `user_active:${user.id}`;
-        const { success, error } = await safeSet(activeUserKey, '1', 900); // 15 minutes TTL
-        if (!success) {
-          console.log('Error marking user as active:', error);
-        }
+        if (!user) throw new Error("User not found");
 
         req.user = user;
         return true;
@@ -253,17 +217,11 @@ export class JwtAuthGuard implements CanActivate {
           if (isApiRequest) {
             throw new UnauthorizedException('Invalid or expired token');
           }
-          res.redirect(`${process.env.FRONTEND_URL}/login`);
           return false;
         }
       }
-    }
 
     // No token → redirect or throw
-    if (isApiRequest) {
-      throw new UnauthorizedException('Authentication required');
-    }
-    res.redirect(`${process.env.FRONTEND_URL}/login`);
-    return false;
+   throw new UnauthorizedException('Authentication required');
   }
 }

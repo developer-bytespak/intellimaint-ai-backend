@@ -8,17 +8,16 @@ import * as bcrypt from 'bcryptjs';
 import { hashPassword } from 'src/common/helpers/hashing';
 import * as jwt from 'jsonwebtoken';
 import { generateOTP } from 'src/common/helpers/generateOtp';
-import { otpExpiry } from 'src/common/helpers/otpExpiry';
 import { safeGet, safeSet } from 'src/common/lib/redis';
 import { sendEmailOTP } from 'src/common/lib/nodemailer';
 import { appConfig } from 'src/config/app.config';
-import axios from 'axios';
+import path from 'path';
 // import { UserRole, AgentStatus } from '../../generated/prisma/enums';
 dotenv.config();
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async checkUserEmail(email: string) {
     const user = await this.prisma.user.findUnique({
@@ -52,41 +51,138 @@ export class AuthService {
         company,
         status: UserStatus.ACTIVE,
       };
+
+
+
+
+
       const newUser = await this.prisma.user.create({
+        data: payload,
+      });
+
+     const oAuthProvider =  await this.prisma.oAuthProvider.create({
         data: {
-          ...payload,
-          oauthProviders: {
-            create: {
-              provider: OAuthProviderType.google,
-              providerUserId: user.id,
-              refreshToken: user.refreshToken,
-              tokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30), // 30 days
-            },
-          },
+          provider: OAuthProviderType.google,
+          providerUserId: user.providerUserId,
+          userId: newUser.id,
         },
       });
 
-            if (!newUser) {
-                throw new BadRequestException('Failed to create user');
-            }
-            return { user: newUser, accessToken: user.accessToken, isNewUser: false };
-        }
-        await this.prisma.oAuthProvider.updateMany({
-            where: {
-                provider: OAuthProviderType.google,
-                userId: existingUser.id,
-            },
-            data: {
-                refreshToken: user.refreshToken,
-                tokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 60), // 60 days expiry
-            }
-        });
 
-    return {
-      user: existingUser,
-      accessToken: user.accessToken,
-      isNewUser: true,
-    };
+      const accessToken = jwt.sign(
+        { userId: newUser.id },
+        appConfig.jwtSecret as string,
+        { expiresIn: '1h' },
+      );
+
+      const refreshToken = jwt.sign(
+        { userId: newUser.id },
+        appConfig.jwtSecret as string,
+        { expiresIn: '14' },
+      );
+
+      res.cookie('google_accessToken', accessToken, {
+        httpOnly: true,
+        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') ,
+        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+        path: '/',
+        maxAge: 1 * 60 * 60 * 1000, // 1 hour
+        // maxAge: 1 * 60 * 1000, // 1 minute
+      });
+      res.cookie('google_refreshToken', refreshToken, {
+        httpOnly: true,
+        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') ,
+        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+        path: '/',
+        maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
+      });
+
+      const existingSession = await this.prisma.session.findFirst({
+        where: { userId: newUser.id },
+      });
+
+      if (existingSession) {
+        await this.prisma.session.update({
+          where: { id: existingSession.id },
+          data: {
+            token: refreshToken,
+            expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+            // expiresAt: new Date(Date.now() + 4 * 60 * 1000), // 4 minutes
+          },
+        });
+        console.log('Existing session updated');
+        return res.redirect(`${process.env.FRONTEND_URL}/chat`);
+      } else {
+        await this.prisma.session.create({
+          data: {
+            userId: newUser.id,
+            token: refreshToken,
+            expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+            // expiresAt: new Date(Date.now() + 4 * 60 * 1000), // 4 minutes
+          },
+        });
+      }
+      console.log('New session created');
+      return res.redirect(`${process.env.FRONTEND_URL}/chat`);
+    }
+    const accessToken = jwt.sign(
+        { userId: existingUser.id },
+        appConfig.jwtSecret as string,
+        { expiresIn: '1h' },
+      );
+
+      const refreshToken = jwt.sign(
+        { userId: existingUser.id },
+        appConfig.jwtSecret as string,
+        { expiresIn: '14d' },
+      );
+
+      res.cookie('google_accessToken', accessToken, {
+        httpOnly: true,
+        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax'),
+        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+        path: '/',
+        maxAge: 1 * 60 * 60 * 1000, // 1 hour
+        // maxAge: 1 * 60 * 1000, // 1 minute
+      });
+      res.cookie('google_refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
+        path: '/',
+        maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
+        // maxAge: 4 * 60 * 1000, // 4 minutes
+      });
+
+      const existingSession = await this.prisma.session.findFirst({
+        where: { userId: existingUser.id },
+      });
+
+
+      if (existingSession) {
+        await this.prisma.session.update({
+          where: { id: existingSession.id },
+          data: {
+            token: refreshToken,
+            expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+            // expiresAt: new Date(Date.now() + 4 * 60 * 1000), // 4 minutes
+          },
+        });
+        console.log('Existing session updated');
+        return res.redirect(`${process.env.FRONTEND_URL}/chat`);
+      } else {
+        await this.prisma.session.create({
+          data: {
+            userId: existingUser.id,
+            token: refreshToken,
+            expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+            // expiresAt: new Date(Date.now() + 4 * 60 * 1000), // 4 minutes
+          },
+        });
+        console.log('New session created');
+        return res.redirect(`${process.env.FRONTEND_URL}/chat`);
+      }
+
   }
 
   // Register
@@ -244,90 +340,95 @@ export class AuthService {
           }
     }
 
-    // Login
-    // This is the function that is called when the user clicks the Login button
-    async login(body: any, res: any) {
-        const { email, password } = body;
-        const user = await this.prisma.user.findUnique({
-            where: { email }
-        });
-        console.log("user", user);
-        if(!user){
-            nestError(400, 'User not found')(res);
-            return;
-        }
-        if(!user.emailVerified){
-            nestError(400, 'User not verified')(res);
-            return;
-        }
-        if(user.status !== UserStatus.ACTIVE){
-            nestError(400, 'User account is not active. Please contact support.')(res);
-            return;
-        }
-        if (!user || !user.passwordHash) {
-            nestError(400, 'Invalid password or user not found')(res);
-            return;
-          }
-        const isPasswordValid = await bcrypt.compare(password, user?.passwordHash);
-        if(!isPasswordValid){
-            nestError(400, 'Invalid password')(res);
-            return;
-        }
-        const accessToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret as string, { expiresIn: '1h' });
-        const refreshToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret as string, { expiresIn: '7d' });
-        
-        const cookieOptions = {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
-            sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
-            path: '/',
-            maxAge: 60 * 60 * 1000, // 1 hour
-        };
-        
-        console.log('Setting local_access cookie with options:', {
-            ...cookieOptions,
-            nodeEnv: process.env.NODE_ENV,
-            forceSecure: process.env.FORCE_SECURE_COOKIES,
-        });
-        
-        // Set access token cookie with proper CORS settings
-        res.cookie('local_access', accessToken, cookieOptions);
-        
-       
-        
-        // Create or update session
-        const existingSession = await this.prisma.session.findFirst({
-            where: { userId: user.id },
-        });
-        
-        if (existingSession) {
-            await this.prisma.session.update({
-                where: { id: existingSession.id },
-                data: {
-                    token: refreshToken,
-                    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-                },
-            });
-        } else {
-            await this.prisma.session.create({
-                data: {
-                    userId: user.id,
-                    token: refreshToken,
-                    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-                },
-            });
-        }
-        const userId = user.id;
-       const {success,error} = await safeSet(`user_active:${userId}`, "1", 3600); // 1 hour TTL
-       if(!success){
-        nestError(500, 'Failed to set user active', error)(res);
-        return;
-       }
-
-        
-        nestResponse(200, 'Login successful')(res);
-        return;
+  // Login
+  // This is the function that is called when the user clicks the Login button
+  async login(body: any, res: any) {
+    const { email, password } = body;
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+    console.log('user', user);
+    if (!user) {
+      return nestError(400, 'User not found')(res);
     }
+    if (!user.emailVerified) {
+      return nestError(400, 'User not verified')(res);
+    }
+    if (!user || !user.passwordHash) {
+      return nestError(400, 'Invalid password or user not found')(res);
+    }
+    const isPasswordValid = await bcrypt.compare(password, user?.passwordHash);
+    if (!isPasswordValid) {
+      return nestError(400, 'Invalid password')(res);
+    }
+    const accessToken = jwt.sign(
+      { userId: user.id },
+      appConfig.jwtSecret as string,
+      { expiresIn: '1h' },
+    );
+    const refreshToken = jwt.sign(
+      { userId: user.id },
+      appConfig.jwtSecret as string,
+      { expiresIn: '14d' },
+    );
+
+    // Set access token cookie
+    res.cookie('local_accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 1000, // 1 hour
+      // maxAge: 2 * 60 * 1000, // 2 minutes
+    });
+
+    res.cookie('local_refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
+      path: '/',
+      maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
+      // maxAge: 7 * 60 * 1000, // 7 minutes
+
+    });
+
+    // Create or update session
+    const existingSession = await this.prisma.session.findFirst({
+      where: { userId: user.id },
+    });
+
+    if (existingSession) {
+      await this.prisma.session.update({
+        where: { id: existingSession.id },
+        data: {
+          token: refreshToken,
+          expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+          // expiresAt: new Date(Date.now() + 7  * 60 * 1000), // 7 minutes
+        },
+      });
+    } else {
+      await this.prisma.session.create({
+        data: {
+          userId: user.id,
+          token: refreshToken,
+           expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+          // expiresAt: new Date(Date.now() + 7 * 60 * 60 * 1000), // 7 minutes
+        },
+      });
+    }
+    // const userId = user.id;
+    // const { success, error } = await safeSet(
+    //   `user_active:${userId}`,
+    //   '1',
+    //   3600,
+    // ); // 1 hour TTL
+    // if (!success) {
+    //   return nestError(500, 'Failed to set user active', error)(res);
+    // }
+
+
+    return nestResponse(200, 'Login successful')(res);
+  }
 
     // Forgot Password
     // This is the function that is called when the user clicks the Forgot Password button
@@ -401,178 +502,72 @@ export class AuthService {
 
   // refresh access token
   // This function handles token refresh for both local JWT tokens and Google OAuth tokens
-  async refreshAccessToken(req: any, res: any) {
+ // AuthService.ts snippet
+async refreshAccessToken(req: any, res: any) {
+  try {
+    const local_refreshToken = req.cookies?.local_refreshToken;
+    const google_refreshToken = req.cookies?.google_refreshToken;
+
+    const token = local_refreshToken || google_refreshToken;
+    const isGoogle = !!google_refreshToken;
+
+    if (!token) return nestError(401, 'No refresh token')(res);
+
     try {
-      const localToken = req.cookies?.local_access;
-      const googleToken = req.cookies?.google_access;
-      const googleEmail = req.cookies?.google_user_email;
+      const decoded = jwt.verify(token, appConfig.jwtSecret as string) as any;
+      
+      const session = await this.prisma.session.findFirst({
+        where: {
+          userId: decoded.userId,
+          token: token, // Strict match: DB wala token aur cookie wala same ho
+          expiresAt: { gt: new Date() },
+        },
+      });
 
-            // ==============================
-            // CASE 1: LOCAL TOKEN REFRESH
-            // ==============================
-            if (localToken) {
-                try {
-                    let userId: string;
-                    
-                    // Try to decode token (even if expired) to get userId
-                    try {
-                        const decoded = jwt.verify(localToken, appConfig.jwtSecret as string) as any;
-                        userId = decoded.userId;
-                    } catch (error) {
-                        // Token is expired or invalid, try to decode without verification to get userId
-                        const decoded = jwt.decode(localToken) as any;
-                        if (!decoded || !decoded.userId) {
-                            res.clearCookie('local_access');
-                            nestError(401, 'Invalid token format')(res);
-                            return;
-                        }
-                        userId = decoded.userId;
-                    }
-                    
-                    // Find user's session with refresh token
-                    const session = await this.prisma.session.findFirst({
-                        where: {
-                            userId: userId,
-                            expiresAt: { gt: new Date() } // Session must still be valid
-                        },
-                    });
+      if (!session) throw new Error('Invalid session');
 
-                    if (!session) {
-                        res.clearCookie('local_access');
-                        nestError(401, 'Session not found or expired')(res);
-                        return;
-                    }
+      const user = await this.prisma.user.findUnique({ where: { id: decoded.userId } });
 
-                    // Verify refresh token
-                    try {
-                        jwt.verify(session.token, appConfig.jwtSecret as string);
-                    } catch (error) {
-                        // Refresh token expired
-                        res.clearCookie('local_access');
-                        nestError(401, 'Refresh token expired')(res);
-                        return;
-                    }
+      const newAccessToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret, { expiresIn: '1h' });
+      const newRefreshToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret, { expiresIn: '14d' });
 
-          // Get user to verify they still exist and are verified
-          const user = await this.prisma.user.findUnique({
-            where: { id: userId },
-          });
+      const tokenPrefix = isGoogle ? 'google' : 'local';
 
-                    if (!user) {
-                        res.clearCookie('local_access');
-                        nestError(401, 'User not found')(res);
-                        return;
-                    }
+      // HAMESHA '/' path use karein login/refresh har jagah
+      res.cookie(`${tokenPrefix}_accessToken`, newAccessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
+        path: '/', 
+        maxAge: 3600000,
+      });
 
-                    if (!user.emailVerified) {
-                        nestError(403, 'User not verified')(res);
-                        return;
-                    }
+      res.cookie(`${tokenPrefix}_refreshToken`, newRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
+        path: '/', // Isko '/' hi rakhein taaki purani delete ho jaye
+        maxAge: 14 * 24 * 60 * 60 * 1000,
+      });
 
-          // Generate new access token
-          const newAccessToken = jwt.sign(
-            { userId: user.id },
-            appConfig.jwtSecret as string,
-            { expiresIn: '1h' },
-          );
+      await this.prisma.session.update({
+        where: { id: session.id },
+        data: {
+          token: newRefreshToken,
+          expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+        },
+      });
 
-                    // Update cookie with new access token
-                    res.cookie('local_access', newAccessToken, {
-                        httpOnly: true,
-                        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
-                        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
-                        path: '/',
-                        maxAge: 60 * 60 * 1000, // 1 hour
-                    });
-
-          // Mark user as active in Redis
-          const activeUserKey = `user_active:${user.id}`;
-          await safeSet(activeUserKey, '1', 900); // 15 minutes TTL
-
-                    nestResponse(200, 'Token refreshed successfully', { refreshed: true })(res);
-                    return;
-                } catch (error) {
-                    res.clearCookie('local_access');
-                    nestError(401, 'Invalid or expired token')(res);
-                    return;
-                }
-            }
-
-      // ==============================
-      // CASE 2: GOOGLE TOKEN REFRESH
-      // ==============================
-      if (googleToken && googleEmail) {
-        try {
-          // Find user by email
-          const user = await this.prisma.user.findUnique({
-            where: { email: googleEmail },
-            include: {
-              oauthProviders: {
-                where: { provider: 'google' },
-              },
-            },
-          });
-
-                    if (!user) {
-                        res.clearCookie('google_access');
-                        res.clearCookie('google_user_email');
-                        nestError(401, 'User not found')(res);
-                        return;
-                    }
-
-                    const provider = user.oauthProviders?.[0];
-                    if (!provider?.refreshToken) {
-                        res.clearCookie('google_access');
-                        res.clearCookie('google_user_email');
-                        nestError(401, 'Refresh token not found')(res);
-                        return;
-                    }
-
-          // Call Google API to refresh access token
-          const refreshRes = await axios.post(
-            'https://oauth2.googleapis.com/token',
-            {
-              client_id: process.env.GOOGLE_CLIENT_ID,
-              client_secret: process.env.GOOGLE_CLIENT_SECRET,
-              refresh_token: provider.refreshToken,
-              grant_type: 'refresh_token',
-            },
-          );
-
-          const newAccessToken = refreshRes.data.access_token;
-
-                    // Update cookie with new access token
-                    res.cookie('google_access', newAccessToken, {
-                        httpOnly: true,
-                        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
-                        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
-                        path: '/',
-                        maxAge: 2 * 60 * 60 * 1000, // 2 hours
-                    });
-
-          // Mark user as active in Redis
-          const activeUserKey = `user_active:${user.id}`;
-          await safeSet(activeUserKey, '1', 900); // 15 minutes TTL
-
-                    nestResponse(200, 'Token refreshed successfully', { refreshed: true })(res);
-                    return;
-                } catch (error) {
-                    console.error('Google token refresh failed:', error.message);
-                    res.clearCookie('google_access');
-                    res.clearCookie('google_user_email');
-                    nestError(401, 'Failed to refresh token')(res);
-                    return;
-                }
-            }
-
-            // ==============================
-            // NO TOKEN FOUND
-            // ==============================
-            nestError(401, 'No valid token found')(res);
-        } catch (error) {
-            console.error('Token refresh error:', error);
-            nestError(500, 'Internal server error during token refresh')(res);
-        }
+      return nestResponse(200, 'Refreshed', { refreshed: true })(res);
+    } catch (e) {
+      // Clear all possible cookies on failure
+      const options = { path: '/', httpOnly: true };
+      res.clearCookie('local_refreshToken', options);
+      res.clearCookie('google_refreshToken', options);
+      return nestError(401, 'Session Expired')(res);
     }
-
+  } catch (error) {
+    return nestError(500, 'Internal Server Error')(res);
+  }
+}
 }
