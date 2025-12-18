@@ -118,28 +118,29 @@ export class AuthController {
         company,
         res as any,
       );
-      const { accessToken, isNewUser, user } = authResult as {
+      const { accessToken, refreshToken, isNewUser, user } = authResult as {
         accessToken: string;
+        refreshToken: string;
         isNewUser: boolean;
         user: any;
       };
 
       // Set Google access token cookie with proper CORS settings
-      res.cookie('google_access', accessToken, {
+      res.cookie('google_accessToken', accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
         sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
         path: '/',
-        maxAge: 1 * 60 * 60 * 1000, // 1 hours
+        maxAge: 1 * 60 * 60 * 1000, // 1 hour
       });
 
-      // Set user email cookie for refresh token logic
-      res.cookie('google_user_email', user.email, {
-        httpOnly: false, // Not httpOnly so guard can read it for refresh
+      // Set Google refresh token cookie
+      res.cookie('google_refreshToken', refreshToken, {
+        httpOnly: true,
         secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
         sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
         path: '/',
-        maxAge: 1 * 60 * 60 * 1000, // 1 hours
+        maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
       });
 
       // if (!isNewUser) {

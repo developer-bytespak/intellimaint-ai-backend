@@ -78,24 +78,8 @@ export class AuthService {
       const refreshToken = jwt.sign(
         { userId: newUser.id },
         appConfig.jwtSecret as string,
-        { expiresIn: '14' },
+        { expiresIn: '14d' },
       );
-
-      res.cookie('google_accessToken', accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
-        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
-        path: '/',
-        maxAge: 1 * 60 * 60 * 1000, // 1 hour
-        // maxAge: 1 * 60 * 1000, // 1 minute
-      });
-      res.cookie('google_refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
-        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
-        path: '/',
-        maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
-      });
 
       const existingSession = await this.prisma.session.findFirst({
         where: { userId: newUser.id },
@@ -111,7 +95,6 @@ export class AuthService {
           },
         });
         console.log('Existing session updated');
-        return res.redirect(`${process.env.FRONTEND_URL}/chat`);
       } else {
         await this.prisma.session.create({
           data: {
@@ -121,9 +104,15 @@ export class AuthService {
             // expiresAt: new Date(Date.now() + 4 * 60 * 1000), // 4 minutes
           },
         });
+        console.log('New session created');
       }
-      console.log('New session created');
-      return res.redirect(`${process.env.FRONTEND_URL}/chat`);
+      
+      return {
+        accessToken,
+        refreshToken,
+        isNewUser: true,
+        user: newUser,
+      };
     }
     const accessToken = jwt.sign(
         { userId: existingUser.id },
@@ -136,23 +125,6 @@ export class AuthService {
         appConfig.jwtSecret as string,
         { expiresIn: '14d' },
       );
-
-      res.cookie('google_accessToken', accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
-        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
-        path: '/',
-        maxAge: 1 * 60 * 60 * 1000, // 1 hour
-        // maxAge: 1 * 60 * 1000, // 1 minute
-      });
-      res.cookie('google_refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
-        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
-        path: '/',
-        maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
-        // maxAge: 4 * 60 * 1000, // 4 minutes
-      });
 
       const existingSession = await this.prisma.session.findFirst({
         where: { userId: existingUser.id },
@@ -169,7 +141,6 @@ export class AuthService {
           },
         });
         console.log('Existing session updated');
-        return res.redirect(`${process.env.FRONTEND_URL}/chat`);
       } else {
         await this.prisma.session.create({
           data: {
@@ -180,8 +151,14 @@ export class AuthService {
           },
         });
         console.log('New session created');
-        return res.redirect(`${process.env.FRONTEND_URL}/chat`);
       }
+
+      return {
+        accessToken,
+        refreshToken,
+        isNewUser: false,
+        user: existingUser,
+      };
 
   }
 
