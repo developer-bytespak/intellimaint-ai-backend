@@ -480,199 +480,72 @@ export class AuthService {
 
   // refresh access token
   // This function handles token refresh for both local JWT tokens and Google OAuth tokens
-  async refreshAccessToken(req: any, res: any) {
+ // AuthService.ts snippet
+async refreshAccessToken(req: any, res: any) {
+  try {
+    const local_refreshToken = req.cookies?.local_refreshToken;
+    const google_refreshToken = req.cookies?.google_refreshToken;
+
+    const token = local_refreshToken || google_refreshToken;
+    const isGoogle = !!google_refreshToken;
+
+    if (!token) return nestError(401, 'No refresh token')(res);
+
     try {
-      const local_refreshToken = req.cookies?.local_refreshToken;
-      const google_refreshToken = req.cookies?.google_refreshToken;
+      const decoded = jwt.verify(token, appConfig.jwtSecret as string) as any;
+      
+      const session = await this.prisma.session.findFirst({
+        where: {
+          userId: decoded.userId,
+          token: token, // Strict match: DB wala token aur cookie wala same ho
+          expiresAt: { gt: new Date() },
+        },
+      });
 
-      // ==============================
-      // CASE 1: LOCAL TOKEN REFRESH
-      // ==============================
-      if (local_refreshToken) {
-        try {
+      if (!session) throw new Error('Invalid session');
 
-          // Try to decode token (even if expired) to get userId
-          const decoded = jwt.verify(
-            local_refreshToken,
-            appConfig.jwtSecret as string,
-          ) as any;
-          const userId = decoded.userId;
+      const user = await this.prisma.user.findUnique({ where: { id: decoded.userId } });
 
-          // Find user's session with refresh token
-          const session = await this.prisma.session.findFirst({
-            where: {
-              userId: userId,
-              expiresAt: { gt: new Date() }, // Session must still be valid
-            },
-          });
+      const newAccessToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret, { expiresIn: '1h' });
+      const newRefreshToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret, { expiresIn: '14d' });
 
-          if (!session) {
-            res.clearCookie('local_refreshToken', { path: '/auth/refresh' });
-            return nestError(401, 'Session not found or expired')(res);
-          }
+      const tokenPrefix = isGoogle ? 'google' : 'local';
 
-          if (session.token !== local_refreshToken) {
-            console.log('Invalid session token');
-            res.clearCookie('local_refreshToken', { path: '/auth/refresh' });
-            return nestError(401, 'Invalid session token')(res);
-          }
+      // HAMESHA '/' path use karein login/refresh har jagah
+      res.cookie(`${tokenPrefix}_accessToken`, newAccessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/', 
+        maxAge: 3600000,
+      });
 
-          const user = await this.prisma.user.findUnique({
-            where: { id: userId },
-          });
+      res.cookie(`${tokenPrefix}_refreshToken`, newRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/', // Isko '/' hi rakhein taaki purani delete ho jaye
+        maxAge: 14 * 24 * 60 * 60 * 1000,
+      });
 
+      await this.prisma.session.update({
+        where: { id: session.id },
+        data: {
+          token: newRefreshToken,
+          expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+        },
+      });
 
-
-          // Generate new access token
-          const newAccessToken = jwt.sign(
-            { userId: user.id },
-            appConfig.jwtSecret as string,
-            { expiresIn: '1h' },
-          );
-
-          const newRefreshToken = jwt.sign(
-            { userId: user.id },
-            appConfig.jwtSecret as string,
-            { expiresIn: '14d' },
-          );
-
-          // Update cookie with new access token
-          res.cookie('local_accessToken', newAccessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            path: "/",
-            maxAge: 60 * 60 * 1000, // 1 hour
-            // maxAge: 2 * 60 * 1000, // 2 minutes
-          });
-
-          res.cookie('local_refreshToken', newRefreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            path: '/auth/refresh',
-            maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
-            // maxAge: 7 * 60 * 1000, // 7 minutes
-          });
-
-          await this.prisma.session.update({
-            where: { id: session.id },
-            data: {
-              token: newRefreshToken,
-              expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-              // expiresAt: new Date(Date.now() + 7  * 60 * 1000), // 7 minutes
-            },
-          });
-
-          console.log('Token refreshed successfully');
-
-
-          return nestResponse(200, 'Token refreshed successfully', {
-            refreshed: true,
-          })(res);
-        } catch (error) {
-          res.clearCookie('local_refreshToken', { path: '/auth/refresh' });
-          return nestError(401, 'Invalid or expired token')(res);
-        }
-      }
-
-      // ==============================
-      // CASE 2: GOOGLE TOKEN REFRESH
-      // ==============================
-      if (google_refreshToken) {
-        try {
-          // Find user by email
-          const decodeGoogleToken = jwt.verify(google_refreshToken, appConfig.jwtSecret as string) as any;
-          const userId = decodeGoogleToken.userId;
-
-          const session = await this.prisma.session.findFirst({
-            where: {
-              userId: userId,
-              expiresAt: { gt: new Date() }, // Session must still be valid
-            },
-          });
-
-          if (!session) {
-            res.clearCookie('google_refreshToken',{ path: '/auth/refresh' });
-            return nestError(401, 'Session not found or expired')(res);
-          }
-
-          if (session.token !== google_refreshToken) {
-            res.clearCookie('google_refreshToken',{ path: '/auth/refresh' });
-            return nestError(401, 'Invalid session token')(res);
-          }
-
-          const user = await this.prisma.user.findUnique({
-            where: { id: userId },
-          });
-
-          if (!user) {
-            return nestError(401, 'User not found')(res);
-          }
-
-          const newAccessToken = jwt.sign(
-            { userId: user.id },
-            appConfig.jwtSecret as string,
-            { expiresIn: '1h' },
-          );
-
-          const newRefreshToken = jwt.sign(
-            { userId: user.id },
-            appConfig.jwtSecret as string,
-            { expiresIn: '14d' },
-          );
-
-          // Update cookie with new access token
-          res.cookie('google_accessToken', newAccessToken, {
-            httpOnly: true,
-            sameSite: 'lax',
-            secure: process.env.NODE_ENV === 'production',
-            path: '/',
-            maxAge: 1 * 60 * 60 * 1000, // 1 hour
-            // maxAge: 1 * 60 * 1000, // 1 minute
-          });
-
-          res.cookie('google_refreshToken', newRefreshToken, {
-            httpOnly: true,
-            sameSite: 'lax',
-            secure: process.env.NODE_ENV === 'production',
-            path: '/auth/refresh',
-            maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
-            // maxAge: 4 * 60 * 1000, // 4 minutes
-          });
-
-           await this.prisma.session.update({
-            where: { id: session.id },
-            data: {
-              token: newRefreshToken,
-              /* The code is setting the `expiresAt` property to a date that is 14 days in the future
-              from the current date and time. The calculation is done by adding 14 days worth of
-              milliseconds to the current timestamp using `Date.now()`. */
-              expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-              // expiresAt: new Date(Date.now() + 4 * 60 * 1000), // 4 minutes
-            },
-          });
-
-
-          return nestResponse(200, 'Token refreshed successfully', {
-            refreshed: true,
-          })(res);
-        } catch (error) {
-          console.error('Google token refresh failed:', error.message);
-          res.clearCookie('google_refreshToken',{ path: '/auth/refresh' });
-          return nestError(401, 'Failed to refresh token')(res);
-        }
-      }
-
-      // ==============================
-      // NO TOKEN FOUND
-      // ==============================
-
-      console.log("Unauthorized: No refresh token provided");
-      return nestError(401, 'Unauthorized')(res);
-    } catch (error) {
-      console.error('Token refresh error:', error);
-      return nestError(500, 'Internal server error during token refresh')(res);
+      return nestResponse(200, 'Refreshed', { refreshed: true })(res);
+    } catch (e) {
+      // Clear all possible cookies on failure
+      const options = { path: '/', httpOnly: true };
+      res.clearCookie('local_refreshToken', options);
+      res.clearCookie('google_refreshToken', options);
+      return nestError(401, 'Session Expired')(res);
     }
+  } catch (error) {
+    return nestError(500, 'Internal Server Error')(res);
   }
+}
 }
