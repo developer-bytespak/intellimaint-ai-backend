@@ -349,12 +349,12 @@ export class AuthService {
     const accessToken = jwt.sign(
       { userId: user.id },
       appConfig.jwtSecret as string,
-      { expiresIn: '1h' },
+      { expiresIn: '1m' },
     );
     const refreshToken = jwt.sign(
       { userId: user.id },
       appConfig.jwtSecret as string,
-      { expiresIn: '14d' },
+      { expiresIn: '4m' },
     );
 
     // Set access token cookie
@@ -363,8 +363,8 @@ export class AuthService {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 60 * 60 * 1000, // 1 hour
-      // maxAge: 2 * 60 * 1000, // 2 minutes
+      // maxAge: 60 * 60 * 1000, // 1 hour
+      maxAge: 1 * 60 * 1000, // 1 minute
     });
 
     res.cookie('local_refreshToken', refreshToken, {
@@ -372,8 +372,8 @@ export class AuthService {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
-      // maxAge: 7 * 60 * 1000, // 7 minutes
+      // maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
+      maxAge: 4 * 60 * 1000, // 4 minutes
 
     });
 
@@ -387,8 +387,8 @@ export class AuthService {
         where: { id: existingSession.id },
         data: {
           token: refreshToken,
-          expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-          // expiresAt: new Date(Date.now() + 7  * 60 * 1000), // 7 minutes
+          // expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+          expiresAt: new Date(Date.now() + 4 * 60 * 1000), // 4 minutes
         },
       });
     } else {
@@ -396,8 +396,8 @@ export class AuthService {
         data: {
           userId: user.id,
           token: refreshToken,
-           expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-          // expiresAt: new Date(Date.now() + 7 * 60 * 60 * 1000), // 7 minutes
+          //  expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+          expiresAt: new Date(Date.now() + 4 * 60 * 1000), // 4 minutes
         },
       });
     }
@@ -506,8 +506,8 @@ async refreshAccessToken(req: any, res: any) {
 
       const user = await this.prisma.user.findUnique({ where: { id: decoded.userId } });
 
-      const newAccessToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret, { expiresIn: '1h' });
-      const newRefreshToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret, { expiresIn: '14d' });
+      const newAccessToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret, { expiresIn: '1m' });
+      const newRefreshToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret, { expiresIn: '4m' });
 
       const tokenPrefix = isGoogle ? 'google' : 'local';
 
@@ -517,7 +517,8 @@ async refreshAccessToken(req: any, res: any) {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/', 
-        maxAge: 3600000,
+        // maxAge: 3600000,
+        maxAge: 1 * 60 * 1000, // 1 minute
       });
 
       res.cookie(`${tokenPrefix}_refreshToken`, newRefreshToken, {
@@ -525,14 +526,16 @@ async refreshAccessToken(req: any, res: any) {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/', // Isko '/' hi rakhein taaki purani delete ho jaye
-        maxAge: 14 * 24 * 60 * 60 * 1000,
+        // maxAge: 14 * 24 * 60 * 60 * 1000,
+        maxAge: 4 * 60 * 1000, // 4 minutes
       });
 
       await this.prisma.session.update({
         where: { id: session.id },
         data: {
           token: newRefreshToken,
-          expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+          // expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+          expiresAt: new Date(Date.now() + 4 * 60 * 1000), // 4 minutes
         },
       });
 
