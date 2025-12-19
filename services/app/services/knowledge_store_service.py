@@ -35,8 +35,8 @@ class KnowledgeStoreService:
             # Humne 9 columns specify kiye hain (id automatically gen_random_uuid() se banega)
             query = """
                 INSERT INTO knowledge_sources 
-                (id, title, source_type, raw_content, model_id, user_id, word_count, created_at, updated_at, metadata)
-                VALUES (gen_random_uuid(), %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                (id, title, source_type, raw_content, model_id, user_id, word_count, created_at, updated_at)
+                VALUES (gen_random_uuid(), %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id;
             """
             
@@ -53,11 +53,11 @@ class KnowledgeStoreService:
                 # json.dumps(user_metadata) # Metadata JSON field
             )
 
-            cur.execute(query, params)
-            result = cur.fetchone()
-            new_id = result['id']
+            # cur.execute(query, params)
+            # result = cur.fetchone()
+            # new_id = result['id']
             
-            conn.commit()
+            # conn.commit()
             print(f"Successfully saved to Neon DB with ID: {new_id}")
             return {"id": str(new_id), "status": "success"}
 
