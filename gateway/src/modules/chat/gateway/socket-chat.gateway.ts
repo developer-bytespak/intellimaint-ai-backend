@@ -19,16 +19,28 @@ interface StreamMessagePayload {
 }
 
 @WebSocketGateway({
+  // Make Socket.IO robust for cross-origin (Vercel ↔ Render)
   cors: {
     origin: [
-      'http://localhost:3001', 
+      'http://localhost:3001',
       'http://localhost:3000',
-      process.env.FRONTEND_URL || 'http://localhost:3001'
-    ],
+      process.env.FRONTEND_URL || 'http://localhost:3001',
+    ].map((o) => String(o).trim().replace(/\/+$/, '')),
     credentials: true,
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
   },
+  // Use explicit namespace and default engine path
   namespace: '/chat',
-  transports: ['websocket', 'polling'],
+  // IMPORTANT: Avoid long-polling in Render without sticky sessions
+  transports: ['websocket'],
+  // Make initial connects resilient to cold starts/proxy delays
+  pingTimeout: 45000,
+  pingInterval: 20000,
+  // Support older engine.io clients if present
+  allowEIO3: true,
+  // Be explicit about the default path to avoid frontend mismatches
+  path: '/socket.io',
 })
 export class SocketChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
