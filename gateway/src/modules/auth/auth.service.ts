@@ -411,8 +411,18 @@ export class AuthService {
     //   return nestError(500, 'Failed to set user active', error)(res);
     // }
 
+    // Return user data along with success
+    const userData = {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      company: user.company,
+      profileImageUrl: user.profileImageUrl,
+    };
 
-    return nestResponse(200, 'Login successful')(res);
+    return nestResponse(200, 'Login successful', userData)(res);
   }
 
   // Forgot Password

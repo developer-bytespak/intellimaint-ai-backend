@@ -35,7 +35,7 @@ export class ChatController {
   async listSessions(
     @Req() req: any,
     @Query() query: ListSessionsQueryDto,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     try {
       const userId = req.user.id;
@@ -61,7 +61,7 @@ export class ChatController {
   async getSession(
     @Req() req: any,
     @Param('sessionId') sessionId: string,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     try {
       const userId = req.user.id;
@@ -86,7 +86,7 @@ export class ChatController {
     @Req() req: any,
     @Param('sessionId') sessionId: string,
     @Body() body: any,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     try {
       const userId = req.user.id;
@@ -118,7 +118,7 @@ export class ChatController {
   async deleteSession(
     @Req() req: any,
     @Param('sessionId') sessionId: string,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     try {
       const userId = req.user.id;
@@ -141,7 +141,7 @@ export class ChatController {
   @Post('cleanup-stopped')
   async cleanupStoppedMessages(
     @Req() req: any,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     try {
       const userId = req.user.id;
@@ -157,7 +157,7 @@ export class ChatController {
   async createMessageWithSession(
     @Req() req: any,
     @Body() body: any,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     try {
       const userId = req.user.id;
@@ -204,7 +204,7 @@ export class ChatController {
     @Req() req: any,
     @Param('sessionId') sessionId: string,
     @Body() body: any,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     try {
       const userId = req.user.id;
@@ -431,7 +431,7 @@ export class ChatController {
   async stopStreamPost(
     @Req() req: any,
     @Param('sessionId') sessionId: string,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     return this.stopStreamHandler(req, sessionId, res);
   }
@@ -440,7 +440,7 @@ export class ChatController {
   async stopStream(
     @Req() req: any,
     @Param('sessionId') sessionId: string,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     return this.stopStreamHandler(req, sessionId, res);
   }
@@ -502,7 +502,7 @@ export class ChatController {
     @Param('sessionId') sessionId: string,
     @Param('messageId') messageId: string,
     @Body() body: { content: string },
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     try {
       const userId = req.user.id;
@@ -538,7 +538,7 @@ export class ChatController {
     @Req() req: any,
     @Param('sessionId') sessionId: string,
     @Param('messageId') messageId: string,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     try {
       const userId = req.user.id;
@@ -559,3 +559,4 @@ export class ChatController {
     }
   }
 }
+

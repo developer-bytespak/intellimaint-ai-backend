@@ -62,7 +62,7 @@ export class AuthController {
 
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
-  async googleRedirect(@Req() req, @Res({ passthrough: true }) res: Response) {
+  async googleRedirect(@Req() req, @Res() res: Response) {
     try {
       let { role, company } = JSON.parse(req.query.state as string);
       // console.log("role", role);
@@ -131,7 +131,7 @@ export class AuthController {
     }
   }
   @Post('refresh')
-  refreshAccessToken(@Req() req, @Res({ passthrough: true }) res: Response) {
+  refreshAccessToken(@Req() req, @Res() res: Response) {
     // Validate refreshToken and generate new access token
     return this.authService.refreshAccessToken(req, res);
   }
@@ -148,7 +148,7 @@ export class AuthController {
   // Logout
   @UseGuards(JwtAuthGuard)
   @Get('logout')
-  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async logout(@Req() req: Request, @Res() res: Response) {
     console.log('logout called successfully');
     // Clear all auth cookie
     const userId = (req as any).user?.id;
@@ -182,7 +182,7 @@ export class AuthController {
 
   // Register
   @Post('register')
-  async register(@Body() body: any, @Res({ passthrough: true }) res: Response) {
+  async register(@Body() body: any, @Res() res: Response) {
     console.log('register called successfully', body);
     const email = body.email;
     const role = body.role;
@@ -234,7 +234,7 @@ export class AuthController {
   @Post('verify-otp')
   async verifyOtp(
     @Body() body: any,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     return this.authService.verifyOtp(body, res as any);
   }
@@ -243,14 +243,14 @@ export class AuthController {
   @Post('resend-otp')
   async resendOtp(
     @Body() body: any,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     return this.authService.resendOtp(body, res as any);
   }
 
   // Login
   @Post('login')
-  async login(@Body() body: any, @Res({ passthrough: true }) res: Response) {
+  async login(@Body() body: any, @Res() res: Response) {
     console.log('login called successfully', body);
     return this.authService.login(body, res as any);
   }
@@ -259,7 +259,7 @@ export class AuthController {
   @Post('forgot-password')
   async forgotPassword(
     @Body() body: any,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     return this.authService.forgotPassword(body, res as any);
   }
@@ -268,8 +268,9 @@ export class AuthController {
   @Post('reset-password')
   async resetPassword(
     @Body() body: any,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     return this.authService.resetPassword(body, res as any);
   }
 }
+

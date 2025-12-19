@@ -17,7 +17,7 @@
 //       limits: { fileSize: 10 * 1024 * 1024 }, // File size limit: 10MB
 //     }),
 //   )
-//   async uploadFile(@UploadedFile() file: Express.Multer.File, @Res({ passthrough: true }) res: Response) {
+//   async uploadFile(@UploadedFile() file: Express.Multer.File, @Res() res: Response) {
 //     console.log("file", file);
 //     if (!file) {
 //      return nestError(400, 'No file uploaded')(res as any);
@@ -95,7 +95,7 @@ export class UploadController {
   )
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @Res({ passthrough: true }) res: Response
+    @Res() res: Response
   ) {
     if (!file) return nestError(400, 'No file uploaded')(res as any);
 
@@ -132,7 +132,7 @@ export class UploadController {
   @Get('/history/images')
   async getHistoryImages(
     @Req() req: Request, 
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
     @Query('page') page?: number,        // ✅ Add this
     @Query('limit') limit?: number       // ✅ Add this
   ) {
@@ -151,3 +151,4 @@ export class UploadController {
     return this.uploadService.getUserImages(userId, res, pageNumber, pageSize);
   }
 }
+

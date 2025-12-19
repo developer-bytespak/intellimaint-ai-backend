@@ -13,7 +13,7 @@ export class SettingsController {
   constructor(private settingsService: SettingsService) {}
 
   @Get('settings')
-  async getSettings(@Req() req: any, @Res({ passthrough: true }) res: Response) {
+  async getSettings(@Req() req: any, @Res() res: Response) {
     try {
       const userId = req.user.id;
       const settings = await this.settingsService.getSettings(userId);
@@ -30,7 +30,7 @@ export class SettingsController {
   async updateSettings(
     @Req() req: any,
     @Body() body: any,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     try {
       const userId = req.user.id;
@@ -52,3 +52,4 @@ export class SettingsController {
     }
   }
 }
+
