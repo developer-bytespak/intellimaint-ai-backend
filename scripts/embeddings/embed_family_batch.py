@@ -38,6 +38,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, Iterator, List, Optional, Sequence, Tuple
+from urllib3.exceptions import ProtocolError
 
 # Optional dotenv support (matches style in your other scripts)
 try:
@@ -50,6 +51,12 @@ try:
 except Exception:  # pragma: no cover
     requests = None  # type: ignore
 
+try:
+    from requests.adapters import HTTPAdapter  # type: ignore
+    from urllib3.util.retry import Retry  # type: ignore
+except Exception:  # pragma: no cover
+    HTTPAdapter = None  # type: ignore
+    Retry = None  # type: ignore
 try:
     import psycopg2  # type: ignore
     from psycopg2.extras import RealDictCursor, execute_values, register_uuid  # type: ignore
@@ -105,13 +112,42 @@ def _openai_post_file(api_base: str, api_key: str, file_path: Path, purpose: str
     """
     _require_requests()
     url = api_base.rstrip("/") + "/v1/files"
-    with file_path.open("rb") as f:
-        files = {"file": (file_path.name, f)}
-        data = {"purpose": purpose}
-        resp = requests.post(url, headers=_openai_headers(api_key), data=data, files=files, timeout=300)
-    if resp.status_code >= 300:
-        raise RuntimeError(f"OpenAI file upload failed: {resp.status_code} {resp.text[:2000]}")
-    return resp.json()
+
+    # Use a Session with urllib3 Retry for idempotent/network errors and
+    # also perform an outer retry loop to handle chunked/streaming errors
+    sess = requests.Session()
+    # Configure urllib3 Retry if available
+    if Retry is not None and HTTPAdapter is not None:
+        retries = Retry(total=3, backoff_factor=2, status_forcelist=(429, 500, 502, 503, 504))
+        sess.mount("https://", HTTPAdapter(max_retries=retries))
+
+    attempts = 4
+    last_exc = None
+    for attempt in range(1, attempts + 1):
+        try:
+            with file_path.open("rb") as f:
+                files = {"file": (file_path.name, f)}
+                data = {"purpose": purpose}
+                resp = sess.post(url, headers=_openai_headers(api_key), data=data, files=files, timeout=600)
+            if resp.status_code < 300:
+                return resp.json()
+
+            # Treat 5xx as retryable; other errors are fatal
+            if 500 <= resp.status_code < 600:
+                last_exc = RuntimeError(f"OpenAI file upload failed: {resp.status_code} {resp.text[:2000]}")
+            else:
+                raise RuntimeError(f"OpenAI file upload failed: {resp.status_code} {resp.text[:2000]}")
+
+        except Exception as e:
+            # Capture exceptions (network, chunked encoding, timeouts, etc.) and retry
+            last_exc = e
+
+        # If we'll retry, sleep with exponential backoff
+        if attempt < attempts:
+            sleep = 2 ** attempt
+            time.sleep(sleep)
+
+    raise RuntimeError("File upload failed after retries") from last_exc
 
 
 def _openai_create_batch(api_base: str, api_key: str, input_file_id: str, endpoint: str) -> Dict:
@@ -144,18 +180,36 @@ def _openai_get_batch(api_base: str, api_key: str, batch_id: str) -> Dict:
 
 
 def _openai_download_file_content(api_base: str, api_key: str, file_id: str, out_path: Path) -> None:
-    """
-    GET /v1/files/{id}/content
-    """
     _require_requests()
     url = api_base.rstrip("/") + f"/v1/files/{file_id}/content"
-    with requests.get(url, headers=_openai_headers(api_key), stream=True, timeout=300) as resp:
-        if resp.status_code >= 300:
-            raise RuntimeError(f"OpenAI download file failed: {resp.status_code} {resp.text[:2000]}")
-        with out_path.open("wb") as f:
-            for chunk in resp.iter_content(chunk_size=1024 * 1024):
-                if chunk:
-                    f.write(chunk)
+    sess = requests.Session()
+    retries = Retry(total=3, backoff_factor=2, status_forcelist=(429,500,502,503,504))
+    sess.mount("https://", HTTPAdapter(max_retries=retries))
+
+    tmp_path = out_path.with_suffix(out_path.suffix + ".tmp")
+    max_attempts = 4
+    for attempt in range(1, max_attempts + 1):
+        try:
+            with sess.get(url, headers=_openai_headers(api_key), stream=True, timeout=(10, 600)) as resp:
+                resp.raise_for_status()
+                with tmp_path.open("wb") as f:
+                    for chunk in resp.iter_content(chunk_size=1024*1024):
+                        if chunk:
+                            f.write(chunk)
+            tmp_path.replace(out_path)
+            return
+        except (requests.exceptions.ChunkedEncodingError,
+                requests.exceptions.ConnectionError,
+                ProtocolError,
+                requests.exceptions.RequestException) as e:
+            if tmp_path.exists():
+                try:
+                    tmp_path.unlink()
+                except Exception:
+                    pass
+            if attempt == max_attempts:
+                raise RuntimeError(f"Failed to download file {file_id}") from e
+            time.sleep(2 ** attempt)
 
 
 def _connect_db(db_url: str):
