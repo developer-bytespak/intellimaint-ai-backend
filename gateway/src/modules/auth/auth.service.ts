@@ -12,6 +12,7 @@ import { safeGet, safeSet } from 'src/common/lib/redis';
 import { sendEmailOTP } from 'src/common/lib/nodemailer';
 import { appConfig } from 'src/config/app.config';
 import path from 'path';
+import { cookieConfigs, setAccessTokenCookie, setRefreshTokenCookie, clearAuthCookie } from 'src/common/helpers/cookieConfig';
 // import { UserRole, AgentStatus } from '../../generated/prisma/enums';
 dotenv.config();
 
@@ -82,18 +83,12 @@ export class AuthService {
       );
 
       res.cookie('google_accessToken', accessToken, {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-        path: '/',
+        ...cookieConfigs.accessToken(),
         maxAge: 1 * 60 * 60 * 1000, // 1 hour
         // maxAge: 1 * 60 * 1000, // 1 minute
       });
       res.cookie('google_refreshToken', refreshToken, {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-        path: '/',
+        ...cookieConfigs.refreshToken(),
         maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
       });
 
@@ -138,18 +133,12 @@ export class AuthService {
       );
 
       res.cookie('google_accessToken', accessToken, {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-        path: '/',
+        ...cookieConfigs.accessToken(),
         maxAge: 1 * 60 * 60 * 1000, // 1 hour
         // maxAge: 1 * 60 * 1000, // 1 minute
       });
       res.cookie('google_refreshToken', refreshToken, {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-        path: '/',
+        ...cookieConfigs.refreshToken(),
         maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
         // maxAge: 4 * 60 * 1000, // 4 minutes
       });
@@ -359,19 +348,13 @@ export class AuthService {
 
     // Set access token cookie
     res.cookie('local_accessToken', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
+      ...cookieConfigs.accessToken(),
       maxAge: 60 * 60 * 1000, // 1 hour
       // maxAge: 2 * 60 * 1000, // 2 minutes
     });
 
     res.cookie('local_refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
+      ...cookieConfigs.refreshToken(),
       maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
       // maxAge: 7 * 60 * 1000, // 7 minutes
 
@@ -523,18 +506,12 @@ async refreshAccessToken(req: any, res: any) {
 
       // HAMESHA '/' path use karein login/refresh har jagah
       res.cookie(`${tokenPrefix}_accessToken`, newAccessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/', 
+        ...cookieConfigs.accessToken(),
         maxAge: 3600000,
       });
 
       res.cookie(`${tokenPrefix}_refreshToken`, newRefreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/', // Isko '/' hi rakhein taaki purani delete ho jaye
+        ...cookieConfigs.refreshToken(),
         maxAge: 14 * 24 * 60 * 60 * 1000,
       });
 
@@ -549,9 +526,8 @@ async refreshAccessToken(req: any, res: any) {
       return nestResponse(200, 'Refreshed', { refreshed: true })(res);
     } catch (e) {
       // Clear all possible cookies on failure
-      const options = { path: '/', httpOnly: true };
-      res.clearCookie('local_refreshToken', options);
-      res.clearCookie('google_refreshToken', options);
+      res.clearCookie('local_refreshToken', cookieConfigs.clearCookie());
+      res.clearCookie('google_refreshToken', cookieConfigs.clearCookie());
       return nestError(401, 'Session Expired')(res);
     }
   } catch (error) {

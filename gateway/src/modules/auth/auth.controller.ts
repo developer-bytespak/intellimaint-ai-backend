@@ -16,6 +16,7 @@ import { nestError, nestResponse } from 'src/common/helpers/responseHelpers';
 import { RegisterDto } from './dto/login.dto';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
+import { cookieConfigs, clearAllAuthCookies } from 'src/common/helpers/cookieConfig';
 
 @Controller('auth')
 export class AuthController {
@@ -35,18 +36,8 @@ export class AuthController {
         return res.redirect(`${process.env.FRONTEND_URL}/chat`);
       } catch (e) {
         // Clear cookies if there's an error
-        res.clearCookie('google_accessToken', {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
-        });
-        res.clearCookie('local_accessToken', {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
-        });
+        res.clearCookie('google_accessToken', cookieConfigs.clearCookie());
+        res.clearCookie('local_accessToken', cookieConfigs.clearCookie());
       }
     }
     const passportInstance =
@@ -157,26 +148,7 @@ export class AuthController {
     }
     // await redisDeleteKey(`user_active:${userId}`);
 
-    res.clearCookie('local_accessToken', {
-      httpOnly: true,
-      sameSite: 'lax',
-      path: '/',
-    });
-    res.clearCookie('google_accessToken', {
-      httpOnly: true,
-      sameSite: 'lax',
-      path: '/',
-    });
-    res.clearCookie('local_refreshToken', {
-      httpOnly: true,
-      sameSite: 'lax',
-      path: '/',
-    });
-    res.clearCookie('google_refreshToken', {
-      httpOnly: true,
-      sameSite: 'lax',
-      path: '/',
-    });
+    clearAllAuthCookies(res);
     return nestResponse(200, 'Logged out successfully')(res);
   }
 

@@ -5,6 +5,7 @@ import * as jwt from 'jsonwebtoken';
 import { PrismaService } from 'prisma/prisma.service';
 import { appConfig } from 'src/config/app.config';
 import { safeGet, redisDeleteKey, safeSet } from 'src/common/lib/redis';
+import { cookieConfigs } from 'src/common/helpers/cookieConfig';
 
 
 @Injectable()
@@ -40,7 +41,7 @@ export class JwtAuthGuard implements CanActivate {
         req.user = user;
         return true;
       } catch (e) {
-        res.clearCookie("local_accessToken");
+        res.clearCookie("local_accessToken", cookieConfigs.clearCookie());
         if (isApiRequest) {
           throw new UnauthorizedException('Invalid or expired token');
         }
@@ -68,7 +69,7 @@ export class JwtAuthGuard implements CanActivate {
         return true;
       } catch (e) {
         console.log("Google token expired → trying refresh...");
-          res.clearCookie("google_accessToken");
+          res.clearCookie("google_accessToken", cookieConfigs.clearCookie());
           if (isApiRequest) {
             throw new UnauthorizedException('Invalid or expired token');
           }

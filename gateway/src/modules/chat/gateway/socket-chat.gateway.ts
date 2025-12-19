@@ -23,7 +23,8 @@ interface StreamMessagePayload {
     origin: [
       'http://localhost:3001', 
       'http://localhost:3000',
-      process.env.FRONTEND_URL || 'http://localhost:3001'
+      process.env.FRONTEND_URL || 'http://localhost:3001',
+      'https://intellimaint-ai.vercel.app',
     ],
     credentials: true,
   },

@@ -121,11 +121,17 @@ export class UsersController {
 
       const result = await this.usersService.deleteAccount(userId, deleteDto);
       
-      // Clear authentication cookies
-      res.clearCookie('local_access', { httpOnly: true, sameSite: 'lax', path: '/' });
-      res.clearCookie('google_access', { httpOnly: true, sameSite: 'lax', path: '/' });
-      res.clearCookie('refresh_token', { httpOnly: true, sameSite: 'lax', path: '/' });
-      res.clearCookie('google_user_email', { httpOnly: false, sameSite: 'lax', path: '/' });
+      // Clear authentication cookies with cross-domain config
+      const clearConfig = { 
+        httpOnly: true, 
+        sameSite: process.env.NODE_ENV === 'production' || process.env.CROSS_DOMAIN === 'true' ? 'none' as const : 'lax' as const, 
+        secure: process.env.NODE_ENV === 'production' || process.env.CROSS_DOMAIN === 'true',
+        path: '/' 
+      };
+      res.clearCookie('local_access', clearConfig);
+      res.clearCookie('google_access', clearConfig);
+      res.clearCookie('refresh_token', clearConfig);
+      res.clearCookie('google_user_email', { ...clearConfig, httpOnly: false });
       
       // Clear Redis cache
       await redisDeleteKey(`user_active:${userId}`);
