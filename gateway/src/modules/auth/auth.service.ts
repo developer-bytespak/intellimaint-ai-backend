@@ -83,8 +83,8 @@ export class AuthService {
 
       res.cookie('google_accessToken', accessToken, {
         httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
+        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
         path: '/',
         maxAge: 1 * 60 * 60 * 1000, // 1 hour
         // maxAge: 1 * 60 * 1000, // 1 minute
@@ -139,16 +139,16 @@ export class AuthService {
 
       res.cookie('google_accessToken', accessToken, {
         httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
+       secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
         path: '/',
         maxAge: 1 * 60 * 60 * 1000, // 1 hour
         // maxAge: 1 * 60 * 1000, // 1 minute
       });
       res.cookie('google_refreshToken', refreshToken, {
         httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
+        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
         path: '/',
         maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
         // maxAge: 4 * 60 * 1000, // 4 minutes
@@ -349,31 +349,31 @@ export class AuthService {
     const accessToken = jwt.sign(
       { userId: user.id },
       appConfig.jwtSecret as string,
-      { expiresIn: '1m' },
+      { expiresIn: '1h' },
     );
     const refreshToken = jwt.sign(
       { userId: user.id },
       appConfig.jwtSecret as string,
-      { expiresIn: '4m' },
+      { expiresIn: '14d' },
     );
 
     // Set access token cookie
     res.cookie('local_accessToken', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
       path: '/',
-      // maxAge: 60 * 60 * 1000, // 1 hour
-      maxAge: 1 * 60 * 1000, // 1 minute
+      maxAge:1* 60 * 60 * 1000, // 1 hour
+      // maxAge: 1 * 60 * 1000, // 1 minute
     });
 
     res.cookie('local_refreshToken', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
       path: '/',
-      // maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
-      maxAge: 4 * 60 * 1000, // 4 minutes
+      maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
+      // maxAge: 4 * 60 * 1000, // 4 minutes 
 
     });
 
@@ -387,8 +387,8 @@ export class AuthService {
         where: { id: existingSession.id },
         data: {
           token: refreshToken,
-          // expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-          expiresAt: new Date(Date.now() + 4 * 60 * 1000), // 4 minutes
+          expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+          // expiresAt: new Date(Date.now() + 4 * 60 * 1000), // 4 minutes
         },
       });
     } else {
@@ -396,8 +396,8 @@ export class AuthService {
         data: {
           userId: user.id,
           token: refreshToken,
-          //  expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-          expiresAt: new Date(Date.now() + 4 * 60 * 1000), // 4 minutes
+           expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+          // expiresAt: new Date(Date.now() + 4 * 60 * 1000), // 4 minutes
         },
       });
     }
@@ -506,36 +506,36 @@ async refreshAccessToken(req: any, res: any) {
 
       const user = await this.prisma.user.findUnique({ where: { id: decoded.userId } });
 
-      const newAccessToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret, { expiresIn: '1m' });
-      const newRefreshToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret, { expiresIn: '4m' });
+      const newAccessToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret, { expiresIn: '1h' });
+      const newRefreshToken = jwt.sign({ userId: user.id }, appConfig.jwtSecret, { expiresIn: '14d' });
 
       const tokenPrefix = isGoogle ? 'google' : 'local';
 
       // HAMESHA '/' path use karein login/refresh har jagah
       res.cookie(`${tokenPrefix}_accessToken`, newAccessToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
         path: '/', 
         // maxAge: 3600000,
-        maxAge: 1 * 60 * 1000, // 1 minute
+        maxAge: 1 * 60 * 60 * 1000, // 1h
       });
 
       res.cookie(`${tokenPrefix}_refreshToken`, newRefreshToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
         path: '/', // Isko '/' hi rakhein taaki purani delete ho jaye
-        // maxAge: 14 * 24 * 60 * 60 * 1000,
-        maxAge: 4 * 60 * 1000, // 4 minutes
+        maxAge: 14 * 24 * 60 * 60 * 1000,
+        // maxAge: 4 * 60 * 1000, // 4 minutes
       });
 
       await this.prisma.session.update({
         where: { id: session.id },
         data: {
           token: newRefreshToken,
-          // expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-          expiresAt: new Date(Date.now() + 4 * 60 * 1000), // 4 minutes
+          expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+          // expiresAt: new Date(Date.now() + 4 * 60 * 1000), // 4 minutes
         },
       });
 
