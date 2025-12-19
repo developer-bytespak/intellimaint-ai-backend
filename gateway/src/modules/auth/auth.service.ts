@@ -412,8 +412,14 @@ export class AuthService {
     //   return nestError(500, 'Failed to set user active', error)(res);
     // }
 
-
-    return nestResponse(200, 'Login successful')(res);
+    // Return tokens in response body as fallback for browsers that block third-party cookies
+    // Frontend can store these in localStorage if cookies are blocked
+    return nestResponse(200, 'Login successful', { 
+      user, 
+      accessToken,
+      refreshToken, 
+      expiresIn: 3600 // 1 hour in seconds
+    })(res);
   }
 
     // Forgot Password

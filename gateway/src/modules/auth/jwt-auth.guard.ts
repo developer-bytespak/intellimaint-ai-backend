@@ -17,6 +17,10 @@ export class JwtAuthGuard implements CanActivate {
 
     const googleToken = req.cookies?.google_accessToken;
     const localToken = req.cookies?.local_accessToken;
+    
+    // Also check Authorization header for Bearer token (fallback for browsers that block cookies)
+    const authHeader = req.headers.authorization;
+    const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
 
     // Check if this is an API request (not a browser redirect)
     const isApiRequest =
@@ -24,7 +28,30 @@ export class JwtAuthGuard implements CanActivate {
 
 
     // ==============================
-    // CASE 1: LOCAL TOKEN
+    // CASE 1: BEARER TOKEN (from Authorization header)
+    // ==============================
+    if (bearerToken) {
+      try {
+        const data = jwt.verify(bearerToken, appConfig.jwtSecret as string) as any;
+
+        const user = await this.prisma.user.findUnique({
+          where: { id: data.userId },
+        });
+
+        if (!user) throw new Error("User not found");
+
+        req.user = user;
+        return true;
+      } catch (e) {
+        if (isApiRequest) {
+          throw new UnauthorizedException('Invalid or expired token');
+        }
+        return false;
+      }
+    }
+
+    // ==============================
+    // CASE 2: LOCAL TOKEN (from cookies)
     // ==============================
     if (localToken) {
       try {
@@ -49,7 +76,7 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     // ==============================
-    // CASE 2: GOOGLE ACCESS TOKEN EXISTS
+    // CASE 3: GOOGLE ACCESS TOKEN EXISTS
     // ==============================
     if (googleToken) {
       try {
