@@ -1,0 +1,139 @@
+services:
+  # PostgreSQL Database with pgvector extension
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: intellimaint-postgres
+    environment:
+      POSTGRES_USER: intellimaint
+      POSTGRES_PASSWORD: intellimaint_password
+      POSTGRES_DB: intellimaint
+    ports:
+      - "5432:5432" 
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U intellimaint"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - intellimaint-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: intellimaint-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - intellimaint-network
+
+  # Gateway Service (NestJS)
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: intellimaint-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      # Application
+      NODE_ENV: production
+      PORT: 3000
+      API_PREFIX: /api/v1
+      
+      # Database
+      DATABASE_URL: postgresql://intellimaint:intellimaint_password@postgres:5432/intellimaint?schema=public
+      
+      # JWT
+      JWT_SECRET: ${JWT_SECRET:-change-this-secret-key-in-production}
+      
+      # Redis
+      REDIS_URL: redis://redis:6379
+      REDIS_PORT: 6379
+      
+      # AWS (optional - set via .env file)
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-}
+      
+      # Stripe (optional - set via .env file)
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      
+      # Gemini API (optional)
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      
+      # Blob Storage (optional)
+      BLOB_READ_WRITE_TOKEN: ${BLOB_READ_WRITE_TOKEN:-}
+      
+      # Frontend URL
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3001}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./gateway:/app
+      - /app/node_modules
+    networks:
+      - intellimaint-network
+    restart: unless-stopped
+
+  # AI Services (FastAPI)
+  services:
+    build:
+      context: ./services
+      dockerfile: Dockerfile
+    container_name: intellimaint-services
+    ports:
+      - "8000:8000"
+    environment:
+      # Application
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      
+      # Database
+      DATABASE_URL: postgresql://intellimaint:intellimaint_password@postgres:5432/intellimaint
+      
+      # Redis
+      REDIS_URL: redis://redis:6379
+      
+      # Deepgram API (optional - set via .env file)
+      DEEPGRAM_API_KEY: ${DEEPGRAM_API_KEY:-}
+      
+      # Gemini API (optional)
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services:/app
+      - services_storage:/app/storage
+    networks:
+      - intellimaint-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  services_storage:
+    driver: local
+
+networks:
+  intellimaint-network:
+    driver: bridge
+

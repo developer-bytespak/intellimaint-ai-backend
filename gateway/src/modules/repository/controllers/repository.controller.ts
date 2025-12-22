@@ -33,7 +33,7 @@ export class RepositoryController {
     // @UploadedFile() file: Express.Multer.File,
     @Req() req: any,
     @Body() body: any,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     try {
       // console.log("req ==>", req);
@@ -64,7 +64,7 @@ export class RepositoryController {
   async listDocuments(
     @Req() req: any,
     @Query() query: ListDocumentsQueryDto,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     try {
       const userId = req.user.id;
@@ -85,7 +85,7 @@ export class RepositoryController {
   async getDocument(
     @Req() req: any,
     @Param('id') id: string,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     try { 
       // console.log("id ==>", id);
@@ -111,7 +111,7 @@ export class RepositoryController {
   async deleteDocument(
     @Req() req: any,
     @Param('id') id: string,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     try {
       const userId = req.user.id;
@@ -132,4 +132,5 @@ export class RepositoryController {
     }
   }
 }
+
 
