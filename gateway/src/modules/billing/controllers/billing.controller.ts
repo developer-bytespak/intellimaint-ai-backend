@@ -1,7 +1,9 @@
-import { Controller, Post, Get, Body, Param } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, UseGuards } from '@nestjs/common';
 import { BillingService } from '../services/billing.service';
+import { JwtAuthGuard } from 'src/modules/auth/jwt-auth.guard';
 
 @Controller('billing')
+@UseGuards(JwtAuthGuard)
 export class BillingController {
   constructor(private billingService: BillingService) {}
 
