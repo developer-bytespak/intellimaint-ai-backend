@@ -15,8 +15,9 @@ redis = new Redis(appConfig.redisUrl, {
         }
         return 2000; // retry after 2 seconds
     },
-    maxRetriesPerRequest: 1,
-    enableOfflineQueue: false,
+    maxRetriesPerRequest: null,
+    enableOfflineQueue: true,
+    enableReadyCheck: true,
 });
 
 // Handle connection errors

@@ -1,5 +1,6 @@
 import os
-from typing import List, Dict, Tuple, Optional, Callable
+import re
+from typing import List, Dict, Tuple, Optional
 
 import fitz  # PyMuPDF
 import pdfplumber
@@ -67,15 +68,11 @@ class DocumentService:
     @staticmethod
     def extract_text_with_image_markers(
         file_path: str, 
-        output_dir: str,
-        progress_callback: Optional[Callable[[int, int], None]] = None
+        output_dir: str
     ) -> Tuple[str, List[str]]:
         """
         Extract text in reading order, skip table-like blocks,
         avoid duplicate text blocks, and save images with markers.
-        
-        Args:
-            progress_callback: Optional callback function(current_page, total_pages) to track progress
         """
 
         full_text = ""
@@ -87,10 +84,6 @@ class DocumentService:
 
         with fitz.open(file_path) as pdf:
             total_pages = len(pdf)
-            
-            # Call progress callback at start
-            if progress_callback:
-                progress_callback(0, total_pages)
             
             for page_index, page in enumerate(pdf):
                 blocks = page.get_text("dict")["blocks"]
@@ -215,10 +208,6 @@ class DocumentService:
                 # NORMALIZE PAGE OUTPUT
                 # -------------------------
                 full_text += "\n".join(page_output_lines) + "\n\n"
-                
-                # Update progress after each page
-                if progress_callback:
-                    progress_callback(page_num, total_pages)
 
         return full_text, image_files
 
@@ -229,22 +218,13 @@ class DocumentService:
     # ------------------------------------
     @staticmethod
     def extract_and_format_tables_from_pdf(
-        file_path: str,
-        progress_callback: Optional[Callable[[int, int], None]] = None
+        file_path: str
     ) -> List[Dict]:
-        """Extract tables using pdfplumber.
-        
-        Args:
-            progress_callback: Optional callback function(current_page, total_pages) to track progress
-        """
+        """Extract tables using pdfplumber."""
         output: List[Dict] = []
 
         with pdfplumber.open(file_path) as pdf:
             total_pages = len(pdf.pages)
-            
-            # Call progress callback at start
-            if progress_callback:
-                progress_callback(0, total_pages)
             
             for page_index, page in enumerate(pdf.pages, start=1):
                 tables = page.extract_tables()
@@ -265,10 +245,6 @@ class DocumentService:
                         "columns": list(df.columns),
                         "rows": df.values.tolist(),
                     })
-                
-                # Update progress after each page
-                if progress_callback:
-                    progress_callback(page_index, total_pages)
 
         return output
 
@@ -278,21 +254,12 @@ class DocumentService:
     @staticmethod
     def upload_images_to_supabase(
         image_paths: List[str],
-        bucket_name: str = "pics",
-        progress_callback: Optional[Callable[[int, int], None]] = None
+        bucket_name: str = "pics"
     ) -> List[Dict[str, str]]:
-        """Upload images to Supabase storage.
-        
-        Args:
-            progress_callback: Optional callback function(current_image, total_images) to track progress
-        """
+        """Upload images to Supabase storage."""
         db = get_db()
         uploaded: List[Dict[str, str]] = []
         total_images = len(image_paths)
-        
-        # Call progress callback at start
-        if progress_callback:
-            progress_callback(0, total_images)
 
         for idx, img_path in enumerate(image_paths, start=1):
             file_name = os.path.basename(img_path)
@@ -323,10 +290,6 @@ class DocumentService:
                     "filename": file_name,
                     "error": str(e),
                 })
-            
-            # Update progress after each image upload
-            if progress_callback:
-                progress_callback(idx, total_images)
 
         return uploaded
 

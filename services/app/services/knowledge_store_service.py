@@ -53,11 +53,11 @@ class KnowledgeStoreService:
                 # json.dumps(user_metadata) # Metadata JSON field
             )
 
-            # cur.execute(query, params)
-            # result = cur.fetchone()
-            # new_id = result['id']
+            cur.execute(query, params)
+            result = cur.fetchone()
+            new_id = result['id']
             
-            # conn.commit()
+            conn.commit()
             print(f"Successfully saved to Neon DB with ID: {new_id}")
             return {"id": str(new_id), "status": "success"}
 
