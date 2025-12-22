@@ -2,7 +2,8 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import orchestrator, vision, rag, asr_tts, doc_extract, stream, chunking
+
+from .routes import orchestrator, vision, rag, asr_tts, doc_extract, stream, chunking, batches, doc_extract_worker
 
 app = FastAPI(
     title="IntelliMaint AI Service",
@@ -60,6 +61,19 @@ app.include_router(
     prefix="/api/v1/chunk",
     tags=["chunking"]
 )
+
+app.include_router(
+    batches.router,
+    prefix="/api/v1",
+    tags=["batches"]
+)
+
+app.include_router(
+    doc_extract_worker.router,
+    prefix="/api/v1/extract/internal",
+    tags=["worker"]
+)
+
 
 # app.include_router(
 #     stream.router,

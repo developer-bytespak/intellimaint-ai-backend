@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
@@ -12,6 +12,8 @@ import { AdminModule } from './modules/admin/admin.module';
 import { HealthModule } from './modules/health/health.module';
 import { RepositoryModule } from './modules/repository/repository.module';
 import { UploadModule } from './modules/upload/upload.module';
+import { QueueModule } from "./modules/queue/queue.module";
+import { startPdfWorker } from './modules/queue/pdf.worker'; 
 
 @Module({
   imports: [
@@ -27,8 +29,12 @@ import { UploadModule } from './modules/upload/upload.module';
     AdminModule,
     HealthModule,
     RepositoryModule,
-    UploadModule
+    UploadModule,
+    QueueModule
   ],
 })
-export class AppModule {}
-
+export class AppModule implements OnModuleInit {
+  onModuleInit() {
+    startPdfWorker();
+  }
+}

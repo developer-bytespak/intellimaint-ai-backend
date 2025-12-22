@@ -2,13 +2,13 @@ import os
 import uuid
 import shutil
 import fitz
-import asyncio
 
-from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
-from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi.responses import PlainTextResponse
 
 from ..services.doc_extract_service import DocumentService
-from ..services.progress_tracker import ProgressTracker
+from ..services.knowledge_store_service import KnowledgeStoreService
+from ..redis_client import redis_client
 
 router = APIRouter()
 
@@ -16,80 +16,88 @@ UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
-def process_pdf_extraction(job_id: str, file_path: str, image_dir: str):
-    """Background task to process PDF extraction with progress tracking"""
+def process_pdf_extraction(
+    user: dict,
+    file_path: str, 
+    image_dir: str,
+    fileName: str = None,
+    model_id: str = None,
+    user_id: str = None,
+    job_id: str = None
+) -> str:
+    print(f"Started PDF extraction for: {fileName}")
+
+    def update_progress(p: int):
+        if job_id and redis_client:
+            redis_client.hset(f"job:{job_id}", mapping={"progress": str(p), "status": "processing"})
+
     try:
-        # ============================================
-        # STEP 1: Text + Images Extraction (60%)
-        # ============================================
-        def update_text_progress(current_page: int, total_pages: int):
-            ProgressTracker.update_text_extraction_progress(job_id, current_page, total_pages)
-        
+        update_progress(10)
+
+        # STEP 1: Text + Images Extraction
         text_with_placeholders, extracted_images = DocumentService.extract_text_with_image_markers(
-            file_path, image_dir, progress_callback=update_text_progress
+            file_path, image_dir
         )
+        update_progress(30)
 
-        # ============================================
-        # STEP 2: Table Extraction (20%)
-        # ============================================
-        def update_table_progress(current_page: int, total_pages: int):
-            step_progress = int((current_page / total_pages) * 100) if total_pages > 0 else 0
-            ProgressTracker.update_step_progress(job_id, "table_extraction", step_progress)
-        
+        # STEP 2: Table Extraction
         extracted_tables = DocumentService.extract_and_format_tables_from_pdf(
-            file_path, progress_callback=update_table_progress
+            file_path
         )
+        update_progress(50)
 
-        # ============================================
-        # STEP 3: Image Upload (15%)
-        # ============================================
-        def update_upload_progress(current_img: int, total_imgs: int):
-            step_progress = int((current_img / total_imgs) * 100) if total_imgs > 0 else 0
-            ProgressTracker.update_step_progress(job_id, "image_upload", step_progress)
-        
+        # STEP 3: Image Upload
         image_urls = DocumentService.upload_images_to_supabase(
-            extracted_images, progress_callback=update_upload_progress
+            extracted_images
         )
-        print(f"Image URLs: {image_urls}")
+        update_progress(70)
 
-        # ============================================
-        # STEP 4: Unified Content (5%)
-        # ============================================
-        ProgressTracker.update_step_progress(job_id, "unified_content", 50)
-        
+        # STEP 4: Unified Content
         text_with_urls = DocumentService.replace_placeholders_with_urls(text_with_placeholders, image_urls)
         unified_content = DocumentService.create_unified_content(text_with_urls, extracted_tables)
-        
-        ProgressTracker.update_step_progress(job_id, "unified_content", 100)
+        update_progress(90)
 
-        # ============================================
-        # Mark as completed
-        # ============================================
-        ProgressTracker.mark_completed(job_id, unified_content)
+        # Background DB Storage
+        try:
+            print("Attempting to log knowledge source to DB...", fileName)
+            KnowledgeStoreService.create_knowledge_source(
+                title=fileName or "Untitled Document",
+                raw_content=unified_content,
+                source_type="pdf",
+                model_id=model_id,
+                user_id=user.get("userId"),
+                email=user.get("email"),
+                role=user.get("role"),
+                name=user.get("name")
+            )
+        except Exception as db_err:
+            print(f"DB Logging Error (Extraction still succeeds): {db_err}")
+
+        if job_id and redis_client:
+            redis_client.hset(f"job:{job_id}", mapping={"progress": "100", "status": "completed"})
+
+        return unified_content
 
     except Exception as e:
         print(f"Error processing PDF: {str(e)}")
-        ProgressTracker.mark_failed(job_id, str(e))
+        raise e
     finally:
-        # Cleanup – wrap deletes to avoid crashing if file is locked
+        # Cleanup
         if os.path.exists(file_path):
-            try:
-                os.remove(file_path)
-            except PermissionError:
-                print(f"Could not delete file {file_path} due to PermissionError.")
+            os.remove(file_path)
         if os.path.exists(image_dir):
-            try:
-                shutil.rmtree(image_dir)
-            except PermissionError:
-                print(f"Could not delete image dir {image_dir} due to PermissionError.")
+            shutil.rmtree(image_dir)
 
 
 @router.post("/extract/full")
 async def extract_text_and_images(
-    file: UploadFile = File(...),
-    background_tasks: BackgroundTasks = BackgroundTasks()
+    userId: str,  # Query param 1
+    name: str = None,  # Query param 2 (optional)
+    role: str = None,  # Query param 3
+    email: str = None,  # Query param 4
+    file: UploadFile = File(...)
 ):
-    """Extract text, images, and tables from a PDF with progress tracking."""
+    """Extract text, images, and tables from a PDF."""
     print(f"Extracting text and images from PDF: {file.filename}")
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Invalid file format. Only PDF files are allowed.")
@@ -97,7 +105,6 @@ async def extract_text_and_images(
     # Save PDF temporarily
     temp_name = f"{uuid.uuid4()}.pdf"
     file_path = os.path.join(UPLOAD_DIR, temp_name)
-    
 
     try:
         with open(file_path, "wb") as buffer:
@@ -109,99 +116,65 @@ async def extract_text_and_images(
         except Exception:
             pass
 
-    # Get total pages first to create job
-    try:
-        with fitz.open(file_path) as pdf:
-            total_pages = len(pdf)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error reading PDF: {str(e)}")
-
     # Create temp image folder
     image_dir = os.path.join(UPLOAD_DIR, f"img_{uuid.uuid4()}")
     os.makedirs(image_dir, exist_ok=True)
 
-    # Create job and get job_id
-    job_id = ProgressTracker.create_job(total_pages=total_pages)
+    user = {
+        "userId": userId,
+        "name": name,
+        "role": role,
+        "email": email
+    }
 
-    # Start background processing
-    background_tasks.add_task(process_pdf_extraction, job_id, file_path, image_dir)
+    # Process PDF synchronously and return unified content
+    try:
+        unified_content = process_pdf_extraction(
+            user=user,
+            file_path=file_path,
+            image_dir=image_dir,
+            fileName=file.filename
+        )
+        
+        return PlainTextResponse(
+            content=unified_content,
+            media_type="text/plain"
+        )
+    except Exception as e:
+        # Ensure cleanup happens even if processing fails
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        if os.path.exists(image_dir):
+            shutil.rmtree(image_dir)
+        raise HTTPException(status_code=500, detail=f"Error processing PDF: {str(e)}")
 
-    # Return job_id immediately
-    return JSONResponse({
-        "job_id": job_id,
-        "status": "processing",
-        "message": "PDF extraction started. Use job_id to check progress.",
-        "total_pages": total_pages
-    })
-
-
-@router.get("/extract/progress/{job_id}")
-async def get_extraction_progress(job_id: str):
+@router.post("/extract/internal")
+async def extract_internal(payload: dict):
     """
-    Get progress of PDF extraction job with long polling at milestones
-    Each API call waits until its milestone is reached (25%, 50%, 75%, 100%)
-    Returns 200 with progress/data at each milestone
+    INTERNAL USE ONLY
+    Called by Node worker
     """
-    
-    # Maximum wait time: 5 minutes
-    MAX_WAIT_TIME = 300  # seconds
-    POLL_INTERVAL = 1  # Check every 1 second
-    elapsed_time = 0
-    
-    while elapsed_time < MAX_WAIT_TIME:
-        progress = ProgressTracker.get_progress(job_id)
-        
-        if not progress:
-            raise HTTPException(status_code=404, detail="Job not found")
-        
-        # If completed, return data as plain text
-        if progress["status"] == "completed":
-            print(f"Progress: {progress['data']}")
-            return PlainTextResponse(
-                content=progress["data"],
-                media_type="text/plain"
-            )
-        
-        # If failed, return error
-        if progress["status"] == "failed":
-            return JSONResponse({
-                "job_id": job_id,
-                "status": "failed",
-                "error": progress["error"]
-            }, status_code=500)
-        
-        # Check if we should return progress based on milestone
-        should_return, api_call_count = ProgressTracker.check_and_increment_api_call(job_id)
-        
-        if should_return:
-            # Calculate which milestone was reached
-            milestone_index = min(api_call_count - 1, len(ProgressTracker.API_MILESTONES) - 1)
-            milestone = ProgressTracker.API_MILESTONES[milestone_index] if milestone_index >= 0 else 0
-            
-            # Return progress info as JSON at milestone
-            return JSONResponse({
-                "job_id": job_id,
-                "status": "processing",
-                "progress": progress["progress"],
-                "current_step": progress["current_step"],
-                "message": progress.get("message", "Processing..."),
-                "api_call": api_call_count,
-                "milestone": milestone
-            })
-        
-        # Milestone not reached yet, wait and check again
-        await asyncio.sleep(POLL_INTERVAL)
-        elapsed_time += POLL_INTERVAL
-    
-    # Timeout - return current progress
-    progress = ProgressTracker.get_progress(job_id)
-    if not progress:
-        raise HTTPException(status_code=404, detail="Job not found")
-    
-    return JSONResponse({
-        "job_id": job_id,
-        "status": "processing",
-        "progress": progress["progress"],
-        "current_step": progress["current_step"],
-        "message": "Timeout: Job still processing"
-    }, status_code=408)
+    try:
+        file_path = payload["filePath"]
+        file_name = payload.get("fileName")
+        user = payload.get("user", {})
+
+        image_dir = os.path.join("uploads", f"img_{uuid.uuid4()}")
+        os.makedirs(image_dir, exist_ok=True)
+
+        result = process_pdf_extraction(
+            user=user,
+            file_path=file_path,
+            image_dir=image_dir,
+            fileName=file_name
+        )
+
+        return {
+            "status": "completed",
+            "result": "ok"
+        }
+
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+
