@@ -21,7 +21,7 @@ export class UsersController {
   ) {}
 
   @Get('profile')
-  async getProfile(@Req() req: any, @Res({ passthrough: true }) res: Response) {
+  async getProfile(@Req() req: any, @Res() res: Response) {
     try {
       const userId = req.user.id;
       const user = await this.usersService.getProfile(userId);
@@ -38,7 +38,7 @@ export class UsersController {
   async updateProfile(
     @Req() req: any,
     @Body() body: any,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     try {
       const userId = req.user.id;
@@ -64,7 +64,7 @@ export class UsersController {
   async changePassword(
     @Req() req: any,
     @Body() body: any,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     try {
       const userId = req.user.id;
@@ -89,7 +89,7 @@ export class UsersController {
   @Post('account/delete-otp')
   async sendDeleteAccountOtp(
     @Req() req: any,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     try {
       const userId = req.user.id;
@@ -107,7 +107,7 @@ export class UsersController {
   async deleteAccount(
     @Req() req: any,
     @Body() body: any,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     try {
       const userId = req.user.id;
@@ -140,7 +140,7 @@ export class UsersController {
   }
 
   @Get('settings')
-  async getSettings(@Req() req: any, @Res({ passthrough: true }) res: Response) {
+  async getSettings(@Req() req: any, @Res() res: Response) {
     try {
       const userId = req.user.id;
       const settings = await this.settingsService.getSettings(userId);
@@ -157,7 +157,7 @@ export class UsersController {
   async updateSettings(
     @Req() req: any,
     @Body() body: any,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     try {
       const userId = req.user.id;
@@ -179,3 +179,4 @@ export class UsersController {
     }
   }
 }
+
