@@ -2,10 +2,13 @@ import json
 import os
 import asyncio
 import time
+import uuid
 from openai import AsyncOpenAI
 from app.services.asr_tts_service import synthesize_speech
 from app.services.chat_message_service import ChatMessageService
 from app.services.summary_service import SummaryService
+from app.redis_client import redis_client
+import uuid
 
 
 class StreamService:
@@ -16,6 +19,7 @@ class StreamService:
             "Short, direct answers. "
             "Plain text only."
         )
+        self.redis_client = redis_client
 
     # ---------- helpers ----------
     def _ms(self, start): 
@@ -51,6 +55,8 @@ class StreamService:
         assistant_text,
         model,
         usage,
+        fakeSessionId,
+        user_id,
     ):
         asyncio.create_task(
             asyncio.to_thread(
@@ -62,14 +68,21 @@ class StreamService:
                 prompt_tokens=usage.prompt_tokens if usage else None,
                 completion_tokens=usage.completion_tokens if usage else None,
                 total_tokens=usage.total_tokens if usage else None,
+                user_id=user_id,
+                fakeSessionId=fakeSessionId,
             )
         )
 
+    # For Create new Session + new ChatMessage records
+
+    
+
     # ---------- REALTIME ----------
-    async def process_text(self, text, session_id, user_id):
+    async def process_text(self, text, session_id, user_id, fakeSessionId):
         t0 = time.perf_counter()
         if not text:
             return None
+        
 
         # 1️⃣ Context read (fast)
         step_start = time.perf_counter()
@@ -112,6 +125,8 @@ class StreamService:
             assistant_text=reply,
             model="gpt-4o-mini",
             usage=usage,
+            fakeSessionId=fakeSessionId,
+            user_id=user_id,
         )
         print(
             f"[TIMING] background_task_scheduling: {self._ms(step_start):.2f} ms",
@@ -122,154 +137,42 @@ class StreamService:
         return audio
 
     async def handle_stream(self, data: dict, user_id: str | None):
-        if "text" not in data:
-            return None
+        msg = data
 
-        step_start = time.perf_counter()
-        msg = json.loads(data["text"])
-        print(f"[TIMING] json_loads: {self._ms(step_start):.2f} ms", flush=True)
-        if msg.get("type") != "final_text":
-            return None
+        print(f"[stream_service] handle_stream: received message: {msg}", flush=True)
 
-        step_start = time.perf_counter()
+        if "text" not in msg or not msg["text"]:
+            return await self._safe_error_reply() 
+    
+        if "text" in msg and msg["text"]:
+            payload = json.loads(msg["text"])   # 👈 important
+            if payload.get("type") == "stop":
+                print("[stream_service] handle_stream: received 'stop' message, returning.", flush=True)
+                return False
+                        # ✅ Handle interrupt message - just return False, no fake_session_id needed
+            if payload.get("type") == "interrupt":
+                print("[stream_service] handle_stream: received 'interrupt' message, returning.", flush=True)
+                return False
+        session_id = payload.get("sessionId")
+        fake_session_id = None
+        if not session_id:
+            fake_session_id = str(uuid.uuid4())
+
+        print(f"[stream_service] handle_stream: session_id={session_id}", flush=True)
+        print(f"fake_session_id={fake_session_id}", flush=True)
+
+        # return False
+
         result = await self.process_text(
-            msg.get("text", ""),
-            msg.get("sessionId"),
+            payload.get("text", ""),
+            session_id,
             user_id,
+            fake_session_id
         )
-        print(f"[TIMING] process_text: {self._ms(step_start):.2f} ms", flush=True)
+        # If a fake session was generated, return it separately
+        if fake_session_id:
+            # Return both the result and fake_session_id as a tuple
+            return (result, fake_session_id)
+        
         return result
-
-
-
-# import json
-# import os
-# import asyncio
-# from openai import AsyncOpenAI
-# from app.services.asr_tts_service import synthesize_speech
-# from app.services.chat_message_service import ChatMessageService
-# from app.services.summary_service import SummaryService
-# from app.redis_client import redis_client
-
-# class StreamService:
-#     def __init__(self):
-#         self.client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-#         self.system_instruction = (
-#             "You are a voice assistant. "
-#             "Short, direct answers. "
-#             "Plain text only."
-#         )
-
-#     async def call_llm(self, prompt: str):
-#         resp = await self.client.chat.completions.create(
-#             model="gpt-4o-mini",
-#             messages=[
-#                 {"role": "system", "content": self.system_instruction},
-#                 {"role": "user", "content": prompt},
-#             ],
-#             temperature=0.3,
-#         )
-#         return resp.choices[0].message.content, resp.usage
-
-#     async def text_to_audio(self, text: str) -> bytes:
-#         return await synthesize_speech(text)
-
-#     def _schedule_background(self, session_id):
-#         asyncio.create_task(
-#             asyncio.to_thread(
-#                 SummaryService.update_summary_if_needed,
-#                 session_id,
-#             )
-#         )
-
-#     async def process_text(self, text, session_id, user_id):
-#         if not text:
-#             return None
-
-#         # ---------- REDIS FAST READ ----------
-#         last_messages = None
-#         summary = None
-
-#         if redis_client and session_id:
-#             last_messages = redis_client.get(f"chat:{session_id}:last5")
-#             summary = redis_client.get(f"chat:{session_id}:summary")
-
-#             if last_messages:
-#                 last_messages = json.loads(last_messages)
-
-#         if last_messages is None:
-#             last_messages = ChatMessageService.get_last_messages(session_id, limit=5)
-#             if redis_client and session_id:
-#                 redis_client.setex(
-#                     f"chat:{session_id}:last5",
-#                     120,
-#                     json.dumps(last_messages),
-#                 )
-
-#         if summary is None:
-#             summary = ChatMessageService.get_summary(session_id)
-#             if redis_client and summary:
-#                 redis_client.setex(
-#                     f"chat:{session_id}:summary",
-#                     120,
-#                     summary,
-#                 )
-
-#         # ---------- PROMPT ----------
-#         parts = []
-#         if summary:
-#             parts.append(f"Conversation summary:\n{summary}")
-#         for m in last_messages:
-#             parts.append(f"{m['role']}: {m['content']}")
-#         parts.append(f"user: {text}")
-#         prompt = "\n".join(parts)
-
-#         # ---------- LLM ----------
-#         reply, usage = await self.call_llm(prompt)
-#         reply = reply or "Sorry, I could not respond."
-
-#         # ---------- TTS ----------
-#         audio = await self.text_to_audio(reply)
-
-#         # ---------- BACKGROUND SAVE ----------
-#         ChatMessageService.save_chat_message(session_id, "user", text)
-#         ChatMessageService.save_chat_message(
-#             session_id,
-#             "assistant",
-#             reply,
-#             model="gpt-4o-mini",
-#             prompt_tokens=usage.prompt_tokens if usage else None,
-#             completion_tokens=usage.completion_tokens if usage else None,
-#             total_tokens=usage.total_tokens if usage else None,
-#         )
-
-#         # ---------- REDIS UPDATE ----------
-#         if redis_client and session_id:
-#             new_last = (last_messages + [
-#                 {"role": "user", "content": text},
-#                 {"role": "assistant", "content": reply},
-#             ])[-5:]
-
-#             redis_client.setex(
-#                 f"chat:{session_id}:last5",
-#                 120,
-#                 json.dumps(new_last),
-#             )
-
-#         self._schedule_background(session_id)
-
-#         return audio
-
-#     async def handle_stream(self, data: dict, user_id: str | None):
-#         if "text" not in data:
-#             return None
-
-#         msg = json.loads(data["text"])
-#         if msg.get("type") != "final_text":
-#             return None
-
-#         return await self.process_text(
-#             msg.get("text", ""),
-#             msg.get("sessionId"),
-#             user_id,
-#         )
+       

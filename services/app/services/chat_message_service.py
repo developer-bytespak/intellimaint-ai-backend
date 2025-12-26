@@ -30,6 +30,32 @@ class ChatMessageService:
     def _put_conn(cls, conn):
         cls._get_pool().putconn(conn)
 
+
+    # -----------------------------
+    # WRITE: create chat session
+    # -----------------------------
+    @staticmethod
+    def create_chat_session(session_id, user_id, status="active", user_text=None):
+        if not session_id or not user_id:
+            return
+
+        pool = ChatMessageService._get_pool()
+        conn = pool.getconn()
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                """
+                INSERT INTO chat_sessions (id, user_id, status, created_at, updated_at,title)
+                VALUES (%s, %s, %s, now(), now(), %s)
+                ON CONFLICT (id) DO NOTHING;
+                """,
+                (session_id, user_id, status, user_text),
+            )
+            conn.commit()
+            cur.close()
+        finally:
+            pool.putconn(conn)
+
     # -----------------------------
     # READ: last messages
     # -----------------------------
@@ -133,113 +159,3 @@ class ChatMessageService:
         finally:
             pool.putconn(conn)
 
-
-
-
-# import os
-# import psycopg2
-# from psycopg2.pool import ThreadedConnectionPool
-# from psycopg2.extras import RealDictCursor
-
-# DB_URL = os.getenv("DATABASE_URL")
-
-# _pool = ThreadedConnectionPool(
-#     minconn=1,
-#     maxconn=10,
-#     dsn=DB_URL,
-# )
-
-# class ChatMessageService:
-
-#     @staticmethod
-#     def _get_conn():
-#         return _pool.getconn()
-
-#     @staticmethod
-#     def _put_conn(conn):
-#         _pool.putconn(conn)
-
-#     @staticmethod
-#     def get_last_messages(session_id, limit=5):
-#         if not session_id:
-#             return []
-#         conn = ChatMessageService._get_conn()
-#         try:
-#             cur = conn.cursor(cursor_factory=RealDictCursor)
-#             cur.execute("""
-#                 SELECT role, content
-#                 FROM chat_messages
-#                 WHERE session_id = %s
-#                 ORDER BY created_at DESC
-#                 LIMIT %s;
-#             """, (session_id, limit))
-#             rows = cur.fetchall()
-#             return list(reversed(rows))
-#         finally:
-#             cur.close()
-#             ChatMessageService._put_conn(conn)
-
-#     @staticmethod
-#     def get_summary(session_id):
-#         if not session_id:
-#             return None
-#         conn = ChatMessageService._get_conn()
-#         try:
-#             cur = conn.cursor()
-#             cur.execute("""
-#                 SELECT context_summary
-#                 FROM chat_sessions
-#                 WHERE id = %s;
-#             """, (session_id,))
-#             row = cur.fetchone()
-#             return row[0] if row else None
-#         finally:
-#             cur.close()
-#             ChatMessageService._put_conn(conn)
-
-#     @staticmethod
-#     def save_chat_message(
-#         session_id,
-#         role,
-#         content,
-#         model=None,
-#         prompt_tokens=None,
-#         completion_tokens=None,
-#         total_tokens=None,
-#     ):
-#         conn = ChatMessageService._get_conn()
-#         try:
-#             cur = conn.cursor()
-#             cur.execute("""
-#                 INSERT INTO chat_messages
-#                 (id, session_id, role, content, model,
-#                  prompt_tokens, completion_tokens, total_tokens, created_at)
-#                 VALUES (gen_random_uuid(), %s, %s, %s, %s, %s, %s, %s, now());
-#             """, (
-#                 session_id,
-#                 role,
-#                 content,
-#                 model,
-#                 prompt_tokens,
-#                 completion_tokens,
-#                 total_tokens,
-#             ))
-#             conn.commit()
-#         finally:
-#             cur.close()
-#             ChatMessageService._put_conn(conn)
-
-#     @staticmethod
-#     def update_summary(session_id, summary):
-#         conn = ChatMessageService._get_conn()
-#         try:
-#             cur = conn.cursor()
-#             cur.execute("""
-#                 UPDATE chat_sessions
-#                 SET context_summary = %s, updated_at = now()
-#                 WHERE id = %s;
-#             """, (summary, session_id))
-#             conn.commit()
-#         finally:
-#             cur.close()
-#             ChatMessageService._put_conn(conn)

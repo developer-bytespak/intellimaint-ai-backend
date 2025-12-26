@@ -17,8 +17,20 @@ class SummaryService:
         prompt_tokens,
         completion_tokens,
         total_tokens,
+        user_id,
+        fakeSessionId,
     ):
         if not session_id:
+            if not fakeSessionId:
+                return
+        
+                # 1️⃣ Ensure session exists
+        if fakeSessionId:
+            session_id = fakeSessionId
+        try:
+            if user_id:
+                ChatMessageService.create_chat_session(session_id, user_id, status="active",user_text=user_text)
+        except Exception:
             return
 
         # 1️⃣ Save messages + tokens
@@ -59,49 +71,3 @@ class SummaryService:
             return
 
 
-
-# import os
-# from openai import OpenAI
-# from app.services.chat_message_service import ChatMessageService
-# from app.redis_client import redis_client
-
-# class SummaryService:
-#     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-#     @staticmethod
-#     def update_summary_if_needed(session_id: str):
-#         if not session_id:
-#             return
-
-#         messages = ChatMessageService.get_last_messages(session_id, limit=10)
-#         if len(messages) <= 5:
-#             return
-
-#         older = messages[:-5]
-#         text = "\n".join(f"{m['role']}: {m['content']}" for m in older)
-
-#         prompt = (
-#             "Summarize this conversation briefly for future context:\n\n"
-#             f"{text}"
-#         )
-
-#         try:
-#             resp = SummaryService.client.chat.completions.create(
-#                 model="gpt-4o-mini",
-#                 messages=[{"role": "user", "content": prompt}],
-#                 temperature=0.2,
-#             )
-#             summary = resp.choices[0].message.content
-#             if not summary:
-#                 return
-
-#             ChatMessageService.update_summary(session_id, summary)
-
-#             if redis_client:
-#                 redis_client.setex(
-#                     f"chat:{session_id}:summary",
-#                     120,
-#                     summary
-#                 )
-#         except Exception:
-#             return
