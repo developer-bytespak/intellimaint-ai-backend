@@ -115,6 +115,7 @@ class DeepgramService:
                 response.raise_for_status()
                 return response.content
         except Exception as e:
+            print(f"[Deepgram TTS Error] {str(e)}")
             raise Exception(f"TTS generation failed: {str(e)}")
 
 
