@@ -106,6 +106,7 @@ class StreamService:
             step_start = time.perf_counter()
             reply, usage = await self.call_llm(prompt)
             print(f"[TIMING] llm_call: {self._ms(step_start):.2f} ms", flush=True)
+            print(f"[LLM Reply]: {reply}", flush=True)
         except Exception:
             return await self._safe_error_reply()
 
