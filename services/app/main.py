@@ -33,7 +33,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["*"],
-    expose_headers=["*"],
+    expose_headers=["*", "Cache-Control", "Content-Type"],  # SSE support
 )
 # Include all routers with appropriate prefixes
 app.include_router(

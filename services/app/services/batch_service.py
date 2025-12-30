@@ -7,7 +7,7 @@ from app.redis_client import redis_client
 
 GATEWAY_URL = os.getenv("GATEWAY_URL", "http://localhost:3000/api/v1")
 
-def create_batch(files_info: List[dict],user_id:str):
+def create_batch(files_info: List[dict], user_id: str):
     if not redis_client:
         raise HTTPException(503, "Redis unavailable")
 
@@ -25,7 +25,7 @@ def create_batch(files_info: List[dict],user_id:str):
             f"job:{job_id}",
             mapping={
                 "status": "processing",
-                "progress": "1",
+                "progress": "0",
                 "fileName": file_name,
                 "error": ""
             }
@@ -42,16 +42,25 @@ def create_batch(files_info: List[dict],user_id:str):
         print(f"[batch] job queued jobId={job_id} file={file_name}")
         
         # Notify Gateway to add to BullMQ
+        gateway_url = f"{GATEWAY_URL}/internal/queue/pdf/enqueue"
+        payload = {
+            "batchId": batch_id,
+            "jobId": job_id,
+            "fileName": file_name,
+            "filePath": file_path,
+            "user": {"userId": user_id, "role": "admin"}
+        }
+        
+        print(f"[batch] 📡 Sending to gateway: {gateway_url}")  # 👈 ADD
+        print(f"[batch] Payload: {payload}")  # 👈 ADD
+        
         try:
-            httpx.post(f"{GATEWAY_URL}/internal/queue/pdf/enqueue", json={
-                "batchId": batch_id,
-                "jobId": job_id,
-                "fileName": file_name,
-                "filePath": file_path,
-                "user": {"userId": user_id, "role": "admin"} 
-            })
+            response = httpx.post(gateway_url, json=payload, timeout=10.0)  # 👈 ADD TIMEOUT
+            print(f"[batch] ✅ Gateway response: {response.status_code}")  # 👈 ADD
+            if response.status_code != 200:
+                print(f"[batch] ⚠️ Gateway error: {response.text}")  # 👈 ADD
         except Exception as e:
-            print(f"[batch] failed to enqueue to gateway: {e}")
+            print(f"[batch] ❌ Failed to enqueue to gateway: {e}")
 
     redis_client.hset(
         f"batch:{batch_id}",

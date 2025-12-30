@@ -663,12 +663,20 @@ class DocumentService:
                     # Extract new image
                     try:
                         pix = fitz.Pixmap(pdf, xref)
+
+                        # 🚨 HARD GUARD (THIS FIXES YOUR ERROR)
+                        if pix.colorspace is None:
+                            continue  # skip broken / mask images
                         
-                        # Fix: Ensure pixmap is RGB/Grayscale before saving as PNG
-                        # If CMYK (n=4) or other formats, convert to RGB
-                        if pix.n - pix.alpha < 3:  # Grayscale or less
-                            pix = fitz.Pixmap(fitz.csRGB, pix)
-                        elif pix.n >= 4: # CMYK
+                        # # Fix: Ensure pixmap is RGB/Grayscale before saving as PNG
+                        # # If CMYK (n=4) or other formats, convert to RGB
+                        # if pix.n - pix.alpha < 3:  # Grayscale or less
+                        #     pix = fitz.Pixmap(fitz.csRGB, pix)
+                        # elif pix.n >= 4: # CMYK
+                        #     pix = fitz.Pixmap(fitz.csRGB, pix)
+
+                        # Convert everything to RGB safely
+                        if pix.n >= 4 or pix.alpha:
                             pix = fitz.Pixmap(fitz.csRGB, pix)
                             
                         # Save image
@@ -683,6 +691,10 @@ class DocumentService:
                         page_output_lines.append("")
 
                         image_counter += 1
+                    
+                    except Exception as e:
+                        print("⚠️ Image skipped:", e)
+                        continue
 
                     finally:
                         pix = None

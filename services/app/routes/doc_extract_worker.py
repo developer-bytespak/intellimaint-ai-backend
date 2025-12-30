@@ -49,7 +49,8 @@ async def extract_from_worker(payload: dict):
             file_path=payload["filePath"],
             image_dir=image_dir,          # Pass the generated path
             fileName=payload["fileName"],
-            job_id=payload.get("jobId")
+            job_id=payload.get("jobId"),
+            batch_id=payload.get("batchId")
         )
 
         return {

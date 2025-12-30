@@ -2,6 +2,7 @@ import os
 import uuid
 import shutil
 import fitz
+import json
 
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.responses import PlainTextResponse
@@ -23,13 +24,26 @@ def process_pdf_extraction(
     fileName: str = None,
     model_id: str = None,
     user_id: str = None,
-    job_id: str = None
+    job_id: str = None,
+    batch_id: str = None
 ) -> str:
-    print(f"Started PDF extraction for: {fileName}")
+    
+    print(f"Processing PDF extraction for file: {fileName}")
 
     def update_progress(p: int):
-        if job_id and redis_client:
+        if job_id and redis_client and batch_id:
             redis_client.hset(f"job:{job_id}", mapping={"progress": str(p), "status": "processing"})
+            print(f"Job {job_id} progress updated to {p}%")
+            # redis_client.rpush(f"batch:{batch_id}:jobs", job_id)
+            redis_client.publish(f"batch-events:{batch_id}", json.dumps({
+                "type": "job_updated",
+                "jobId": job_id,
+                "status": "processing",
+                "progress": p,
+                "timestamp": int(__import__('time').time() * 1000)
+            }))
+
+
 
     try:
         update_progress(10)
@@ -158,6 +172,9 @@ async def extract_internal(payload: dict):
         file_path = payload["filePath"]
         file_name = payload.get("fileName")
         user = payload.get("user", {})
+        job_id = payload.get("jobId")
+        batch_id = payload.get("batchId")
+
 
         image_dir = os.path.join("uploads", f"img_{uuid.uuid4()}")
         os.makedirs(image_dir, exist_ok=True)
@@ -166,7 +183,11 @@ async def extract_internal(payload: dict):
             user=user,
             file_path=file_path,
             image_dir=image_dir,
-            fileName=file_name
+            fileName=file_name,
+            # model_id=None,
+            # user_id=None,
+            job_id=job_id,
+            batch_id=batch_id
         )
 
         return {
