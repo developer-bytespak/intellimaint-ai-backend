@@ -11,8 +11,8 @@
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from services.embedding_service import process_embeddings_for_source
-from services.knowledge_store_service import KnowledgeStoreService
+from ..services.embedding_service import process_embeddings_for_source
+from ..services.knowledge_store_service import KnowledgeStoreService
 
 router = APIRouter()
 
@@ -35,6 +35,8 @@ async def generate_embeddings(request: EmbeddingRequest):
         # Step 1: Chunks fetch karo source_id se
         chunks = KnowledgeStoreService.get_chunks_by_source_id(source_id)
         
+        # print("chunks of source id", chunks)
+        
         if not chunks:
             raise HTTPException(status_code=404, detail="No chunks found for this source_id")
         
@@ -42,6 +44,7 @@ async def generate_embeddings(request: EmbeddingRequest):
         
         # Step 2: Embeddings generate aur store karo
         result = await process_embeddings_for_source(chunks)
+        print(f"Embeddings processed and stored for source_id: {result}")
         
         return {
             "status": "success",

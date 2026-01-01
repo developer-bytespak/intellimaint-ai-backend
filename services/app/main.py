@@ -1,9 +1,11 @@
 """Main FastAPI application combining all AI services"""
 
+from pprint import pp
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routes import orchestrator, vision, rag, asr_tts, doc_extract, stream, chunking, batches, doc_extract_worker
+
+from .routes import orchestrator, vision, rag, asr_tts, doc_extract, stream, chunking, batches, doc_extract_worker , embedding_routes
 
 app = FastAPI(
     title="IntelliMaint AI Service",
@@ -72,6 +74,12 @@ app.include_router(
     doc_extract_worker.router,
     prefix="/api/v1/extract/internal",
     tags=["worker"]
+)
+
+app.include_router(
+    embedding_routes.router,
+    prefix="/api/v1",
+    tags=["embedding_routes"]
 )
 
 
