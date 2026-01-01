@@ -21,6 +21,14 @@ import argparse
 from dataclasses import dataclass, field
 from typing import Optional, List, Tuple
 from pathlib import Path
+import unicodedata
+
+# Try to import langdetect, but make it optional
+try:
+    from langdetect import detect, LangDetectException
+    HAS_LANGDETECT = True
+except ImportError:
+    HAS_LANGDETECT = False
 
 
 # =============================================================================
@@ -133,6 +141,7 @@ class UniversalPreprocessor:
         4. Remove TOC/Index sections
         5. Normalize whitespace
         6. Merge wrapped lines
+        7. Filter to English-only content
         """
         lines = text.split("\n")
         cleaned_lines = []
@@ -144,6 +153,10 @@ class UniversalPreprocessor:
             # Skip empty lines (will normalize later)
             if not stripped:
                 cleaned_lines.append("")
+                continue
+            
+            # Skip non-English lines
+            if not self._is_english_text(stripped):
                 continue
             
             # Check if entering TOC/Index section
@@ -182,6 +195,113 @@ class UniversalPreprocessor:
             if pattern.match(line):
                 return True
         return False
+    
+    def _is_english_text(self, text: str) -> bool:
+        """
+        Check if text is primarily English.
+        
+        Strategy:
+        1. Try langdetect if available (most accurate)
+        2. Fall back to pattern matching for common non-English words
+        3. Reject if text has too many non-English indicators
+        """
+        if not text or len(text.strip()) < 3:
+            return True
+        
+        # Try langdetect first if available
+        if HAS_LANGDETECT:
+            try:
+                lang = detect(text)
+                return lang == 'en'
+            except:
+                pass  # Fall through to pattern matching
+        
+        # Pattern-based fallback detection
+        text_lower = text.lower()
+        
+        # Common Italian word patterns (ending, content)
+        italian_indicators = [
+            r'\binstallazione\b',
+            r'\butilizzo\b',
+            r'\bgruppo\b',
+            r'\belettroge\b',  # elettrogeno
+            r'\bmanutenzione\b',
+            r'\bmanuale\b',
+            r'\buso\b',
+            r'\banomalie\b',
+            r'\bcause\b',  # Italian word (causes/reasons)
+            r'\brimedi\b',  # Italian word (remedies)
+            r'\b(?:il|lo|la|i|le|gli)\s',  # Italian articles
+            r'\b(?:del|della|dei|delle|dello)\b',  # Italian prepositions
+            r'\b(?:e|o|a)\s',  # Italian conjunctions/prepositions at word boundary
+            r'\b(?:sono|è|sto|stai|sta)\b',  # Italian verbs
+            r'\b(?:buono|cattivo|grande|piccolo)\b',  # Italian adjectives
+            r'zione\b',  # Italian noun endings
+            r'tà\b',  # Italian noun endings
+            r'ità\b',  # Italian noun endings
+        ]
+        
+        # Spanish indicators
+        spanish_indicators = [
+            r'\b(?:el|la|los|las)\s',  # Spanish articles
+            r'\b(?:de|del|de la)\b',  # Spanish prepositions
+            r'\bción\b',  # Spanish noun ending
+            r'ía\b',  # Spanish noun ending
+            r'\b(?:es|soy|está|estoy)\b',  # Spanish verbs
+        ]
+        
+        # French indicators
+        french_indicators = [
+            r'\b(?:le|la|les)\s',  # French articles
+            r'\b(?:de|du|des)\b',  # French prepositions
+            r'\b(?:est|suis|est|suis)\b',  # French verbs
+        ]
+        
+        # German indicators
+        german_indicators = [
+            r'\b(?:der|die|das|den|dem)\s',  # German articles
+            r'\b(?:und|oder|aber)\b',  # German conjunctions (aber is distinctive)
+            r'keit\b',  # German suffix
+        ]
+        
+        # Count non-English indicators
+        non_english_score = 0
+        
+        for pattern in italian_indicators:
+            if re.search(pattern, text_lower):
+                non_english_score += 5
+        
+        for pattern in spanish_indicators:
+            if re.search(pattern, text_lower):
+                non_english_score += 3
+        
+        for pattern in french_indicators:
+            if re.search(pattern, text_lower):
+                non_english_score += 3
+                
+        for pattern in german_indicators:
+            if re.search(pattern, text_lower):
+                non_english_score += 3
+        
+        # Common English patterns to increase confidence
+        english_score = 0
+        english_indicators = [
+            r'\b(?:the|a|an|and|or|but|is|are|was|were|be|been)\b',
+            r'\b(?:have|has|do|does|did|will|would|should|could|may|might|must|can)\b',
+            r'\b(?:that|this|these|those|what|which|who|whom|why|how)\b',
+        ]
+        
+        for pattern in english_indicators:
+            if re.search(pattern, text_lower):
+                english_score += 3
+        
+        # If non-English score is high, reject
+        if non_english_score > 3:
+            return False
+        
+        return True
+    
+    
     
     def _is_toc_heading(self, line: str) -> bool:
         """Check if line is a TOC/Index heading"""
@@ -930,14 +1050,16 @@ class ChunkSizeController:
 # =============================================================================
 
 class FinalChunkBuilder:
-    """Build final Chunk objects with proper metadata"""
+    """Build final Chunk objects with proper metadata and overlap for embeddings"""
+    
+    OVERLAP_RATIO = 0.15  # 15% overlap between consecutive chunks
     
     def __init__(self):
         self.analyzer = ContentAnalyzer()
         self.classifier = ChunkClassifier()
     
     def build_chunks(self, candidates: List[ChunkCandidate]) -> List[Chunk]:
-        """Convert candidates to final Chunk objects"""
+        """Convert candidates to final Chunk objects with overlap"""
         chunks = []
         
         for i, candidate in enumerate(candidates):
@@ -969,7 +1091,111 @@ class FinalChunkBuilder:
             )
             chunks.append(chunk)
         
-        return chunks
+        # Apply overlap between consecutive chunks
+        chunks_with_overlap = self._apply_overlap(chunks)
+        
+        return chunks_with_overlap
+    
+    def _apply_overlap(self, chunks: List[Chunk]) -> List[Chunk]:
+        """
+        Apply 15% token overlap between consecutive chunks.
+        
+        For each chunk after the first:
+        - Prepend ~15% of the previous chunk's content
+        - Mark heading with "Continued: " prefix if overlapping
+        - Recalculate token count to include overlapped content
+        """
+        if len(chunks) <= 1:
+            return chunks
+        
+        overlapped_chunks = []
+        
+        for i, chunk in enumerate(chunks):
+            if i == 0:
+                # First chunk - no overlap needed
+                overlapped_chunks.append(chunk)
+            else:
+                prev_chunk = chunks[i - 1]
+                
+                # Calculate overlap amount (15% of previous chunk's tokens)
+                overlap_tokens = int(prev_chunk.token_count * self.OVERLAP_RATIO)
+                
+                # Get overlap text from end of previous chunk
+                overlap_text = self._get_overlap_text(prev_chunk.content, overlap_tokens)
+                
+                if overlap_text:
+                    # Prepend overlap text to current chunk
+                    new_content = overlap_text + "\n\n" + chunk.content
+                    
+                    # Update heading with "Continued: " prefix
+                    if chunk.heading:
+                        if chunk.heading == prev_chunk.heading:
+                            new_heading = f"Continued: {chunk.heading}"
+                        else:
+                            new_heading = chunk.heading
+                    else:
+                        if prev_chunk.heading:
+                            new_heading = f"Continued: {prev_chunk.heading}"
+                        else:
+                            new_heading = None
+                    
+                    # Recalculate token count (includes overlap)
+                    new_token_count = len(new_content) // 4
+                    
+                    # Update metadata to indicate overlap
+                    new_metadata = chunk.metadata.copy()
+                    new_metadata["has_overlap"] = True
+                    new_metadata["overlap_tokens"] = overlap_tokens
+                    
+                    new_chunk = Chunk(
+                        chunk_index=i,
+                        content=new_content,
+                        heading=new_heading,
+                        token_count=new_token_count,
+                        metadata=new_metadata
+                    )
+                    overlapped_chunks.append(new_chunk)
+                else:
+                    # No overlap possible (previous chunk too small)
+                    overlapped_chunks.append(chunk)
+        
+        return overlapped_chunks
+    
+    def _get_overlap_text(self, content: str, target_tokens: int) -> str:
+        """
+        Get approximately `target_tokens` worth of text from the end of content.
+        Tries to break at sentence boundaries for cleaner overlap.
+        """
+        if target_tokens <= 0:
+            return ""
+        
+        # Estimate characters needed (4 chars per token)
+        target_chars = target_tokens * 4
+        
+        if len(content) <= target_chars:
+            return ""  # Content too small to overlap
+        
+        # Get the last portion of the content
+        overlap_candidate = content[-target_chars:]
+        
+        # Try to find a good break point (sentence or paragraph)
+        # Look for sentence boundary ". " in the first half of overlap
+        half_point = len(overlap_candidate) // 2
+        
+        # Find the first sentence start after half point
+        for i in range(half_point):
+            if i + 2 < len(overlap_candidate):
+                if overlap_candidate[i:i+2] == ". ":
+                    # Found sentence end, return from next char
+                    return overlap_candidate[i+2:].strip()
+        
+        # No good break point found, just return the overlap (may start mid-sentence)
+        # Clean up by finding the first space
+        first_space = overlap_candidate.find(" ")
+        if first_space > 0 and first_space < len(overlap_candidate) // 3:
+            return overlap_candidate[first_space+1:].strip()
+        
+        return overlap_candidate.strip()
 
 
 # =============================================================================

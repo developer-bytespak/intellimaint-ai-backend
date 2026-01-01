@@ -1,0 +1,1495 @@
+{
+  "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+  "source_title": "Generator_manual40.pdf",
+  "chunks": [
+    {
+      "id": "923d3fc0-e0a9-4b1d-9751-ebd7887aac5f",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 0,
+      "heading": "First of all, we would like to thank you for choosing Kaplan Power Generators.",
+      "content": "Thanks to the experience of long years, KAPLAN POWER JENERATOR manufactures efficient, reliable and quality\n\nDo not perform operate, maintain or repair your generator without taking general safety precautions.\n\nMaintenance and Operation Manual has been prepared and developed to help you in operating and maintaining the\n\nThis manual shall be read by the operator who will be operating the generator carefully.\n\nContactor systems;\n\nInverter switch systems;",
+      "token_count": 114,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:14.157956Z"
+    },
+    {
+      "id": "c33ef5ae-82c0-45af-84ec-669956277506",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 1,
+      "heading": "CUSTOMER SERVICES",
+      "content": "Some interventions and maintenance operations may be required to\n\nbe performed by specially trained, qualified technicians; operators\n\nmay only carry out tasks up to a certain level.\n\nThis manual provides general information on the installation, operation\n\nand maintenance of the generator. Also, general information on the\n\ngenerator you have purchased are provided in the , tables and charts.\n\nKaplan Generator is designed to be activated immediately wherever it is taken if the coolant, antifreeze, fuel, lubricant and charged battery are provided.\n\nIt is recommended to perform maintenance more frequently to ensure\n\nproper operation of the generator in dirty and dusty environments.\n\nParts or details shown in the figures and drawings provided in this manual may differ from the generator assembly you have. These images are for informative purposes only.\n\nMaintenance, adjustment and repair operations shall always be\n\nperformed by the authorized services and qualified persons using\n\ngenuine parts. Each generator has a model and serial number shown on\n\na plate attached to the the control panel or cabinet (Figure 1). This plate\n\nalso provides the manufacturing date, voltage, current, power in kVA,\n\nfrequency, power coefficient and weight of the generator.",
+      "token_count": 316,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:14.351845Z"
+    },
+    {
+      "id": "ba015e94-56a0-47f0-9e96-e21b5ecbe2fd",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 2,
+      "heading": null,
+      "content": "Generator is designed and manufactured to operate safely.\n\nHowever, user is responsible for safety. Possibility of an accident is\n\nvery low if the safety precautions specified are followed. Securing\n\nsafety before any technical operation or action is the responsibility\n\nof the user performing the operation or the action. Generator shall\n\nonly be operated by authorized and trained persons.\n\n\u2022 Read and understand all safety precautions and warnings.\n\n\u2022 Read and understand all warnings in the\n\nmanual before performing any maintenance on the generator or operating the generator.\n\n\u2022 Accidents and injuries are possible if the procedures, instructions\n\nand safety precautions provided in this manual are not followed.\n\n\u2022 Do not operate the generator in case of a known unsafe condition.\n\n\u2022 In case of an unsafe condition on the generator, place the\n\ndanger warning plate, press the emergency stop button and disconnect the negative (-) terminal of the battery and prevent operation of the generator until the condition is corrected.\n\n\u2022 Generator assembly shall not be intervened by unauthorized persons.\n\nYou may put warning signs for this purpose.\n\n\u2022 Press the emergency stop button and disconnect the\n\nnegative (-) terminal of the battery before performing maintenance, repair or cleaning on the generator.\n\n\u2022 Generator shall be installed and commissioned by authorized\n\nservices as per the standards. Maintenance and repair procedures shall be performed by authorized services.\n\n\u2022 Learn the location of the emergency stop\n\nbutton. Emergency stop buttons shall only be used for emergency conditions.\n\n\u2022 Do not use emergency stop devices and buttons for regular shutdown.\n\n\u2022 Maximum water pressure (30 psi) may applied for cleaning.\n\nAlways use safety goggles while cleaning the cooling system.\n\n\u2022 Maximum water pressure (30 psi) may be applied for\n\ncleaning; air hole shall be clean and personal protection equipment shall be used besides the burr protection.\n\n\u2022 Pressurized air and water may cause splashing\n\nof dirt and hot water, thus it may cause injuries.\n\n\u2022 Wear protective equipment, shoes and goggles\n\nwhen you shall use pressurized air. Use safety goggles or face shield.\n\n\u2022 Do not open the filling cap of the radiator until the\n\ncoolant is cooled. Loosen the cap slowly before\n\nopening the radiator cap completely to ensure that\n\nthe high vapour pressure is reduced.",
+      "token_count": 594,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:14.544736Z"
+    },
+    {
+      "id": "7592b436-4ebe-4f78-9957-2190d369d552",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 3,
+      "heading": "Prevent leaking of the fluids inside the generator",
+      "content": "during the maintenance or repair procedures of\n\nthe generator. Prepare required containers and\n\ncleaning materials against the risk of leakage\n\nbefore opening parts with fluids in them.\nImproper disposal of waste may threaten the environment. All waste\n\nchemicals shall be disposed as per the environmental regulations.\n\nAlways use sealed containers while disposing fluids. Waste",
+      "token_count": 94,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:14.737625Z"
+    },
+    {
+      "id": "8d49691d-706c-4020-8ccf-d7f42c1cdff3",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 4,
+      "heading": "Completely full BC and ABC type fire extinguishers",
+      "content": "shall be present beside the generator.\n\nInstructions on using the fire extinguishers shall be provided to the operator. Fire extinguishers shall be inspected regularly by authorized institutions and qualified persons.\n\nbefore intervening the generator.\n\u2022 You shall use ear protectors to prevent\n\nhearing problems due to the noise that occur while the generator is operated.\n\u2022 Do not wear clothes that may be caught\n\nby the rotating parts while the generator is operated.\n\u2022 All solutions used for cleaning shall be used\n\ngenerator. Read this section before handling, lifting, placing or towing the\n\ngenerator with trailer. Follow the safety precautions below.",
+      "token_count": 164,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:14.929616Z"
+    },
+    {
+      "id": "273520d3-fd45-4398-8e91-e2cd5fe07fba",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 5,
+      "heading": "\u2022 Make the wiring connections as per the relevant standards.",
+      "content": "Take care about earthing.\n\u2022 Ensure that the fuel storage system designed for the\n\ngenerators are installed as per the relevant codes, standards and other requirements.\n\u2022 Engine exhaust gases are dangerous for the staff. Exhaust gases of all\n\ngenerators in confined places shall be discharged with sealed black\n\npipes as per the relevant standards. Hot exhaust muffler and exhaust\n\npipes shall be protected against the contact of flammable materials and\n\nthe staff. Ensure that the exhaust gases are discharged safely.\n\n[\n0]\n\n[\n1]\n\n[\n2]\n\n[\n3]\n\n[\n4]\n\n[\n5]\n\n[\n6]\n\n[\n7]\n\n[\n8]\n\n[\n9]\n\n\u2022 Do not lift the generator using alternator and engine lifting\n\nlugs. Use lifting points on the chassis to lift the generator.\n\nUse lifting points on the upper part of the cabinet or the\n\nlifting points on the chassis for generators with cabinets.\n\n\u2022 Ensure that lifting equipment and support structures are\n\nsturdy and that they have the capacity to bear the generator. All staff\n\nshall be kept away from the generator when the generator is lifted.\n\n\u2022 Pay attention to all traffic rules, standards and other regulations while\n\ntowing the generator with trailer. These rules also cover the required\n\nequipment and speed limits expressly specified in the regulations.\n\n\u2022 Do not allow the personnel to ride on the mobile\n\ngenerator. Do not allow the personnel to stand on the draw bar or between the mobile generator and the truck.\n\n\u2022 Do not install or operate the generator in an environment classified\n\nas dangerous unless it is designed specifically for this purpose.\n\nAs a part of the generator, fuel and smoke may\n\nignite and explode. Taking proper precautions for\n\nthe storage of these materials shall reduce the risk\n\nof fire and explosion. Keep BC and ABC types of fire\n\nextinguishers at hand. Personnel shall be trained for\n\nthe operation of these extinguishers.\n\nOil and some cooling mixtures are flammable.\nFlammable fluids poured on the hot surfaces and areas with live current may cause fire. Fires may cause damage to the property and lives.\n\n\u2022 Do not collect inflammable materials in the area where your\n\ngenerator is placed. Fuel and lubricants shall be stored in sealed containers and away from unauthorized persons.\n\n\u2022 Consider the risk that the diesel engine may be used in an\n\nenvironment where flammable gases may enter the air intake system. These gases may cause the engine to overrev.\nInjuries and damage to the engine may be experienced.\n\n\u2022 Ventilate the generator room properly.\n\n\u2022 Flammable materials shall be kept in protective containers. Do\n\nnot smoke in areas where flammable materials are stored.\n\n\u2022 All power cables shall be connected tight and properly.\n\nIn case of loose or worn cables, contact authorized service for maintenance before operating the engine.\n\n\u2022 Arcs and sparks may cause fire. Arcing does not\n\noccur when secure connections, correct cables and battery cables maintained regularly are used.",
+      "token_count": 729,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:15.121507Z"
+    },
+    {
+      "id": "d42cba93-a0f4-4aa8-8ad3-2a7d6f8f2586",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 6,
+      "heading": "\u2022 Make the wiring connections as per the relevant standards.",
+      "content": "\u2022 Do not put any metal object between terminals while checking\n\nthe battery charge. Use voltmeters or hydrometers.\n\n\u2022 Cut off the power supply of the battery charger before\n\nconnecting or disconnecting the battery.\n\u2022 The batteries shall be kept clean. Use recommended\n\ncables, connections and battery covers while you are using the generator assembly.\n\u2022 Do not allow anything that may cause fire such as\n\nflames, sparks, smoking beside the fuel.\n\u2022 Do not operate the generator in case of a fuel\n\nleakage in the fuel system.\n\u2022 An emergency exit shall be present for\n\neasy exit of the personnel in case of a fire.\n\u2022 Do not refuel while the generator is running.\n\u2022 Do not use aerosols for starting aid. Otherwise,\n\nexplosions and injuries may occur.\n\u2022 Do not charge overturned batteries; otherwise, explosions may occur.\n\u2022 Keep the room, ground and generator set clean. In case of fuel, oil,",
+      "token_count": 222,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:15.312404Z"
+    },
+    {
+      "id": "6387d8fb-0500-4822-b343-2b2476443d7b",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 7,
+      "heading": "\u2022 Always use the diesel engine in a well ventilated area.",
+      "content": "Take the exhaust installation outside if the diesel engine is placed in a confined area. Exhaust gases of the diesel engine contain combustion products harmful to health.\n\u2022 Your generator is designed with housings in order to\n\nprotect against moving parts. Still, you shall be careful\n\nto protect the personnel and equipment from\n\nother mechanical risks while working in around the generator set.\n\u2022 Do not operate the generator set while the housings are\n\nremoved. Do not attempt to access under or around the housings for any reason while the generator is operated.\n\u2022 Keep your hands, long hair, loose clothes and\n\njewellery away from pulleys, belts and other moving and rotating parts.\n\u2022 Some moving parts may not be visible\n\nwhile the generator is operated.\n\u2022 Avoid contact to hot oil, hot fuel, hot coolant,\n\nhot exhaust installation, hot surfaces, sharp edges and corners against risk of injury.\n\n[\n0]\n\n[\n1]\n\n[\n2]\n\n[\n3]\n\n[\n4]\n\n[\n5]\n\n[\n6]\n\n[\n7]\n\n[\n8]\n\n[\n9]\n\n[\n0]",
+      "token_count": 241,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:15.503303Z"
+    },
+    {
+      "id": "c3637b7b-2f5d-424b-9ecf-e8761686f9f5",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 8,
+      "heading": "CHEMICAL",
+      "content": "Lubricants, fuel, coolants and electrolytes used in the generator are industrial type. These may be harmful for the personnel if they are not used properly.\n\nelectrolyte to the skin and do not touch these materials. Get medical attention immediately\n\nin case of inadvertent contact of electrolyte to the eye specifically. In case of contact with PROTECTIVE\n\nyour skin, wash with soapy water.\n\n\u2022 Do not wear clothes contaminated with fuel\n\nor oil. Wear an apron, face mask and protective goggles resistant\n\nagainst acid while preparing the battery. Clean the affected area\n\nwith ample amount of pressurized water immediately if the battery\n\nelectrolyte spills on the skin or the cloth. Wash with soapy water.\n\n\u2022 Hot oil may cause injuries. It shall not contact the\n\nskin. Hot parts shall not contact the skin, too.\n\n\u2022 Engine coolant is hot, too, when the diesel engine is\n\nhot. Also, the coolant is under pressure. Hot coolant is present in the radiator and hoses. Any contact with hot coolant or its vapour can cause severe burns.",
+      "token_count": 257,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:15.694194Z"
+    },
+    {
+      "id": "bee9e388-2229-48ec-9230-30c69d0ebb19",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 9,
+      "heading": "\u2022 Generator to load connection shall be performed by an authorized",
+      "content": "service personnel trained and qualified at this subject and as per\n\nthe relevant electrical codes and standards.\n\u2022 Ensure that all your generator is grounded before operating the\n\n\u2022 Stop the generator and disconnect the negative (-) terminal of the\n\nbattery before making the load connection or disconnecting the load\n\nfrom the generator.\n\u2022 Do not attempt to make the load connection or disconnecting the\n\nload when the generator is on a wet or humid surface.\n\u2022 Wait until the cooling system parts are\n\ncooled before draining the cooling system.\n\npersonal injury. Electrolyte shall not contact\n\nthe skin and the eyes. Use protective goggles\n\nduring the maintenance of the batteries.\n\n\u2022 Wash your hands after contacting\n\nthe batteries.\n\n\u2022 Do not contact to the conductors, connection\n\ncables and live parts on the generator with any\n\npart of your body or with any uninsulated object.\n\u2022 Reinstall the alternator terminal cover after\n\nmaking the load connection or disconnecting the load. Do not operate\n\nthe generator unless the cover is placed safely.\n\u2022 Connect the generator to loads and electrical systems proper to the\n\npower and electrical characteristics of the generator.\n\u2022 Keep all electrical equipment clean and dry. Renew the electrical\n\nNoise levels of generators with soundproof canopies are over\n93-95L WA . Use noise cancelling ear protectors as per the occupational safety rules during operation and maintenance. It is dangerous. Noise level plate is shown beside.)\n\ninstallation where insulation is worn, broken or cracked. Renew the\n\nterminals that are worn, corroded or discoloured. Keep the terminals\n\nclean and ensure that the connections are tight.\n\u2022 Insulate all connections and free cables.\n\u2022 Use BC and ABC types of fire extinguishers for electrical fires.\n\n[\n1]\n\n[\n3]\n\n[\n2]\n\n[\n3]\n\n[\n4]\n\n[\n5]\n\n[\n6]\n\n[\n7]",
+      "token_count": 456,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:15.885779Z"
+    },
+    {
+      "id": "53e801f8-1d99-4dd2-bfc4-c3c0a9f5b84d",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 10,
+      "heading": "\u2022 Do not touch the electrocuted person by bare hands",
+      "content": "before disconnecting the power source.\n\u2022 Save the victim from the electric current.\n\u2022 If this is not possible, stand on a dry insulating material\n\nand take the exposed person away from the conductor by using an insulating material, preferably dry wood.\n\u2022 If the victim is breathing, bring the victim to the\n\nhealing position as described below.\n\u2022 If the electrocuted person has lost consciousness,",
+      "token_count": 99,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:16.077670Z"
+    },
+    {
+      "id": "a63eb766-a436-4068-aa7f-ce5f55989c53",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 11,
+      "heading": "3. Blow slowly into the mouth, observing that",
+      "content": "his/her rib cage is elevated. Then stop blowing, and let the rib cage completely breaths per seconds to the victim.\n4.\n\nbreaths and return as soon as possible and resume breathing.",
+      "token_count": 45,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:16.271559Z"
+    },
+    {
+      "id": "29456046-b0f9-4f6c-8cc6-3b50b584edc4",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 12,
+      "heading": "1. Call for medical attention or call the",
+      "content": "nearest health institution. Give two breaths to the victim and start cardiac massage as shown in the figure.\n\n4.\nHolding your arms upright, press down\n4-5 cm down 15 times per minute.",
+      "token_count": 45,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:16.462450Z"
+    },
+    {
+      "id": "ba7d2230-f081-4393-aa45-c8a75ce7cd72",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 13,
+      "heading": "5. Repeat the process of giving 2 breaths and 15",
+      "content": "heart massages until the medical aid arrives.\n6.\nIf improvement on the condition of the victim\n\nis observed, continue to giving breath by\n\nchecking his/her pulse. Check his/her pulse after every 10 breaths.\n\nforward to keep the respiratory tract open.\n\nthe procedure above if any of these two stop.",
+      "token_count": 74,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:16.655156Z"
+    },
+    {
+      "id": "234573df-9fb4-48bb-955a-254c7ef56820",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 14,
+      "heading": "Do not give any liquids such as water until you he/she",
+      "content": "[\n8]\n\n[\n9]\n\n[\n0]\n\n[\n1]\n\n[\n2]\n\n[\n3]\n\n[\n3]\n\nConsider the following items for the selection and installation of fire protection systems.\n\n\u2022 Generator room shall not be used for storage.\n\n\u2022 Keep BC and ABC types of fire extinguishers in the generator room.\n\n\u2022 Do not refuel the fuel tank while engine is running.\n\n\u2022 Do not allow smoking, sparks, arc devices or presence or operation of\n\nother sources of ignition near the fuel tank or generator set.\n\n\u2022 Adequate amount safety precautions shall be taken to prevent\n\nleaks in the fuel lines. Engine fuel connections shall be performed\n\nwith flexible lines (fuel hoses). Do not use copper pipes.\n\n\u2022 Do not connect exhaust systems of two or more engines together.\n\n\u2022 Do not let exhaust of the engine to the environment from the\n\nbrick tiles, concrete block chimneys or from similar structures.\n\n\u2022 Exhaust manifold shall be placed inside a housing.\n\n\u2022 Do not use exhaust gases for heating a room.\n\n\u2022 Isolate exhaust pipes open to the contact of personnel\n\nor that is laid near the flammable materials against heat.\n\n\u2022 Suspend exhaust system from the ceiling. Forced\n\nloading or torsion on the exhaust manifold shall be avoided, especially on the turbocharged engines.\n\n\u2022 Connections of the housings, clamps and the brackets\n\non rotating fans, belts etc. shall be tightened securely.\n\n\u2022 Protect your jewellery, clothes and hands from the moving parts.\n\nKeep them away.\n\n\u2022 Using improper cables and/or installation for power generation,\n\ntransfer and distribution systems may cause fire or electrocution.\n\n\u2022 Personnel working on the maintenance of the\n\ngenerator shall stand on a dry wooden platform or an insulated mat, and his/her shoes shall be dry.\n\n\u2022 Do not leave the cables lying on the floor of the generator room.\n\n\u2022 Use separate ducts or pipes for power wiring, fuel and water pipes.\n\n\u2022 Use separate ducts or pipes for AC and DC wiring.\n\n\u2022 Make sure that the device is grounded properly.\n\n\u2022 Disconnect battery and battery charging connections to\n\nprevent inadvertent operation of the generator when you shall apply maintenance of generator with automatic control. Cut off the AC supply of the battery charger before disconnecting the battery. Inadvertent operation of the generator while working on the generator causes injuries to the personnel or deaths.\n\n\u2022 Do not unlock electrical locks.\n\n\u2022 Electrical connections shall be made by qualified and",
+      "token_count": 599,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:16.847045Z"
+    },
+    {
+      "id": "c4efde01-b5a9-44ef-850d-26f47c966979",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 15,
+      "heading": "\u2022 Water or humidity contacting especially live parts such the",
+      "content": "panel or the alternator of the generator will cause electrical arcs. And this may damage the generator or cause injuries that may lead to the death of the personnel.\n\u2022 Do not operate the generator in case of excessive humidity\n\nin the environment where the generator is placed.\n\u2022 Inform the authorized service. Only the authorized service may",
+      "token_count": 85,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:17.038935Z"
+    },
+    {
+      "id": "bb824167-2979-49fb-9510-7076c3167f83",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 16,
+      "heading": "\u2022 Do not operate the block water heater when there is",
+      "content": "no water inside the radiator.\n\u2022 Coolant boils at higher temperatures than water while under\n\npressure. Do not open the radiator cap while the engine is running.\n\u2022 Open the radiator in a controlled way after the diesel\n\n\u2022 Do not use copper pipes between the fuel tank and the diesel engine.\n\u2022 Prefer fuel hose for flexible connections.",
+      "token_count": 83,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:17.229826Z"
+    },
+    {
+      "id": "f8ca7277-fe43-4131-8d55-041374ecfba2",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 17,
+      "heading": "Kaplan Generator is designed as a whole to provide high quality and",
+      "content": "confidence. Figure-2 and Figure-2a show main parts of a typical\n\ngenerator. However, each generator differs in some ways as per the\n\nconfiguration and size of its main parts. This section describes parts of\n\nthe generator set briefly. Detailed information is provided in the next\n\nsections of this book. Each generator has a plate of its own (Figure-1).\n\nThis plate contains information defining the generator and its operating\n\ncharacteristics. These are information such as model number, serial\n\nnumber, alternator voltage and frequency, output power in kVA, weight\n\nand year of manufacture. Model and serial numbers define the specific\n\ngenerator and they are required for the warranty operations and when",
+      "token_count": 177,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:17.426743Z"
+    },
+    {
+      "id": "a62189b1-9be8-46f2-97a1-a3ec9522784b",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 18,
+      "heading": "Engine and alternator are installed on a steel chassis. There is a fuel",
+      "content": "tank available inside the chassis. A separate fuel tank may be provided\n\nprevent transfer of vibration to the floor where the generator is placed.\n\nThese insulators are placed between the engine and alternator legs and\n\nthe chassis. Special insulators to be installed between the chassis and\n\nthe floor are provided with the generator. It shall be installed while the",
+      "token_count": 91,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:17.618632Z"
+    },
+    {
+      "id": "63d7832a-c095-4d7c-a3ef-1b0caeee24d6",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 19,
+      "heading": "LIFTING, PLACEMENT, INSTALLATION AND STORAGE 4",
+      "content": "Generator placement may be planned when the dimensions of the generator are known. This section covers the required and important factors for effective and safe placement of the generator.\n\nFollowing factors shall be considered for the selection of the placement area of the generator and required applications shall be performed.\n\n\u2022 Adequate Fresh Air Intake,\n\n\u2022 Construction of Levelled Concrete Pedestal or Determination of Levelled Concrete Area\n\n\u2022 Protection Against Adverse Weather Conditions (Sun, Drifting Rain and Snow, etc.)\n\n\u2022 Protection Against Adverse Environmental Conditions (Excessive Dust, Humidity, Moisture, etc.)\n\n\u2022 Providing A Clearance of Minimum 1 M. Around the Generator To Ensure Service Operations\n\n\u2022 Designing of the Width of the Entrance Door For the Possibility of Removing the Generator From the Possible Installation Area\n\n[\n5]\n\n[\n6]",
+      "token_count": 216,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:17.809040Z"
+    },
+    {
+      "id": "59622090-a7f4-4862-91ef-71ef0c7e3ad2",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 20,
+      "heading": "Transport and placement of the generator shall be facilitated significantly and installation costs shall be minimized when the generator is",
+      "content": "placed inside a cabinet. Cabinet protects the generator against operation by unauthorized persons and against external factors.\n\nSelecting the generator with cabinet shall provide benefits in terms of noise and removal of negative environmental factors.\nGenerator set with cabinet shall be placed on a level ground. Generator with cabinet may be installed on a concrete and level ground easily.\nGenerator sets with cabinets shall always be placed outdoors. If the generator with cabinet is installed inside a room, cooling with adequate amount of\n\nfresh air shall be provided. Hot air and exhaust gases generated shall be discharged to open air by ducts/installation. Hot air discharge duct system\n\nand exhaust installation system shall be designed and applied so that they shall not affect the performance of the generator set.\n\nm\n\nGenerator chassis is specifically designed to facilitate the transportation of the generator. Incorrect lifting of the generator may cause serious damages on the parts.",
+      "token_count": 250,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:17.999932Z"
+    },
+    {
+      "id": "ae19aa1a-c33a-42e0-adab-e8cc86ff6525",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 21,
+      "heading": "FORK LIFT BLADE CHANNELS",
+      "content": "Generator may be lifted using the lift truck lifting points specifically designed on the chassis (Figure-5). It is recommended to drive in a wooden plank under the chassis for safety reasons to prevent damage to the chassis while transporting with a pallet jack.",
+      "token_count": 65,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:18.191822Z"
+    },
+    {
+      "id": "78176fa1-efbd-423e-b380-7893b98b2c6f",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 22,
+      "heading": "the generator set with cabinet (Figure-6).",
+      "content": "Figure-6 Lifting the generator with Crane\n\nA distributing lifting rod is required to prevent damage to the set while lifting from the chassis (Figure-6). This rod shall be placed on the weight center for vertical lifting.",
+      "token_count": 55,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:18.383712Z"
+    },
+    {
+      "id": "aad0266a-0bb9-475f-b901-612e6733035a",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 23,
+      "heading": "\u2022 Keep staff away from the generator when the",
+      "content": "generator is lifted for transportation.\n\u2022 Use lifting lug holes on the chassis or cabinet while lifting\n\nthe generators with or without cabinets using a crane.\n\u2022 Take required precautions to prevent damage to the\n\nparts where the steel rope or chain to be used to lift the generator set contacts the generator set.\n\u2022 Guiding ropes shall be used to prevent slinging of the\n\ngenerator set lifted from the ground.\n\u2022 Lower the generator set to a flat, level surface that\n\nhas a capacity to bear its weight.\n\u2022 Check the connection points for cracked welds or\n\nloose nuts and bolts before lifting.\n\u2022 Do not lift or lower the generator under heavy wind conditions.\n\nFollowing factors shall be considered while selection the location of the generator:\n\u2022 Adequate ventilation shall be provided.\n\u2022 It shall be protected against conditions such as rain, snow,\n\nflood, direct sunlight, freezing cold or extreme hot conditions.\n\u2022 It shall be protected against harmful material born on air\n\nsuch as dust, fibers, smoke, oil vapour, steam and engine exhaust smoke that causes wear or conductivity.\n\u2022 Floor of the generator room shall be flat and have the\n\nproperties to bear the total weight of the generator.\n\u2022 It shall be protected against impact of objects that\n\nmay fall down such as trees or poles.\n\u2022 There shall be a minimum clearance of 1 meter around\n\nthe generator and 2 meters over the generator for cooling, service and maintenance of the generator.\n\u2022 A proper way where the generator may fit shall be\n\navailable to carry the generator to the room.\n\u2022 Entrance of unauthorized persons to the generator\n\nroom shall be limited.\n\n[\n3]\n\n\u2022 If the generator shall be placed outdoors, it shall be\n\nplaced inside a cabinet or a room. Also, using a cabinet shall be beneficent if the generator shall be operated indoors or outdoors temporarily. Basement installation plan of a typical generator set is given in Figure-9.\n\n\u2022 Check the internal grounding conditions.\n\n\u2022 Bury the grounding plate or rod to the nearest\n\nlocation to the generator.",
+      "token_count": 507,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:18.576602Z"
+    },
+    {
+      "id": "fee7d454-9006-47c7-9ba5-2ebfaffee49d",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 24,
+      "heading": "Generator Foundation and Base",
+      "content": "Special base concrete is recommended. However, a smooth concrete floor that may bear the weight of the generator\n(including oil, antifreeze and fuel) is adequate. This work\n(including seismic description) and designing of the base concrete shall be the responsibility of a civil engineer.\n\nIt is a good practice to place the generator set on a concrete base. Concrete base shall be designed to bear the weight of the generator set. It shall have a height of 200-300 mm. It is required to allow a space more than 250mm around the generator. Consult a specialist for further details.\n\nGenerator installation ground shall bear its static weight and any type of dynamic force caused by the operation of the engine.\n\nIf there may be water puddles on the selected ground from time to\n\ntime, Concrete base shall be raised as per the extent of the risk.",
+      "token_count": 211,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:18.769491Z"
+    },
+    {
+      "id": "6b1c3e57-4bcb-481f-8ea3-7375953775f1",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 25,
+      "heading": "Basic Functions of the Base Concrete",
+      "content": "\u2022 Bear whole weight of the generator\n\n\u2022 Isolating the vibration caused by the generator set\n\nYour generator set is equipped with rubber dampeners to minimize the vibration transferred to the ground.\n\nThese dampeners consist of a group between the engine/alternator leg and\n\nthe chassis, and another group between the chassis and the ground.\n\nAlso, flexible areas shall be provided on connection points of the\n\ngenerator set such as air duct, exhaust installation and fuel installation.",
+      "token_count": 121,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:18.961570Z"
+    },
+    {
+      "id": "ef3e2b75-0a66-4c94-ac6a-e5806635844f",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 26,
+      "heading": "Engine combustion air shall be clean and cool as much as possible.",
+      "content": "Combustion air is drawn from the environment of the generator by\n\nmeans of the air filter installed on the engine. However, air around\n\nthe generator may not be proper due to conditions such as dust, dirt\n\nand temperatures. In such a case, it is possible to connect an air\n\nintake duct. This duct provides clean air to the air filter on the engine",
+      "token_count": 86,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:19.152450Z"
+    },
+    {
+      "id": "1aeffa1e-af57-45b1-8c66-565852887b3a",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 27,
+      "heading": "Engine and alternator disperse heat and cause increase in the ambient",
+      "content": "temperature. And increased temperature affects operation of the\n\ngenerator negatively. Thus, adequate ventilation shall be provided to\n\nkeep the engine and the alternator cool. Air flow shall be as shown in\n\nFigure 7. Air shall enter the generator from the alternator side, it shall\n\npass over the engine and through the radiator and leave the room\n\nthrough a bellow-type flexible canvas. If no canvas is used to discharge\n\nhot air from the room, it would decrease the effectiveness of the cooling\n\nby dispersing hot air in the generator room.\n\nFigure-7 Direction of air discharged from the radiator with air ducts\nAvoid making sharp corners on radiator hot air discharge duct or flue\n\n(Figure-8). It shall be arranged to direct the air discharged (Figure-7).\n\n[\n7]\n\nFigure-8 Weak ventilation mechanism\n\nAir entrance and exit windows shall have adequate dimensions to\n\nfacilitate the entrance and exit of air to/from the room. Roughly\n\ncalculated, air entrance and exit windows shall have a dimension that is 1.5 times the radiator area. Air entrance and exit windows\n\nshall have shutters to protect the generator from weather conditions.\n\nThese shutters may be fixed, but it shall be preferred that they are movable for cold climates. Shutters may be closed when the\n\ngenerator is not operated. Thus hot air that facilitate initial operation and loading shall be kept inside the room. If the shutters inside a\n\ngenerator room with automatic control system are movable, these\n\nmay be moved automatically. Thus, it may be provided that shutters are opened immediately when engine is started and that shutters\n\nare closed when the engine is stopped.\n\nFigure-9 Basement installation plan of a typical generator set\n\n[\n8]",
+      "token_count": 429,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:19.344340Z"
+    },
+    {
+      "id": "0ea1b6fa-b727-4d24-8cd8-0549c9244bca",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 28,
+      "heading": "ROOM INSTALLATION DIMENSIONS FOR A GENERATOR WITHOUT CABINET",
+      "content": "Figure-10 Level room installation plan of a typical generator set\n\ncolumns: MODEL, ROOM DIMENSIONS (mm), None, None, HOT AIR EXIT AREA DIMENSIONS\n\n[\n9]\n\ncolumns: MODEL, ROOM DIMENSIONS (mm), None, None, HOT AIR EXIT AREA DIMENSIONS\n\n[\n0]\n\ncolumns: MODEL, ROOM DIMENSIONS (mm), None, None, HOT AIR EXIT AREA DIMENSIONS\n\nModels, specifications (capacity, weight, dimensions, etc.) and visuals of all products in this manual may differ based on the project.\n\nKAPLAN JENERATOR reserves the right to make changes on all information without prior notice.\n\n[\n0]\n\n[\n1]",
+      "token_count": 140,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:19.535771Z"
+    },
+    {
+      "id": "295c1349-3ec9-44af-9c0e-62e2333aa1c5",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 29,
+      "heading": "\u2022 Engine exhaust gases are dangerous to inhale. Exhaust",
+      "content": "gases of all generators in confined places shall be discharged with sealed pipes as per the standards.\n\u2022 Keep hot exhaust muffler and exhaust pipe away from flammable\n\nmaterial and ensure that they are secure for the safety of the staff.\n\u2022 It shall be ensured that back pressure does not exceed the\n\nback pressure value allowed by the manufacturer of the engine while designing the exhaust system. Excessive back pressure may cause damage to the engine. Exhaust pipes shall be short and straight as much as possible to reduce back pressure.\n\u2022 Any required elbow shall have a curve with a radius that is\n\n1.5 times the pipe inner diameter. It shall be proper to use pipes with diameters 1 inches wider at every 6 meters or every 3 elbows for reducing the back pressure.\n\u2022 To prevent that engine vibration is transferred to the exhaust\n\npipe system and the building and to allow for the expansion due to heating, a flexible connection shall be used between the exhaust manifold and exhaust pipe system.\n\u2022 Weight of the exhaust pipes shall be supported by structures\n\naround (especially by the ceiling) to prevent weight being imposed on the engine manifold or the turbocharger outlet.\nWeight of the exhaust system shall be born on the building.\nTensioning elements may be used for this purpose.\n\u2022 Exhaust system components installed inside the generator\n\nroom shall be insulated to reduce the noise level and the temperature dispersed. Muffler and exhaust pipes shall be placed away from flammable materials.\n\u2022 To prevent ingress of rain to the open exhaust exit, flap type rain\n\ncovers with counterweights may be used in different applications.\n\u2022 Each generator shall have an exhaust system of its",
+      "token_count": 424,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:19.728660Z"
+    },
+    {
+      "id": "d34daad5-8c59-4449-92bc-3926d3a45f10",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 30,
+      "heading": "2. From the prismatic or cylindrical external fuel tank",
+      "content": "outside the chassis\nOne of the most important issues for diesel engine is using clean fuel\n\nthat does not contain foreign material. Dirt in the fuel causes damage\n\nwith the standards.\n\u2022 Do not allow anything that may cause fires such as flames,",
+      "token_count": 61,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:19.919552Z"
+    },
+    {
+      "id": "c8bdabbc-770b-46eb-a99f-7e3703f2344b",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 31,
+      "heading": "A main fuel tank may be connected in addition to the daily fuel tank to",
+      "content": "operate the generator for a longer time. Main fuel tank shall be placed in\n\na proper place outside the room to facilitate the refuelling and\n\nmaintenance operations. However, main fuel tank shall not be kept at\n\nextreme cold conditions as fuel flow shall be limited with the increased\n\nviscosity in cold environments. An air escape outlet (ventilation) shall be\n\nput on the fuel tank to reduce the air pressure created during\n\nvaporization, expansion and refuelling. This air escape outlet also\n\nprevents creation of vacuum inside the tank during the consumption of\n\nthe fuel. Bottom of the fuel tank shall be inclined. This prevents water\n\nand sediment collection at a single point, thus damage to the fuel\n\nsystem. A drain valve shall be provided on the bottom point of the fuel",
+      "token_count": 195,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:20.114458Z"
+    },
+    {
+      "id": "21eab0af-cec6-4df4-b871-e37e1769926d",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 32,
+      "heading": "tank to drain water and sediments.",
+      "content": "proper for fuel such as flexible hoses may be used for fuel piping.\n\nFlexible fuel hoses shall be connected between the engine and fuel tank\n\nto avoid leaks and damages caused by engine vibration. Fuel supply line\n\nshall be taken from at least 10-50 mm above the bottom of the fuel tank\n\nand from a point away from the fuel return line.\n\n[\n3]\n\n\u2022 Use black steel pipes or flexible connection elements for fuel system.\n\n\u2022 Do not fill the fuel tanks full. Keep at least 10% of the fuel tank capacity empty to allow expansion of fuel at high ambient temperatures.\n\n\u2022 Natural flow due to gravity from fuel pipes to the engine shall not be present when the engine is stopped.\n\n\u2022 Fuel temperature is a critical factor for proper running of the engine. Engine output power is reduced as it a fuel\n\ntemperature above 71\u00b0C reduces the heat amount per volume due to expansion.\n\n\u2022 Connection pipe from main fuel tank to daily fuel tank shall be bigger than or equal in size to the pipe of the daily fuel tank.\n\n\u2022 Usage of fuel-water seperator filter in fuel system lines shall protect injectors and the fuel pump.\n\n\u2022 Main fuel tank may be above or under the daily fuel tank.\n\nFigure-11 Installation of general fuel piping from main fuel tank to daily fuel tank",
+      "token_count": 312,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:20.321411Z"
+    },
+    {
+      "id": "c9ac90c1-37a4-4286-a3b2-1a16a5ea0535",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 33,
+      "heading": "Maximum Number of",
+      "content": "Recommended Pipe\n\nStand-By (kVA) the Fuel Pipe (m)\n\nTable-1 Table for recommended fuel installation pipe diameters\nPositive static fuel pressure shall be applied on the fuel pump intake for fuel tank applications that shall be installed as per the standby generator assemblies.\n\nCheck valves shall be used if the fuel tank height is 2 m above the\n\ncentre of the crankshaft. Maximum fuel level cannot exceed 2 m\n\nabove the centre of the crankshaft and minimum fuel level shall be\n\n15 cm above the fuel injection pump. Engine damage may occur if\n\nfuel level exceeds 2 m. Proper fuel pressure cannot be provided in\n\nthe intake of the fuel pump if fuel level is less than 15 cm. In other\n\nwords, fuel level in the tank shall not be above the injectors and it\n\nshall not be more than 180 cm below the fuel pump. (Figure-12a)\n\nFigure-12a Typical fuel diagram with the fuel tank\n\ninstalled below the engine\nIf fuel tank is taken approximately 1.5 m above the injectors, 2 check valves (as in Figure-12b) shall be placed to protect the engine from hydraulic locking.\nThese valves have a protection capacity from 0 to 1.5 m. If the fuel tank shall be above 1.5 m, a float tank shall be provided.\nTank installed away and at height is shown in (Figure-12c).\n\nFigure-12b Fuel tank placed approximately above the fuel return\n\nand check valve connection\n\nFigure-12c Elevated fuel tank and the float tank used\n\n[\n2]\n\nTank installed away and under the engine level is shown in (Figure-12d).\n\nFigure-12d Fuel tank installed below 1500 mm",
+      "token_count": 380,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:20.514566Z"
+    },
+    {
+      "id": "c4b48ca9-c33e-4955-944e-be3577baa763",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 34,
+      "heading": "OIL AND ANTIFREEZE USED IN THE GENERATOR",
+      "content": "Lubrication system of diesel engines is one of the most important parts of the engine. Correctly performed engine and provision of due care for the type of the oil used) increases the life of the engine and reduces operation costs.\n\nRecommended oil; 15W/40 Turbo\n\nYou may check if the oil used is proper for the temperatures in your region from the chart below.\n\nAntifreeze is not provided in the radiator of your generator in the\n\nfactory. Add antifreeze with the ratio required by your regional\n\nconditions (50% in average) while adding water to your radiator.\n\nUsing water with antifreeze in your engine whole year is important in\n\nterms of the service of life of your engine and its coolant pipes.\n\n0W",
+      "token_count": 176,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:20.705666Z"
+    },
+    {
+      "id": "8c928029-ff20-4efb-b8ea-540959b02089",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 35,
+      "heading": "\u2022 Do not allow anything that may cause fires such as",
+      "content": "flames, sparks, smoking beside the batteries.\n\u2022 Wear an apron, face mask and protective goggles resistant\n\nagainst acid while preparing the battery. Clean the affected area with ample amount of pressurized water immediately if the battery electrolyte spills on the skin or the cloth.\n\u2022 Remove your jewellery such as bracelets, rings on your hands\n\nand wrists before using conducting tools on the battery.\n\u2022 Connect the negative terminal last while connecting the battery;\n\nand disconnect the negative terminal first while disconnecting it.\n\u2022 Adding water to the battery and maintenance of the\n\nbattery shall be performed outdoors.\n\u2022 Batteries shall be placed near the generator as much as possible.\n\nPlacing the batteries away from the generator may cause voltage\n\ndrops. And this reduced the starting capacities of the batteries.",
+      "token_count": 207,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:20.897558Z"
+    },
+    {
+      "id": "146f2db8-7712-404a-813c-bb25e856f0ce",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 36,
+      "heading": "ADDING ELECTROCLYTE TO THE BATTERY FOR THE FIRST TIME",
+      "content": "\u2022 Remove the protective cover on battery covers.\n\u2022 Remove air discharge covers.\n\u2022 Fill the battery with battery electrolyte with a specific density of\n\n1.280 at 20 \u00b0C up to 15 mm above the upper point of the plates.\n\nBattery and electrolyte temperature shall be above 10 \u00b0C.\n\u2022 Keep the battery waiting for 15 minutes. Then boiling shall start in\n\nbattery cells (compartments) and gas bubbles shall be observed\n\non the surface of the electrolyte. Reinstall air discharge covers.\n\u2022 Check the battery with a hydrometer after waiting for 15 minutes.\n\u2022 Minimum charging period is 6 hours. Check the\n\ncharge current and electrolyte level every 1 hour. It is charged if no change is observed after 1 hour.\n\u2022 Check the electrolyte level 2 hours after the charging operation\n\nand add distilled water so that it shall be 10 mm above the plates.\n\u2022 Keep the upper surface and terminals of the battery clean.\n\u2022 Cover the battery terminals and connections with\n\npetroleum jelly carefully.\n\u2022 Tighten the terminals securely.\n\u2022 Check the electrolyte level regularly. Electrolyte level\n\nshall always be 10 mm above the plates.\n\u2022 Regularly check for wear on the charging alternator\n\nbelt and the tensioning of the belt.\n\u2022 Ensure that battery is not discharged.\n\n[\n3]\n\n[\n4]\n\n[\n5]\n\n[\n6]\n\n\u2022 Visually check the battery before testing it.\n\u2022 Oxidation occurs on battery terminals and connection points in\n\ntime. Oxidation wears battery terminals and prevents charging.\nRemove the terminal and clean the oxidation with boiled water.\nThen connect it again and cover with petroleum jelly or grease.\n\n\u2022 As it is not possible to generate the harmonics or anticipate their\n\namount in advance in the planning stage of the facility, neutral\n\nconductors shall either be dimensioned with high values or the\n\ncross-section of the neutral conductor shall at least be equal to the\n\ncross-section of the phase conductor.\n\n\u2022 Another point that shall be considered during wire selection is that\n\nif loads with starting current are present (such as electrical motors)\n\u2022 Do not allow loose connections.\n\u2022 Specific density of the sulphuric acid in\n\nthe battery and the charge status may\n\nbe measured using a hydrometer.\n\nbattery water level is reduced.\nUse pure water only.\n\u2022 Keep the barrel part of the hydrometer\n\nupright and draw adequate amount of\n\nelectrolyte upwards. It shall float freely\n\nin the tube. Reading shall be performed\n\nEvaluation is as follows:\n\nRubber injector\n\n1,300\n\n1,100\n\nbeside the distance between the load and the generator.\nOn low voltage networks, voltage may drop to undesired levels on the load side as voltage drop shall increase greatly while starting if the distance is very long. You may select a load wire with a better\n\ncross-section using the formula given below to prevent this.",
+      "token_count": 693,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:21.088176Z"
+    },
+    {
+      "id": "99603f5d-97a3-44c8-9c87-f748b09c914e",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 37,
+      "heading": "\u2022 Electrical connections shall be performed with flexible",
+      "content": "wires due to the vibration on the generator.\n\u2022 Wires shall be placed inside conduits and they shall\n\nhave cross-sections and types proper for the generator output voltage and current.\n\u2022 While deciding for the wire cross-section, tolerances for ambient\n\ntemperature, placement method and proximity to the other wires shall be provided. Moreover, wires shall be selected as per TSE or\n\u2022 It shall be checked very carefully if all connections are correct.\n\nIf the distance is short in low voltage networks;\nIf the voltage is known,\n\nIf the power is known,",
+      "token_count": 137,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:21.280066Z"
+    },
+    {
+      "id": "937adb3e-1005-46b8-9267-020f199fd7a6",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 38,
+      "heading": "It is very important to provide stable load to the generator while",
+      "content": "planning the distribution panel. If a load on a phase is much higher\n\n[\n7]\n\n[\n8]\n\nthan the load on other phases, this causes alternator coils overheat,\n\ndestabilization of output voltage between phases and damage to the\n\ndelicate three-phased (3-phased) devices connected to the system.\n\nNo phase current shall exceed the nominal current of the generator.\n\nAvailable distribution system may be rearranged to ensure that\n\nthese loading conditions are provided.\n\nGenerator provides the specified power and operates properly if the load\n\npower factor is from 0.8 to 1.0. Generator is overloaded if the load power\n\nfactor is below 0.8. Power factor correction elements such as capacitors\n\nmay be used to correct this power factor. However, in such a case,\n\npower factor correction elements shall be deactivated when generator is\n\nloaded. Exact power shall be determined by calculating both active and\n\nreactive powers while determining the generator power.\n\nFaults, damages that may occur on the insulation of electrical\n\ndevices cause that the metal parts of the devices that are not\n\nrelated with the power system out of the main current circuit of the\n\ndevices are placed under voltage. Sometimes, insulation is ruptured\n\nand causes these insulated parts are also placed under voltage as\n\nthe device is exposed to rupture voltage when voltage level reaches\n\nexcessive values. Grounding shall be performed to protect both\n\nhuman lives and the devices (Figure-14).\n\nWhat is expected from a good grounding?\n\n\u2022 That it is continuous and uninterrupted\n\n\u2022 That it has the capacity to bear the fault currents\n\n\u2022 That it has low impedance value to limit the voltage drop\n\n\u2022 That ground dissipation resistance value is low\n\n\u2022 That ground specific resistance is low.\n\nPower companies have different grounding methods as per their network types. Thus, power companies around the world select the proper one for themselves amongst the TT, TN and IT systems for the transmission and distribution systems.\n\nTN type networks are the most common network types today. Star\n\npoint of the network is grounded in such networks. Device bodies\n\nand metal parts are connected to the protective conductor PE. PE is\n\nalso connected to the grounded part on the star point.\nIn case of phase-ground contact, voltage against ground values of\n\nPE or PEN protection lines and connected devices are increased.\n\nBy keeping the value of these voltages, i.e. the RB resistance, below\n\n2 ohms, it will be possible to obtain the desired value, in other words\n\na value under the allowed contact voltage.\nWhile creating a project for the grounding facility;\n\u2022 Location of the grounding facility is determined.\n\u2022 Measurements are performed to determine the\n\nground specific resistance.\n\u2022 Electrode type to be used in the grounding operation\n\nto be performed is determined.\n\u2022 Short circuit current of the facility and the opening time of the protection",
+      "token_count": 727,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:21.470957Z"
+    },
+    {
+      "id": "e75866b3-6bd9-46fd-8f4a-ca050ef660f3",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 39,
+      "heading": "It is very important to provide stable load to the generator while",
+      "content": "elements to be connected to the system are determined.\n\n\u2022 Dissipation resistance is calculated.\n\u2022 Cross-section of grounding conductor is calculated.\n\u2022 Selection made and values calculated are verified.\n\u2022 Step and contact voltages are calculated and it is\n\nexamined if the prospected system is suitable.\nAll conductors and connection points are inspected manually and visually before starting operation.\nGrounding resistance Rt shall be < 4 ohm. If this value cannot be obtained, proper ground resistance shall be obtained by performing the operations above.\nThe most important issue while grounding is that the areas for the network ground and the ground for the generator shall have a distance of 20 m at least. This distance is required to prevent the grounding systems affecting each other.\nAnd for the most common grounding systems performed with the\n\ngrounding rods, the lengths of the grounding rods used and the\n\ndistance between these rods are important. For grounding systems\n\nperformed with more than one grounding rods, the distance between\n\nthe points where these rods are driven in the ground shall be at least\n\ntwo times the length of a rod. For a grounding operation where a\n\ngrounding rod with a length of 1.5 m is used, the other rod shall be\n\ndriven at least 3 m away from the first rod.\nGenerator body shall always be grounded. Ground connection shall be flexible to prevent disconnections due to vibration. Grounding wires shall meet the standards and shall have a capacity to carry full load current at least.\n\nFigure-13 TN Type Network\n\n[\n9]\n\nin parallel with other generators and the grid. Please contact our",
+      "token_count": 408,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:21.678840Z"
+    },
+    {
+      "id": "c7b843f2-2ed0-4af9-acfb-2f3cc1fc1152",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 40,
+      "heading": "An insulation test shall be performed when your generator is not",
+      "content": "operated for a long period of time. Test the insulation resistance of coils\n\nbefore operation when the generator is not operated for a long period of\n\ntime. At this time, Automatic Voltage Regulator (AVR) connection and all\n\ncontrol oriented connections shall be disconnected. And rotating diodes\n\nshall be short circuited or disconnected. A 500 V Megger or a similar\n\nmeasurement device may be used. Connect the Megger between the\n\noutput terminal and ground (chassis). Insulation resistance against the\n\nground shall be above 1 M \u03a9 . Dry the alternator coils if the insulation\n\nresistance is below 1 M \u03a9 .\nInsulation test shall be performed by qualified and authorized services and personnel only.\n\n[\n0]\n\n[\n1]",
+      "token_count": 177,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:21.899712Z"
+    },
+    {
+      "id": "a0dd4de7-a01a-4bb8-b688-ca592a05bfb3",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 41,
+      "heading": "TOWING THE GENERATORS WITH TRAILERS",
+      "content": "All connection elements on the truck and the generator with trailer\n\nshall be checked for loose nuts, bent metal, cracks, wear, etc.\n\nCheck the condition of all tires. Check if all flashers and headlamps work.\n\nRemember that the weight of the trailer shall affect manoeuvres and stopping distance while towing the generator with trailer.\n\n\u2022 Follow all traffic rules, standards and other regulations while towing the\n\ngenerator with trailer. These rules also cover the required equipment\n\nand speed limits expressly specified in the regulations.\n\n\u2022 Do not allow the personnel to ride on the mobile generator.\n\n\u2022 Do not allow the personnel to stand on the draw bar\n\nor between the mobile generator and the truck.\n\n\u2022 Avoid slopes and soft terrain and obstacles such as pits and stones.\n\n\u2022 Ensure that the ground behind and below the mobile\n\ngenerator is clean before making a backwards manoeuvre.\n\nPark the generator with trailer on a dry ground that may bear its weight. If it shall be parked on a slope, park diagonally on the slope and use chocks to prevent it from sliding downwards. Do not park on a ground with a slope over 15\u00b0.\n\nStorage of engine and alternator for a long period of time may have adverse effects. These effects may be minimized by preparing and storing the generator properly. Take support required from authorized services for periods over 1 month.",
+      "token_count": 342,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:22.092602Z"
+    },
+    {
+      "id": "8fd9fb24-2d3d-46fb-a9ee-15b8cacac31a",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 42,
+      "heading": "Battery shall be inspected every 8 weeks while it is stored, and it shall be",
+      "content": "fully charged if required. Automatically activating generators have charge\n\nhave it take the load. Heater heats the block coolant of the engine when\n\ngenerator is not operated. Thus, heater shall be active in all seasons.\nAutomatically activating generators have block coolant heaters. This feature is optional for manual generators.\n\nHeight (H)\nDepth (D)\n\n[\n2]\n\n[\n3]\n\n[\n4]\n\n[\n5]\n\ncolumns: Height (H), Depth (D), Weight",
+      "token_count": 104,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:22.285491Z"
+    },
+    {
+      "id": "78652f3c-b9e0-4b34-8727-88a7b5b3c923",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 43,
+      "heading": null,
+      "content": "A good maintenance schedule extends the service of the generator.\n\nWhat type of maintenance shall be applied on the generator at what\n\nperiod is given in the Periodical Maintenance Chart. Periodical\n\nMaintenance Chart is provided together with this manual for each\n\ngenerator. Maintenance and repair procedures shall only be performed\n\nby authorized services. In general, generator shall always be kept clean.\n\nDo not allow materials such as water, fuel and oil collect on and inside\n\nthe generator. Keep the floor of the generator always clean.",
+      "token_count": 136,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:22.476492Z"
+    },
+    {
+      "id": "708827b7-b814-4583-9faf-eab66b2cdb9a",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 44,
+      "heading": "BLEEDING THE FUEL SYSTEM",
+      "content": "Loosen the nut on the outlet of supply pump marked with 1. Keep\n\npumping the hand primer no.1 until fuel reaches nut no. 1. Complete\n\nthe operation by tightening nut no. 1 when fuel reaches the nut.\n\nSame operation may be performed by loosening the bolt on the fuel\n\nfilter in some models (if applicable). This differ as per the engine.",
+      "token_count": 84,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:22.668056Z"
+    },
+    {
+      "id": "05d58359-a5ad-48c1-a5ba-18ea28dd4170",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 45,
+      "heading": "Inspection",
+      "content": "Inspect belts for wear and cracks to maximize the engine performance.\n\nReplace belts that are worn or damaged.\n\nFor applications that require more than one drive belts, replace belts\n\nas paired sets. Replacing only one belt of a paired set shall cause\n\nthe new belt to carry more load because the older belt is stretched.\n\nAdditional load may cause the new belt to break.\n\nIf the belts are too loose, vibration may cause unnecessary wear on the\n\nbelts and pulleys. Loose belts may slip enough to cause overheating.\n\nUse a proper gauge to inspect the belt tension correctly.\n\nBurroughs Indicator\n\n[\n6]\n\n[\n7]\n\n[\n8]",
+      "token_count": 153,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:22.858945Z"
+    },
+    {
+      "id": "edc5b525-571b-40bc-b511-361756372857",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 46,
+      "heading": "\u2022 NEGATIVE \u201c-\u201d wire connects the NEGATIVE \u201c-\u201d battery",
+      "content": "terminal to the NEGATIVE \u201c-\u201d terminal on the starter.\n\nDisconnect the wire from the NEGATIVE \u201c-\u201d battery terminal.\n\u2022 POSITIVE \u201c+\u201d wire connects the POSITIVE \u201c+\u201d battery\n\nterminal to the POSITIVE \u201c+\u201d terminal on the starter.\n\nDisconnect the wire from the POSITIVE \u201c+\u201d battery terminal.\nNote: Always recycle batteries. Never discard a battery.\nDispose of used batteries to a suitable recycling centre.\n\u2022 Remove the used battery.\n\u2022 Install the new battery.\nNote: Ensure that the system is OFF before disconnecting the wires.\n\u2022 Connect the wire from the starter to the POSITIVE\n\n\u201c+\u201d battery terminal.\n\u2022 Connect the NEGATIVE \u201c-\u201d wire to the NEGATIVE \u201c-\u201d battery terminal.",
+      "token_count": 166,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:23.049836Z"
+    },
+    {
+      "id": "d1fd83a2-fe09-4bc6-87a7-30d9b35d6348",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 47,
+      "heading": "Make sure that the batteries in confined areas are ventilated properly.",
+      "content": "Follow the procedures below to prevent short circuits/sparks beside the\n\nbatteries. Do not smoke when the batteries are connected.\nThe battery cables or the batteries should not be removed with the battery cover in place. The battery cover should be removed before any servicing is attempted.\nRemoving the battery cables or batteries while the cover is in place\n\nmay cause battery explosions that may lead to personal injuries.",
+      "token_count": 106,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:23.240727Z"
+    },
+    {
+      "id": "5aa3be76-2bd1-4a83-86eb-97673e64de37",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 48,
+      "heading": "for detailed information and procedure.",
+      "content": "\u2022 Ensure that the application is performed on level ground.\n\u2022 Remove the cooling system filler cap.\n\u2022 Remove the drain plug from the side of the cylinder block to\n\ndrain the engine. Ensure that the drain hole is not restricted.\n\u2022 Open the radiator drain tap or remove the drain plug on the\n\nbottom of the radiator to drain the radiator. Disconnect the hose on the bottom of the radiator if no radiator drain tap or drain plug is available in the radiator.\n\u2022 Flush the coolant system with clean water.\n\u2022 Install drain plugs and close the radiator drain tap.\n\nInstall the radiator hose if it is removed before.\n\u2022 Fill the system with an approved antifreeze mixture.\n\nRefit the filler cap.\n\u2022 Start the engine and check for any coolant leaks.\n\navoid air locks. Cooling of air system air locks may damage the engine.\n\n[\n9]\n\n[\n0]\n\n[\n3]",
+      "token_count": 207,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:23.434617Z"
+    },
+    {
+      "id": "5284fd13-b07a-4d62-8de9-4c0a4ac9fefd",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 49,
+      "heading": "Engines with no Coolant Return Tank",
+      "content": "Check the coolant level when the engine is stopped and cool.\n\nPressurized System: Hot coolant may cause serious burns. To open the cooling system filler cap, stop the engine and wait until the cooling system components are cool. Loosen the cooling system pressure cap slowly in order to relieve the pressure.\n\n\u2022 Remove the cooling system pressure cap slowly in\n\norder to relieve the pressure.\n\n\u2022 Keep the coolant level on correct mark for your\n\napplication. Keep the coolant level on correct mark on the sight glass if a sight glass is available on the engine.\n\nCooling System\n\n\u2022 Clean the cooling system filler cap and inspect the gasket. If the\n\ngasket is damaged, discard the old filler cap and install a new filler\n\ncap. If the gasket is not damaged, use a suitable pressurizing\n\npump in order to pressure test the filler cap. Correct pressure is\n\nstamped on the front side of the filler cap. If the filler cap cannot\n\nretain the correct pressure value, install a new filler cap.\n\n\u2022 Inspect the cooling system for leaks.",
+      "token_count": 256,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:23.632747Z"
+    },
+    {
+      "id": "7e5aaaa2-83f9-4998-ab73-75deaebf908d",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 50,
+      "heading": "CLEANING/REPLACEMENT OF",
+      "content": "\u2022 Never run the engine without air filters installed. Never run the engine\n\nwith damaged air filters. Do not use elements with damaged pleats,\n\ngaskets or seals. Dirt entering the engine may cause serious damage\n\nto the engine components. Air filters prevent ingress of dust and\n\nforeign materials to the intake manifold.\n\n\u2022 Do not clean air filters while the engine is operated,\n\nthis will cause dust ingress to the engine.",
+      "token_count": 106,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:23.833633Z"
+    },
+    {
+      "id": "3f2d8564-51cf-4922-87ba-9754ba2d4660",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 51,
+      "heading": "\u2022 Pre-air filter (if available) and dust bowl are used to catch",
+      "content": "dust and dirt daily. Clean the dust and dirt as required.\n\u2022 Operating conditions (dust, dirt and burrs) may require\n\nmore frequent service for the air filter elements.\n\u2022 Air filter element shall be replaced at least once a\n\nelement. Inspect the air filter elements for tears and/or holes on the\n\nfiltering materials thoroughly before installing the filter to its place.\n\nInspect the gasket or the seal of the air filter element for damage.",
+      "token_count": 109,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:24.028521Z"
+    },
+    {
+      "id": "e7729697-34ef-4072-a491-44824f94aef8",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 52,
+      "heading": "engine is operated in dusty or dirty environments, air filter",
+      "content": "1 Cover\n\n[\n1]\n\n[\n2]\n\n[\n3]\n\n[\n2]\n\nevery third replacement of the external air filter element.\n\u2022 Close the air intake side with a tape to prevent ingress of dust.\n\u2022 Clean the interior and body of the air filter over with a clean, dry cloth.\n\u2022 Open the air intake side you have closed with a tape.",
+      "token_count": 73,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:24.220412Z"
+    },
+    {
+      "id": "0f2c497f-a4c2-4b91-b9bb-f0a135226ee2",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 53,
+      "heading": "\u2022 Use low pressure compressed air to remove the dust from the filter",
+      "content": "element. Air pressure shall not exceed 207 kPa (30 psi). Direct the\n\nair flow to the top and bottom of the filter pleats through the filter\n\nelement. Be careful to prevent damage to the pleats.\n\u2022 Do not use air filter elements with damaged pleats, gaskets or seals.\n\nDirt entering the engine may cause damage to engine compartments.\n\u2022 Contact authorized service to get information on maximum times\n\nthat an external filter element may be cleaned. Inspect the air filter\n\nelements for tears and/or holes on the filtering materials when the\n\nexternal air filter element is cleaned. External air filter element\n\nshall be replaced at least once a year. This replacement shall be\n\nperformed regardless of the number of cleaning operations.",
+      "token_count": 183,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:24.411289Z"
+    },
+    {
+      "id": "96397ee2-bf42-4059-b040-0f5bcb7eda1a",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 54,
+      "heading": "Inspect the clean, dry external air filter element. Use a 60 W blue",
+      "content": "light inside a dark room or in a similar place. Place the blue light\n\ninside the external air filter element. Rotate the external air filter\n\nelement. Inspect the external air filter element for tears and/or holes.\n\nInspect the external air filter element as per the light passing through\n\nthe filter material. To verify the result, compare with a new external\n\nair filter element with the same part number if required.\n\n[\n3]\n\n[\n4]\n\n[\n3]\n\n[\n5]\n\nDo not use a external air filter element that has any tears and/or holes in the filter material. Do not use a external air filter element with damaged pleats, gasket or seal.\nDiscard any damaged external air filter elements.",
+      "token_count": 167,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:24.603796Z"
+    },
+    {
+      "id": "b1953c99-38c6-46ca-9421-749decde95ba",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 55,
+      "heading": "Single Element Air Cleaners",
+      "content": "Never run the engine without air filters installed. Never run the\n\nengine with damaged air filters. Do not use elements with damaged\n\npleats, gaskets or seals. Dirt entering the engine may cause serious\n\ndamage to the engine components. Air filters prevent ingress of dust\n\nand foreign materials to the intake manifold.\n\nDo not clean air filters while the engine is operated, this will cause dust ingress to the engine.\n\nA wide variety of air filters may be installed for usage with this engine. Contact authorized service for the correct procedure for replacement of the air filter.",
+      "token_count": 145,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:24.795686Z"
+    },
+    {
+      "id": "780b737c-b725-47af-84d0-5b3b81508214",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 56,
+      "heading": "AIR FILTER INDICATOR",
+      "content": "Some engines may be equipped with a different type of service indicator.\n\nSome engines may be equipped with a differential pressure indicator.\n\nIntake air differential pressure indicator indicates the difference between\n\nthe pressure before the air enters the air filter element and the pressure\n\nafter the air leaves the air filter element. As the air filter element\n\nbecomes dirty, the pressure differential rises. If your engine is equipped\n\nrecommendations while maintaining the air filter service indicator.\n\nService indicator may be installed on the air filter element or away from the filter.\n\nTypical Service Indicator\n\nObserve the service indicator. When any of the conditions below occur, air filter element shall be cleaned or replaced.\n\n\u2022 If the yellow diaphragm enters the red zone.\n\n\u2022 If the red piston locks in the visible position.",
+      "token_count": 211,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:24.987576Z"
+    },
+    {
+      "id": "ab384347-88de-4ced-a7f7-79cd448f871a",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 57,
+      "heading": "Do not drain the oil when the engine is cold. As the oil cools, suspended",
+      "content": "waste particles settle on the bottom of the oil pan. The waste particles\n\nwill not be removed with the drained cold oil. Drain the oil pan when the\n\nengine is off. Drain the oil pan while the oil is hot. This method ensures",
+      "token_count": 55,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:25.178400Z"
+    },
+    {
+      "id": "aa610b5a-7a70-4305-ba48-5a550e6593f7",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 58,
+      "heading": "enough to collect the waste oil.",
+      "content": "After running the engine at the normal operating temperature, stop the\n\nengine. Use one of the methods below to drain the engine sump oil:\n\n\u2022 If the engine is equipped with a drain valve (2), rotate the drain valve\n\nswitch counter-clockwise to drain the oil. Rotate the drain valve switch\n\nclockwise to close the drain valve after the oil is drained.\n\u2022 If the engine is not equipped with a drain valve, remove\n\nthe oil drain plug (1) in order to allow the oil to drain.\nAfter the oil has drained, the oil drain plugs shall be cleaned and installed. If required, renew the O-ring seal on the drain plug.\nSome oil pan types have oil drain plugs on both sides of the oil pan because of the form of the pan. This type of oil pan requires the engine oil to be drained from both plugs.\n\n[\n6]\n\n[\n7]\n\n[\n3]",
+      "token_count": 199,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:25.371336Z"
+    },
+    {
+      "id": "18007656-9600-4357-b575-b41942c9afca",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 59,
+      "heading": "\u2022 Clean the sealing surface of the oil filter housing (3).",
+      "content": "Make sure that the union (6) on the oil filter housing is intact and that it is not damaged.\n\u2022 Apply clean engine oil to the O-ring seal (4) on the oil filter.\n\nit until the O-ring contacts the sealing surface (3). Then rotate the oil 3/4 of a full turn. Remove the container and discard the waste oil as per local regulations.\n\nrequired quantity of oil.",
+      "token_count": 88,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:25.562857Z"
+    },
+    {
+      "id": "003b90e2-600d-4619-b7c2-fba06f82197c",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 60,
+      "heading": "To prevent crankshaft bearing damage, crank the engine with the",
+      "content": "fuel OFF. In this way, oil filters shall be filled before the operation of\n\nthe engine. Do not crank the engine for more than 30 seconds.\n\u2022 Start the engine and run at \u201cLOW IDLE\u201d for 2 minutes. Perform this\n\nprocedure in order to ensure that the lubrication system has oil\n\nand that the oil filters are filled. Inspect the oil filters for oil leaks.\n\u2022 Stop the engine and wait until the oil is drained back\n\nto the oil pan for a minimum of 10 minutes.\n\n\u2022 Remove the oil level gauge in order to check the oil\n\nlevel. Maintain the oil level between the \u201cADD\u201d and\n\u201cFULL\u201d marks on the engine oil level dipstick.\n\n(L) \u201cLow\u201d mark. (H) \u201cHigh\u201d mark.\n\n\u2022 Some dipsticks may have \u201cH\u201d and \u201cL\u201d marks as shown in the\n\nfigure. Maintain the oil level between the \u201cL\u201d and \u201cH\u201d marks on the\n\nengine oil level dipstick. Do not fill the oil pan over the \u201cH\u201d mark.\n\n[\n8]\n\n[\n9]\n\n[\n0]\n\n[\n3]",
+      "token_count": 216,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:25.753748Z"
+    },
+    {
+      "id": "9d933a9c-1b95-4c9d-a673-c01022f5b823",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 61,
+      "heading": "TYPE 3 SPIN-ON FUEL FILTER",
+      "content": "\u2022 Clean the external housing of the filter assembly. Install a suitable\n\ntube on the drain (2). Rotate the drain valve (1) counter-clockwise.\n\nDrain the fuel to the container and remove the pipe. Ensure that\n\nthe fuel drain (2) on the new spin-on filter is closed.\n\n\u2022 Use a suitable tool to remove the spin-on filter (5)\n\nfrom the filter housing (3).\n\n\u2022 Lubricate the sealing ring (4) with clean engine oil.\n\n\u2022 Install the spin-on filter (5) to the filter housing (1).\n\n\u2022 Tighten the spin-on filter by hand until the sealing ring contacts\n\nthe filter head. Rotate the spin-on filter 90 degrees.\n\u2022 Turn the fuel supply valve ON, if applicable, and remove the container.\n\u2022 The primary fuel filter and the auxiliary fuel filter shall\n\nbe replaced at the same time.\n\u2022 Manually pump fuel to the fuel system.\n\n[\n1]\n\n[\n2]\n\n\u2022 Inspect the engine and generator visually in general.\n\nEnsure that air intake and exit and exhaust gas exit may be performed easily in the specified areas.\n\n\u2022 Open the radiator cover and check the coolant level. Add\n\nantifreeze-water mixture if coolant is missing. Coolant level shall be 30 mm below the coolant filling neck.\n\n\u2022 Engine coolant shall contain antifreeze as per the coldest weather\n\nconditions in the region. Mixture of 50% antifreeze and 50% water\n\nshall provide proper protection almost at all regions.\n\n\u2022 Check air filter indicator. Replace the air filter if required. Keep the\n\nwindow shutter and fresh air intake shutters of the radiator open.\n\n\u2022 Remove foreign material on the engine and alternator\n\nsuch as spanners, tools, rags, papers, etc.\n\n\u2022 Inspect the fuel level in the daily fuel tank. Add fuel if it is missing.\n\nCheck the engine oil level with the dipstick. Add suitable oil if it is\n\ninadequate. Oil level shall be near the maximum level line.\n\n\u2022 Check for breaks, cracks, tears, leaks and looseness. Do not\n\noperate the generator in case of a fault before correcting the fault.\n\n\u2022 Check if the circuit breaker output switch is\n\ndeactivated (OFF), if available.\n\n\u2022 Check if the emergency stop button is pressed.\n\n\u2022 Check the electrolyte levels in cells by opening the battery covers if you\n\nare using batteries that require maintenance. Top up the cells lacking\n\nelectrolyte so that the pure water is 1 cm over the separator.\nDo not add tap water, acidic water, or acid to the cells.\n\n\u2022 Check the battery connection cables. Always tighten\n\nloose battery terminals and keep the terminals clean.\n\n\u2022 Check the radiator air exit hood, open it if it is blocked\n\nand remove anything that is blocking air in front of it.",
+      "token_count": 640,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:25.945638Z"
+    },
+    {
+      "id": "6f5c35ca-a2af-4898-bcb6-dcf1d83439c7",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 62,
+      "heading": "GENERATOR CONTROL SYSTEMS",
+      "content": "Electronic control systems are used to control and monitor generator operation. Any one of the standard control systems may be used as per the requirements of the generator. Control panel allows the operation and stopping of the generator and monitoring of operation conditions and output voltage. Also, it stops the generator automatically in case of low oil pressure, high engine temperature and in various fault conditions.",
+      "token_count": 106,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:26.138533Z"
+    },
+    {
+      "id": "75bc7791-f2d7-447d-8dc1-476771d90e2c",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 63,
+      "heading": "\u2022 Press the AUTO button and bring the automatic transfer device on",
+      "content": "the front panel of the generator to Automatic position.\n\u2022 When the mains voltage is within normal limits, generator is in\n\nstand-by mode. If any one of the mains phases is cut-off or it the\n\nmains voltage drops or increases excessively, generator is\n\nactivated and starts to supply the installation within 14-15 seconds.\n\nWhen the mains voltage is restored or it is returned back to normal",
+      "token_count": 97,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:26.330018Z"
+    },
+    {
+      "id": "d2d8fd8f-6509-442d-a144-d358bbae1d91",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 64,
+      "heading": "D 300 is an automatic control and transfer device designed for",
+      "content": "diesel engines. Device starts the generator automatically in case of\n\na mains fault, and transfers the load to the generator automatically.\n\nParameters may be programmed with an operator or technician\n\npassword from the front panel or from the PC interface software.\nWhen the device detects a fault, it flashes the relevant fault LED and displays the relevant fault message on the\nLCD display and stops the engine if required. Parameters programmed on the device are recorded on a non-volatile memory so they shall not be affected by power outages.\n\nUnit may be programmed with the buttons on the control panel and\n\nthe LCD display or with the PC interface software.\n\n[\n3]",
+      "token_count": 168,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:26.521909Z"
+    },
+    {
+      "id": "16f91b00-a7cf-408e-b415-78a968e90d9b",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 65,
+      "heading": "OPERATION OF THE GENERATORS",
+      "content": "Switches to TEST mode. Generator starts and takes the load.\n\nSwitches to OPERATION mode. Generator starts and waits without taking the load.\n\nSwitches to AUTO mode. Generator operates and takes the load when required.\n\nSwitches to OFF mode. The generator is stopped.\n\nSwitches to the next screen in the same group.\n\nActivates LAMP TEST if it is hold pressed.\n\nSwitches to previous screen group.\n\nSwitches to next screen group.\n\nSwitches to the previous screen in the same group.\n\nManual control of MAINS CONTACTOR in\n\nManual control of GENERATOR CONTACTOR\n\n6 and 7 Switches to PROGRAMMING mode if these two buttons\n\nare pressed for 5 seconds.\n\n5 and 8 Service time counters are reset if these two buttons\n\nare pressed for 5 seconds simultaneously.",
+      "token_count": 186,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:26.712799Z"
+    },
+    {
+      "id": "316db0aa-b582-411f-ac12-a47ee643fe61",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 66,
+      "heading": "TRANS-AMF AUTOMATIC TRANSFER DEVICE",
+      "content": "TRANS-AMF is an automatic control and transfer device designed for\n\ndiesel engines. Device starts the generator automatically in case of a\n\nmains fault, and transfers the load to the generator automatically.\n\nUnit may be programmed with the buttons on the control panel and the LCD display or with the PC interface software.\n\nRed Alarm Warning;\n\nAlarms that may stop the engine are indicated with this warning. Alarm information is displayed alternatively on the bottom line of the LCD display (4).\n\nYellow Alarm Warning;\n\nTemporary (electrical) alarms are indicated with\n\nthis warning when they occur. Alarm information is displayed alternatively on the bottom line of the LCD display (4).\n\nThis warning is displayed when maintenance period is over, and the alarm information is displayed alternatively on the bottom line of the LCD display (4).\n\nMains OK Warning;\n\nThis LED shall illuminate if the mains voltage and frequency is within the specified limits.\n\nMains Contactor Off Warning;\n\nThis LED indicates if the mains contactor is on or off.\n\nAlso, this LED indicates that the load is supplied by the mains.\n\nIf conf. input is selected as Mains Contactor Fault,\n\nthis LED operates as per the condition of the input.\nGenerator Contactor Off Warning;\n\nThis LED indicates if the generator contactor is on or\n\noff. Also, this LED indicates that the load is supplied by the generator.\n\nIf conf. input is selected as Generator Contactor Fault,\n\nthis LED operates as per the condition of the input.\nGenerator OK Warning;\n\nThis LED shall illuminate if the generator voltage and frequency is within the specified limits. Also, this LED indicates that the generator is ready to take on the load.\n\nThis LED indicates when any starter cut-off parameter\n\noccurs after cranking.\n\nIf cranking cannot be performed and this\nLED is illuminated, Engine Starter Cut-off parameters shall be checked.\n\nAutomatic Operation Mode LED\n\n[\n4]\n\n[\n5]\n\n[\n6]\n\nManual Operation Mode LED\n\nStop and Off Mode LED\n\nAlarms that occur on the panel are listed by pressing this button. If no alarm has occurred on the panel and alarm is reset, this button is not functional.\n\nEvent records indication button;\n\nPanel stores last 50 event records in its memory. You\n\nmay access these records by pressing this button. Event records are displayed with values measured at the time that they have occurred. Navigation between event records is performed with direction buttons.\n\nLamp test button;\n\nDirection buttons;\n\nNavigation between event records, and changing of the values are performed with these buttons.\n\nConfirmation Button;\n\nIt is used to confirm and store parameter changes. Also, language may be changed with this button other than the program menu.\nESC button;\n\nIt is used to return back to the previous program menu.\n\nIt is used for accessing the programming menus.\n\nHorn mute button;\n\nBoth the conf. output selected as horn and the internal\n\nbuzzer on the panel give an audible warning when an alarm occurs. Muting the audible warning is provided with this button.\n\nMains contactor On / Off button;\n\nFunctional in manual operation mode only, it is indicated with LED no. (6).\n\nGenerator contactor On / Off button;",
+      "token_count": 796,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:26.908688Z"
+    },
+    {
+      "id": "065de29c-25d5-42f9-9b70-54b954f21294",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 67,
+      "heading": "load only, it is indicated with LED no. (7).",
+      "content": "Reset (Fault Clear) button;\n\nIt is used to clear the faults occurred after being corrected.\n\nAutomatic Operation Mode Selection;\n\nPanel is switched to automatic (AUTO) mode with this\n\nbutton, it is indicated with LED no. (10). Panel monitors\n\nthe mains voltage in automatic mode, disconnects the\n\nload from the mains and starts the engine when the\n\nvoltage goes out of the set limits, and ensures that\n\nthe load is supplied by the generator when generator voltage reaches the set limits.\n\nPanel shall not start the engine even if the mains voltage goes out of the limits if the conf.\ninput is selected as prohibit operation of the generator in Remote Start or Automatic Mode, or if the Operation schedule is activated and it is not in the specified time period.\n\nTest Operation Mode Selection;\n\nPanel is switched to test mode with this button, it is indicated with LED no. (11). Mains voltage shall be within the set limits in order to select the test mode.\nEngine is started when the panel is switched to test mode, generator takes on the load when it is ready if\nTest on Load feature is selected in the program\n\nparameters, or resumes operation without load if this parameter is selected as Test Without\nLoad. Panel switches automatically to the\nAUTO mode and resumes to supply the load if the mains go out of the set limits in test mode.\n\nIf exercise parameters are activated and set in the program menu, panel shall be switched to\nTest mode automatically in this period.\n\nManual Operation Mode Selection;\n\nPanel is switched to manual mode with this button, it is\n\nindicated with LED no. (12). Start (32), Stop (33), Mains\n\n(26) and Generator (27) Load transfer operations\n\nmay be performed manually with the buttons on the panel in manual mode. Electrical locking in Mains and\n\nGenerator load transfer is performed by the panel\n\nand contactors are prevented from closing at the\n\nsame time. Remote Start/Stop input and operation\n\nschedule functions do not operate in manual mode.\n\nThis button is used to start the engine in manual mode,\n\nit is indicated with LED no. (13).\n\nIf an alarm has occurred on the panel, this button is not functional until the alarm is corrected and cleared using the Reset (22) button.\n\n[\n7]\n\nStop Button and Off Mode Selection;\n\nOperated generator is stopped with the Stop button, it is\n\nindicated with LED no. (14). When the stop button is\n\npressed for the first time, engine shall resume\n\noperation for the set cooling period, and then stop when this period ends. You shall press the same button again to stop the engine without waiting for this period.\n\nStop button also ensures that the panel is switched to off mode. Start/Stop and load transfer operations are not performed in off mode.",
+      "token_count": 680,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:27.100578Z"
+    },
+    {
+      "id": "1258381e-a118-44ca-a5d5-3531094e9e68",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 68,
+      "heading": "MAINTENANCE OF THE DEVICE:",
+      "content": "Device shall be repaired by qualified persons. De-energize the device first in order to access internal parts of the device.\nDo not clean the device solutions containing hydrocarbons\n(such as petroleum, Trichlorethylene). Cleaning the device with such solutions may reduce mechanical reliability of the device.\nUse a cloth dampened with ethyl alcohol or water to clean the external plastic part of the device.\nThe life cycle of the device is 10 years in average.",
+      "token_count": 115,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:27.292840Z"
+    },
+    {
+      "id": "c3440b7b-190f-4c91-8506-a45a4028606b",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 69,
+      "heading": "\u2022 Run the engine at idle for 1 minute to allow cooling of the engine.",
+      "content": "Then, press the stop switch on the device and wait until the engine\n\nstops. Finally, bring the ignition switch to position \u201c0\u201d.\n\n\u2022 Bring the ignition switch from \u201c0\u201d to \u201c1\u201d.\n\u2022 Warning lamps of the manual control device shall illuminate at",
+      "token_count": 59,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:27.490727Z"
+    },
+    {
+      "id": "afd4df01-c3f6-4a50-82c1-cb60908b20e8",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 70,
+      "heading": null,
+      "content": "this time.\n\u2022 Then, press \u201cSTART\u201d button once to operate the engine. Engine of\n\nthe generator shall start.\n\u2022 Check whether the warning lamps on the panel illuminate and\n\nwhether the values on the indicators are normal.\n\u2022 Run the generator at idle for 1 minute. Generator shall heat in this\n\n\u2022 Consumers (loads) in the installation shall be off at this time.\n\u2022 Bring the main switch to position \u201c1\u201d.\n\u2022 Bring the inverter switch from \u201cMAINS\u201d to \u201cGENERATOR\u201d.\n\u2022 Activate consumers one by one.\n\u2022 Check the current and voltage on phases using the ammeter and\n\n\u2022 Bring the inverter switch to \u201cMAINS\u201d position when mains voltage\n\nis restored.\n\nOn/Off Switch",
+      "token_count": 162,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:27.684617Z"
+    },
+    {
+      "id": "68d898d0-8ebc-416a-a3cc-97754a2bab07",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 71,
+      "heading": "power when the switch at position 0.",
+      "content": "This is used to start the generator and to make changes on the program parameters.\n\n[\n8]\n\n[\n9]\n\n[\n0]\n\n[\n1]\n\n[\n3]\n\nOperation of the engine from the start operation until\n\nthe engine is stopped is monitored by this LED.\n\nThis is used to stop the engine and to make changes on the program parameters.\n\nStop LED\n\nThis LED allows you to observe that the engine is not operated and/or it is stopped.\n\nYou may access Program menus by pressing this button for 5 seconds.\n\nWhen the button is pressed shortly each time, engine\n\nspeed, alternator frequency and operating hours are displayed on the display (7).\n\nStorage of parameter values and navigation to the next parameter in the program menus are performed with this button.\n\nProgram parameters, measured values and fault codes are displayed here.\n\nStarting fault\n\nThis LED flashes and panel switches to fault mode\n\nHigh Temperature Fault\n\nThis LED flashes and panel switches to fault mode when the coolant temperature exceeds sensor value.\n\nFault is reset by switching On/off switch (1) to 0 (off)\n\nposition and then switching it back to 1 (on.)\n\nwhen oil pressure is reduced. Fault is reset by switching On/off switch (1) to 0 (off) position and then switching it back to 1 (on.)\n\nGenerator Frequency and Speed\n\nEngine Operating Hours\n\nThis LED illuminates when engine operating hours are\n\nSpeed Fault",
+      "token_count": 336,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:27.876507Z"
+    },
+    {
+      "id": "cc044099-cdd7-42ea-b374-e847a313ed96",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 72,
+      "heading": "and then switching it back to 1 (on.)",
+      "content": "Charging Alternator Fault\n\nwhen charging alternator voltage exceeds the set limit\n\n(off) position and then switching it back to 1 (on.)\n\nThis LED flashes for all alarms other than the ones",
+      "token_count": 47,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:28.068008Z"
+    },
+    {
+      "id": "81cf4631-3a7c-4b6f-bc8c-d317ff5e5378",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 73,
+      "heading": "MAINTENANCE OF THE DEVICE",
+      "content": "Device shall be repaired by qualified persons. De-energize the device first in order to access internal parts of the device.\nDo not clean the device solutions containing hydrocarbons (such as petroleum, Trichlorethylene). Cleaning the device with such solutions may reduce mechanical reliability of the device.\nUse a cloth dampened with ethyl alcohol or water to clean the external plastic part of the device.\nThe life cycle of the device is 10 years in average.",
+      "token_count": 115,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:28.259898Z"
+    },
+    {
+      "id": "ef514760-5861-4802-b14f-9f04942915ec",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 74,
+      "heading": "POINTS TO BE CONSIDERED IN OPERATION",
+      "content": "It is important for problem-free operation of your operation that the load distribution on phases is balanced both on manual and automatic controlled generators. It is the user's responsibility to keep the load distribution between phases at a tolerance range of -/+ 15%. Faults caused by inadequate or lacking maintenance or by negligence are not covered under warranty.\n\n[\n2]",
+      "token_count": 94,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:28.450788Z"
+    },
+    {
+      "id": "6242183f-52ef-4cad-81e9-809fe7adc684",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 75,
+      "heading": "\u2022 Currents drawn from the generator shall be distributed evenly to three phases as much as possible. Max.",
+      "content": "difference between phases shall be +/-15%.\n\u2022 Information on transfer of current by power cables to be used for generators are given in Section 4. Electrical Connections.\n\u2022 Operating connection of the generator shall be performed correctly so that it can function properly. This connection type is shown in\n\nFigure-22. There are two cable inputs to the panel. One is the mains input for mains control and the other is the generator output.\nMains line taken from the electric meter output or from the compensation panel, if applicable, is connected to the consumer via the mains contactor. The point to be considered here is that the generator shall be connected after the meter.\n\nFigure- 22 Connection Method of the Generator to Operation\n\nAutomatic generators manufactured by KAPLAN JENERATOR is offered with a remote control system that is designed with the DATAKOM D 300 generator control device and hardware.\n\nThe automatic remote control system includes the diesel engine, alternator controller and protection functions, furthermore the\nDATAKOM D 300 controller device with a microchip is able to follow a mains source, evaluation, the AMF operation scenario mode that is initialized to automatically operate the generator in an event that the mains source is out of range.\n\nAnother component of the automatic generator system is the transfer system and DATAKOM D 300 controller system may control the transfer system automatically or manually. Therefore the transfer system that will allow the load to be fed with the mains or the generator is controlled automatically.\n\nKaplan transfer systems are offered with contactor at AG, inverter switch or (ACB) engine switch based on the generator power and customer requests. Kaplan transfer systems, in addition to 3 pole or 4 pole options, have a very wide product series with different brands such as SMART GRID, ABB, LG/LS.\n\nThe transfer systems consist one circuit breaker for controlling mains source, one circuit breaker for controlling generator source and auxiliary\n\nhardware. The System is designed with the principle to connect the Mains and generator source breakers output side in parallel and having a\n\nload output through the connection point. For inverter type switches, even though there is only one physical switch, it consists a package of\n\none switch that consists two switches combined. Builds with contactor and air circuit breakers, the circuit breakers are placed separately.",
+      "token_count": 612,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:28.643679Z"
+    },
+    {
+      "id": "b68b5e1e-506d-442f-9afb-76dcf0a69dc9",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 76,
+      "heading": "The load is fed by mains energy by closing the mains breaker if there is mains energy, or fed by generator energy by closing the generator",
+      "content": "breaker if mains energy is not available. Closing and opening the breakers are decided by the micro processor based generator control\n\ndevice within the generator control panel. Both breakers may not be closed at the same time. One must be open in order to close the other.\n\nGenerator and Transfer Panel Connection",
+      "token_count": 78,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:28.835568Z"
+    },
+    {
+      "id": "559b87da-ebcb-43b0-9b02-8b6fdb7adc1c",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 77,
+      "heading": "Contactor systems;",
+      "content": "Contactor systems consist two contactors and auxiliary hardware that is capable to match the generator and mains source standby power. The electric locking in the system comes as standard, the mechanical lock is optional. The transfer system includes the generator body heater and a fuse and its related hardware for battery charge, and are ready to be used at the connection terminal. The connection between the system and automatic generator system consists a compatible and simple terminal group. This terminal group P-N feed output for generator charge and body heater, 3P+N mains references to ensure that the generator controller system follow the mains and 2 input connectors for controlling the mains contactors.\n\nKaplan contactor transfer systems are manufactured with SMART GRID 4P for 10kVA \u2013 50kVA 400V models,\nLG/LS - ABB brand for 10kVA -550kVA 400V models with 3 or 4 pole options.",
+      "token_count": 224,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:29.029457Z"
+    },
+    {
+      "id": "cc870b53-0c9c-4e32-9be2-e5a58483a273",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 78,
+      "heading": "Air Circuit Breakers (ACB) systems;",
+      "content": "Air circuit breakers systems consist two air circuit breakers and auxiliary hardware that is capable to match the generator and mains source standby\n\npower. The electric locking in the system comes as standard, the mechanical lock is optional. The transfer system includes the generator body heater\n\nand a fuse and its related hardware for battery charge, and are ready to be used at the connection terminal. The connection between the system and\n\nautomatic generator system consists a compatible and simple terminal group. This terminal group F-N feed output\n\nfor generator charge and body heater, 3xF+N mains references to ensure that the generator controller system follow the mains and 2 input connectors for mains and generator engine drive switch controller.\nKaplan air circuit breakers transfer systems are manufactured with ABB and LG/LS brand for 350kVA-2500kVA 400V with 3 or 4 pole options.\n\n[\n3]",
+      "token_count": 226,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:29.221355Z"
+    },
+    {
+      "id": "20c6fcbd-d9cf-46ba-b25d-d8329512995c",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 79,
+      "heading": "FAULT:",
+      "content": "\u2022 Alternator has no output voltage.\n\n\u2022 Loss of magnetism in stator windings.\n\nIf the alternator is equipped with excitation winding, contact the same ends of a 9.5 V dry battery to the + and - terminals.\n\n\u2022 Loose contact on the panel or terminal connections.\n\nOpen the panel cover and check whether the cable ends are loose, and similarly whether the terminal ends are loose.\n\n\u2022 Disconnection in the warning button.\n\nCheck all connections, especially the alternator line terminal connections.\n\n\u2022 Fault in rotating diodes.\n\nTest the diodes one by one with the diode test section of the multimeter, and replace the faulty diodes.\n\n\u2022 Engine speed is too low.\n\nIncrease the speed of the drive machine to nominal value.\n\n\u2022 Regulator board is faulty.\n\nReplace the board that is not regulating.\n\n\u2022 Voltage is lowered as the alternator is loaded.\n\nSet the output voltage to 400 V with the regulator potentiometer at idle operation. Replace the board if voltage is dropped as the alternator is loaded after this setting.\n\n\u2022 Speed loss of the drive machine is too\n\nhigh. Check the power of the drive machine.\n\n\u2022 Alternator is overloaded.\n\nDo not load above the nominal value.\n\n\u2022 Rotating diodes are faulty.\n\nCheck the diodes with multimeter. Replace the faulty ones.\n\n\u2022 Voltage is increased as the alternator is loaded.\n\n\u2022 A motor rotating in reverse is present in the circuit.\n\nChange the locations of generator output cables.",
+      "token_count": 354,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:29.414371Z"
+    },
+    {
+      "id": "97f9e66a-27cc-4f69-8c83-a65b14659c1a",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 80,
+      "heading": "\u2022 Disconnection in voltage control switch",
+      "content": "terminals. Check the terminals of the switch.\n\nfunction. Replace the regulator board.\n\u2022 Short circuit in the coils.\nOpen the terminal box, and check the coils with multimeter.\nShort circuit is present in case of difference in resistance.\n\u2022 One or more of the bridge diodes are faulty.",
+      "token_count": 71,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:29.605820Z"
+    },
+    {
+      "id": "0feddfee-f3ca-408b-b7c6-316cce776c0a",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 81,
+      "heading": "\u2022 Resistance in the movement of fuel governor.",
+      "content": "\u2022 Engine is overheated\n\n\u2022 Exhaust pipe is blocked\n\n\u2022 Cooling fan is faulty\n\n\u2022 Radiator cores are dirty or pipe is blocked inside\n\n\u2022 Air circulation is inadequate\n\n\u2022 Air filter or pipe is blocked\n\n\u2022 Injectors are faulty or their setting is incorrect\n\n\u2022 Heater system is faulty\n\n\u2022 Oil level in the sump is low\n\n\u2022 Sump pressure is high\n\n\u2022 Sump ventilation pipe blocked\n\n\u2022 Valve setting is incorrect (worn on the snap ring and the liner)\n\n\u2022 Not firing (engine will crank but will not start)\n\n\u2022 Air in fuel system\n\n\u2022 Engine temperature is very low\n\n\u2022 Valve settings are incorrect\n\n\u2022 Heater is faulty\n\n\u2022 Oil sensor / switch or connection are faulty\n\n\u2022 Fuel consumption is high",
+      "token_count": 167,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:29.796711Z"
+    },
+    {
+      "id": "95c596ba-d8e6-4434-9931-114afc530cf5",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 82,
+      "heading": "OTHER TECHNICAL DATA 8",
+      "content": "[\n3]\n\nEngine Speed (r/min), 1500, 1500, 1500, 1500, 1500\nRotation Direction From the Front, Counter- clockwise, Counter- clockwise, Counter- clockwise, Counter- clockwise, Counter- clockwise",
+      "token_count": 47,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:29.987602Z"
+    },
+    {
+      "id": "0764e6a8-898d-44b2-ae34-ec0a348d84f4",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 83,
+      "heading": "Cooling Fan Air Flow (m /min)",
+      "content": "3, \u2264 171.1\nEngine speed:\n\nEngine speed:\n\nEngine speed:\n\nEngine speed:\n\nEngine speed:\n\nIntake Valve Clearance While the Engine is Cold (mm), 0.2 + 0.05, 0.2 + 0.05, 0.2 + 0.05, 0.28 \u00b1 0.03, 0.33 \u00b1 0.03\nExhaust Valve Clearance While the Engine is Cold (mm), 0.3 + 0.05, 0.3 + 0.05, 0.3 + 0.05, 0.38 \u00b1 0.03, 0.38 \u00b1 0.03",
+      "token_count": 79,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:30.180497Z"
+    },
+    {
+      "id": "21b5a40d-5dcd-4958-8c68-1c359c0ca2ba",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 84,
+      "heading": "Connecting Rod Bolt Torque",
+      "content": "(N - M), 85-135, 85-135, 85-135, 170~250 (Manual Tightening)\n155~230 (Automatic Tightening), 170~250 (Manual Tightening)\n155~230 (Automatic Tightening)\nFlywheel Bolt Torque (N - M), 285-295, 285-295, 285-295, 230~280 (Manual Tightening)\n230~300 (Automatic Tightening), 230~280 (Manual Tightening)\n230~300 (Automatic Tightening)",
+      "token_count": 81,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:30.375426Z"
+    },
+    {
+      "id": "816e8452-7105-4e4e-8a97-15a5a81e0b29",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 85,
+      "heading": "\u2264 600 \u00b0C",
+      "content": "\u2264 171.1\n\u2264 171.1\n\u2264455\n\u2264574.14\n\u2264 535.8\n\nEngine speed:\nEngine speed:\nEngine speed:\nEngine speed:\nEngine speed:\nCooling Fan Air Flow (m 3 /min)\n\nIntake Valve Clearance While\n\n0.2 + 0.05\n0.2 + 0.05 0.2 + 0.05\n0.28 \u00b1 0.03\n0.33 \u00b1 0.03 the Engine is Cold (mm)\n\nExhaust Valve Clearance While\n\n0.3 + 0.05\n0.3 + 0.05 0.3 + 0.05\n0.38 \u00b1 0.03\n0.38 \u00b1 0.03 the Engine is Cold (mm)\n\n25 ~ 26\n25 ~ 26\n\nMain Bearing Bolt Torque\n\n265 \u00b1 25\n265 \u00b1 25\n\nConnecting Rod Bolt Torque\n\n170 ~ 250 (Manual Tightening)\n170 ~ 250 (Manual Tightening)\n\n155 ~ 230 (Automatic Tightening)\n155 ~ 230 (Automatic Tightening)",
+      "token_count": 145,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:30.613294Z"
+    },
+    {
+      "id": "07a4614a-d4df-4fc5-83f8-c61ed1ab5a67",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 86,
+      "heading": "Flywheel Bolt Torque (N - M)",
+      "content": "230 ~ 280 (Manual Tightening)\n230 ~ 280 (Manual Tightening)\n\n230 ~ 300 (Automatic Tightening)\n230 ~ 300 (Automatic Tightening)\n\nAbbreviation for Engine brand (eg. Ricardo)\n\nKaplan brand abbreviation\n\n[\n4]\n\n[\n5]\n\n[\n6]",
+      "token_count": 54,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:30.805184Z"
+    },
+    {
+      "id": "28daccf6-219c-44d5-adc2-9065eb239d47",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 87,
+      "heading": "OIL AND WATER CAPACITIES OF THE GENERATOR",
+      "content": "at Full Load, Oil, Water, Fuel Tank\nNone, Stand By, None, Prime, None, None, None, Capacity, Capacity, Capacity\n\n[\n7]\n\nat Full Load, Oil, Water, Fuel Tank\nNone, Stand By, None, Prime, None, None, None, Capacity, Capacity, Capacity\n\nat Full Load, Oil",
+      "token_count": 62,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:30.999012Z"
+    },
+    {
+      "id": "185b2d73-5b16-44f3-9bce-df465163da00",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 88,
+      "heading": "Capacity, Water",
+      "content": "Capacity\n\nat Full Load, Oil\n\nCapacity\n\nat Full Load, Oil\n\n[\n8]\n\n[\n9]\n\nat Full Load, Oil, Water, Fuel Tank\nNone, Stand By, None, Prime, None, None, None, Capacity, Capacity, Capacity\n\nat Full Load, Oil",
+      "token_count": 50,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:31.199897Z"
+    },
+    {
+      "id": "b2801afe-0d19-4e1c-af3f-a596e69cc07a",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 89,
+      "heading": "700, 560.0, 636.3, 509.0, TWD 1643 GE, 125,49, 48.00, 166.00, 1050",
+      "content": "at Full Load, Oil\n\n[\n9]\n\nat Full Load, Oil, Water, Fuel Tank\nNone, Stand By, None, Prime, None, None, None, Capacity, Capacity, Capacity\n\nat Full Load, Oil\n\nCapacity\n\nat Full Load, Oil\n\nCapacity\nStand By, None, Prime, None, None, None, None, None, None\n\n[\n9]\n\n[\n00]\n\nat Full Load, Oil, Water, Fuel Tank\nNone, Stand By, None, Prime, None, None, None, Capacity, Capacity, Capacity\n\n[\n9]\n\n[\n1]",
+      "token_count": 97,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:31.392822Z"
+    },
+    {
+      "id": "b8a92aae-f67a-4336-b8ce-f254070b12e1",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 90,
+      "heading": "CROSS-SECTIONS OF CABLES TO BE USED",
+      "content": "In some cases, the air to be drawn by the engine may be taken from outside as the room is not suitable.\nFollowing points shall be considered in such cases.\n\ncolumns: Stand By phase, power phase, power phase, power phase, power phase, power phase, power phase, power phase\n\nA phase phase phase phase phase phase phase phase\n\n\u2022 100mt. Recommended up to the distance above.\n\n\u2022 \u201cPhase cross-section / 2\u201d may be used for neutral line.\n\n[\n01]\n\n[\n1]",
+      "token_count": 110,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:31.584695Z"
+    },
+    {
+      "id": "0faf2ae4-af75-43db-a19c-84e79ff9be5e",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 91,
+      "heading": "(WITHOUT CABINET)",
+      "content": "columns: None, GENERATOR DIMENSIONS\n\n(WITHOUT CABINET), None, None, None\n\n(WITHOUT CABINET), None, None, None\n\n[\n02]\n\n(WITHOUT CABINET), None, None, None\n\n[\n02]\n\n[\n3]\n\nNone, Daily, Mon hours, 1000 hours, 2000 hours, 5000 hours, Once in every\n6 months, Once in months, None",
+      "token_count": 68,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:31.778092Z"
+    },
+    {
+      "id": "1a4104aa-4e05-49f7-b986-48f7bf74a091",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 92,
+      "heading": "Check the Diesel Engine Lubricating Oil Level",
+      "content": "Perform the Generator Set Perimeter and, , , , , , , , , , eb ep, fr ro m de .\nn 6hr a0e n5t eefaht , nts i, h as llmht a nt hsno srom ue mo 6 c pu ni ton si\nCheck the Diesel Engine Cooling Water Level, , , , , , , , , , , None, None, Operator\nCheck the Generator Set Fuel Level (min. 1/4), , , , , , , , , , , None, None, Operator\nCheck the Diesel Engine Temperature, , , , , , , , , , , None, None, Operator\nThrough the Fuel Filter, , , , , , , , , , , None, None, Operator",
+      "token_count": 118,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:31.983190Z"
+    },
+    {
+      "id": "a75a61d6-8895-48e4-82f0-a430c5a27b7c",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 93,
+      "heading": "Check for Abnormal Vibration Check by",
+      "content": "Running the Generator in Test Mode, , , , , , , , , , , None, None, Operator\n\nCover Studs, , , , , , , , , , , None, None, Authorized Service\nTension and Wear, , , , , , Once in every 150 hours, None, None, None, None, None, None, Authorized Service\nOil Level, , , , , , Once in every 150 hours, None, None, None, None, None, None, Authorized Service",
+      "token_count": 87,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:32.180533Z"
+    },
+    {
+      "id": "cba285bf-c344-4dbd-890a-f0e22b93681e",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 94,
+      "heading": "Change the Diesel Engine Oil and Oil Filter",
+      "content": "(with 15W/40 Turbo Diesel Oil), , , , , , Once in every 150 hours, None, None, None, None, None, None, Authorized Service\nChange the Oil Filter (Based on the Gauge), , , , , , Check the Gauge, None, None, None, None, None, None, Authorized Service",
+      "token_count": 61,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:32.372671Z"
+    },
+    {
+      "id": "03f2bf72-b821-4493-a759-da17983a60f1",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 95,
+      "heading": "Perform Valve Clearance Adjustment and",
+      "content": "Controls, , , , , , , , , , , None, None, Authorized Service\nChange Diesel Engine Fuel Filter, , , , , , Once in every 150 hours, None, None, None, None, None, None, Authorized Service\nClean the Crankcase Air Discharge Mechanism, , , , , , , , , , , None, None, Authorized Service\nPerform Injector Test and Adjustment, , , , , , , , , , , None, None, Authorized Service\nPerform Compression Pressure Check, , , , , , , , , , , None, None, Authorized Service\nCheck the Circulation Pump, , , , , , , , , , , None, None, Authorized Service\nCheck the Turbocharger, , , , , , , , , , , None, None, Authorized Service\nPerform Fuel Pump Test and Adjustment, , , , , , , , , , , None, None, Authorized Service\nCheck the Cylinder Covers., , , , , , , , , , , None, None, Authorized Service",
+      "token_count": 194,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:32.575555Z"
+    },
+    {
+      "id": "936f999a-50af-43fb-97c5-d1c821729bf9",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 96,
+      "heading": "Authorized Service",
+      "content": "Check the Jackets for Wear, , , , , , , , , , , None, None, Authorized Service\nClean the Cooling Water Passage, , , , , , , , , , , None, None,\n\nBearing Clearance Check, , , , , , , , , , , None, None, Authorized Service\nCheck the Piston for Wear, , , , , , , , , , , None, None, Authorized Service\nCheck the Crankshaft for Wear, , , , , , , , , , , None, None, Authorized Service\nCheck the Crank Mill for Wear, , , , , , , , , , , None, None, Authorized Service",
+      "token_count": 115,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:32.766963Z"
+    },
+    {
+      "id": "163ed48f-a91c-46ab-99e1-f6b6d3611bb3",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 97,
+      "heading": "Check Driver Gear Group for Wear",
+      "content": "Perform General Maintenance for Fuel Pump, , , , , , , , , , , None, None, Authorized Service\nReplace the Diesel Engine Oil Pump, , , , , , , , , , , None, None, Authorized Service\nReplace the Crank Seals, , , , , , , , , , , None, None, Authorized Service\nReplace Alternator Bearing, , , , , , , , , , , None, None, Authorized Service\n\nthly hours hours hours hours hours hours hours hours\n\nin every\n\n6 months months\nCheck the Diesel Engine Lubricating Oil Level\n\nrf\n\nor\n\ned\n\n.\n\nd.",
+      "token_count": 120,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:32.957848Z"
+    },
+    {
+      "id": "38c668c4-5f53-4840-9c3f-0b4c18b7bd7e",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 98,
+      "heading": "Check the Diesel Engine Cooling Water Level",
+      "content": "Check the Generator Set Fuel Level (min. 1/4)\n\nGeneral Clean up\n\nmonths,the50h\n\nceshall\n\nupin1year,after1year150hoursmaintenanceshall\n\nbe\n\nCheck the Diesel Engine Temperature",
+      "token_count": 43,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:33.148740Z"
+    },
+    {
+      "id": "1e7ab1d1-4b88-4189-84c5-0dcad3c74cb6",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 99,
+      "heading": "Authorized Service",
+      "content": "Once in every 150 hours\n\nOnce in every 150 hours\n\nOnce in every 150 hours\n\nChange the Oil Filter (Based on the Gauge)\n\nPerform Valve Clearance Adjustment and\n\nOnce in every 150 hours\n\nAuthorized Service\n\nup\n\nin\n\nAuthorized Service\n\n50Workingh\n\n150Workinghours",
+      "token_count": 64,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:33.339631Z"
+    },
+    {
+      "id": "c42d829b-af62-4d90-b0c4-5caf45bee544",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 100,
+      "heading": "Perform Fuel Pump Test and Adjustment",
+      "content": "Authorized Service\n\nCheck the Cylinder Covers.\n\nAuthorized Service\n\nClean the Cooling Water Passage\n\nInaneventwher\n\netherst\n\nAfterinitialmaintenance,ifth\n\ne\n\nPerform Main Bearing and Rod",
+      "token_count": 46,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:33.534176Z"
+    },
+    {
+      "id": "9514d283-87d9-4f2b-8db1-fcfce2870a9f",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 101,
+      "heading": "Check the Piston for Wear",
+      "content": "Authorized Service\n\nAuthorized Service\n\nAuthorized Service\n\n[\n03]\n\n[\n04]\n\n[\n05]\n\n[\n06]\n\n[\n3]\n\naccredited by Kiwa & MEYER.\n\nOur generators have TS ISO 8528-5, TS EN 12601 certificates. Our generators comply with CE declaration.",
+      "token_count": 56,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:33.725068Z"
+    },
+    {
+      "id": "e36b1e01-ec80-467e-a4c2-1226945a0d1a",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 102,
+      "heading": "RESPONSIBILITIES OF THE EN CUSTOMER",
+      "content": "Consider the following points to prevent your generator from being void of warranty prematurely, to ensure that it operates without any problem and that it has a long service life.\n\n\u2022 Operations performed shall not be covered under warranty if warranty certificate or invoice is not presented.\n\n\u2022 Generator shall be void of warranty if any person other than KAPLAN JENERATOR authorized services\n\nintervenes the generator for whatever reason.\n\n\u2022 Inspections and maintenance operations specified in the maintenance schedule shall be performed in time and\n\ncompletely. Faults caused by the lack of periodical are not covered under warranty. Generator shall be installed as described in the operation manual. Otherwise, any faults that occur are not covered under warranty.\n\n\u2022 Customer shall be responsible for faults that occur when dirty fuel, fuel with water content or fuel that\n\ndo not comply with the standards are used.\n\n\u2022 Lubrication oil shall be selected as per the criteria described in the operation manual. Faults that may\n\noccur otherwise shall be considered out of warranty cover.\n\n\u2022 Battery is void of warranty in case of breaking, adding excessive electrolyte, or hardening the battery by leaving it discharged.\n\n\u2022 Do not start and stop the diesel engine when the generator is under load for generators with manual control.\n\nStart and stop operations shall be performed when the generator is not under load after disconnecting the load.\nOtherwise, faults that may occur on the diesel engine and alternator shall be out of warranty cover.\n\n\u2022 KAPLAN JENERATOR shall not be held responsible for damages on components used in automatically\n\ncontrolled generator sets and supplied by the mains power such as mains contactors, block coolant heaters, battery charge rectifiers, etc. due to overcurrent, low or high voltage.\n\nKAPLAN JENERATOR reserves the right to make changes on all models, specifications, colors, visuals related with equipment and accessories, product specifications and all other information without prior notice. Our company shall not be held responsible for any misspelling related with the product information.\n\n[\n3]",
+      "token_count": 536,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:33.917077Z"
+    },
+    {
+      "id": "6588d285-3c4c-4bd8-8bc3-121646af46bf",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 103,
+      "heading": "WARRANTY CONDITIONS / RESPONSIBILITIES OF THE CUSTOMER",
+      "content": "\u2022 Customers of KAPLAN JENERATOR shall not allow any service or persons\n\nother than the KAPLAN JENERATOR\u2019s authorized services to intervene the\n\ngenerator in the cover of the warranty. Such an intervention renders the\n\ngenerator out of the warranty cover provided by KAPLAN JENERATOR.\n\u2022 The guarantee period for the generators sold start with the\n\ndate of invoice and it is 2 years. Operating hours of engines in the generator sets under warranty cover are 1000 hours.\n\u2022 Purchased generators shall be commissioned by the KAPLAN\n\nJENERATOR Authorized Services. Generator shall be out of warranty\n\ncover if the customer has the generator commissioned by himself or by\n\nanother service. Commissioning operation performed by checking the\n\noperating conditions of the generator (layout, installation, electrical\n\nlines, etc.) applies for the location where the commissioning is\n\nperformed and for the point where the electrical connections are made.\n\nAs the environmental operating conditions shall also change if it is\n\nrequired to change the location where the commissioning is performed,\n\nit shall be inspected and commissioned again by Kaplan JENERATOR\n\nauthorized services to ensure proper operation of the generator and to\n\nresume the warranty period.\n\u2022 All maintenances specified in the periodical maintenance chart for all\n\ngenerators within the warranty period shall be performed by Kaplan\n\nJENERATOR's authorized services. Maintenance chart for the\n\ngenerator and maintenance manuals are delivered to the customer\n\ntogether with the generator. Customer is responsible for procuring\n\nthese documents again if these maintenance manuals and charts are\n\n\u2022 Customer shall cover all fees for maintenance, correction of faults\n\nand problems other than the ones caused by manufacturing errors.\n\u2022 Faults caused by negligence, misuse and keeping the generator\n\nunder proper conditions including the responsibility for unloading\n\nthe generator (after delivery on truck up to the commissioning\n\n(start) phase) are in full responsibility of the customer.\n\u2022 For deliveries on truck, transportation of the generator and keeping the\n\ngenerator under proper conditions including the responsibility for\n\nunloading the generator (after delivery on truck up to the\n\ncommissioning (start) phase) are in full responsibility of the customer.\n\u2022 If the generator purchased shall not be commissioned within 2 months,\n\nit shall be stored by providing the storage conditions for that generator.\n\nYou may get information and help required for the storage conditions of\n\nyour generator from Kaplan JENERATOR Authorized Services. Storage\n\n(conservation) operation of a generator within warranty period shall",
+      "token_count": 670,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:34.108967Z"
+    },
+    {
+      "id": "952760f0-49ed-4a3d-909b-2cd453c20732",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 104,
+      "heading": "WARRANTY CONDITIONS / RESPONSIBILITIES OF THE CUSTOMER",
+      "content": "always be performed by KAPLAN JENERATOR.\n\u2022 If the service personnel providing the warranty service is asked to do overtime by the customer, costs incurred due to overtime shall be paid by the customer.\n\u2022 Costs for entrances, barriers, walls, rails, floors, ceilings, decks or\n\nsimilar structures made to access the generator, for rental cranes or\n\nsimilar machines, ramps built or similar structures, trucks or similar\n\nvehicles and fees incurred for taking off or connecting the\n\ngenerator as a whole are the responsibility of the customer.\n\u2022 Customer has the right to ask and examine the\n\nauthorization of the personnel who has come for service operations. This is also a duty of the customer.\n\u2022 Customer is responsible to present the warranty certificate\n\nand commissioning form of the generator to the service personnel when requested in order to receive the warranty service. Thus, aforementioned documents shall be kept inside the generator room where it can be reached easily.\n\u2022 To resume warranty of a generator under the cover of warranty\n\nwhen it is relocated, Kaplan JENERATOR authorized services shall\n\nbe asked for commissioning after performing the installation of the\n\ngenerator in its new location. Relocation and recommissioning\n\noperations performed by unauthorized persons shall render the\n\ngenerator void of warranty. Customer shall pay the costs of a\n\nsecond commissioning operation required when installation\n\npreparations are not performed or completed.\n\u2022 Customer is responsible to ensure adequate ventilation and exhaust outlet and to ensure that dimensions of the generator room complies with the norms.\n\u2022 Customer is responsible for faults that occur when chemicals that\n\nshall be added to the cooling system to prevent pitting, erosion\n\nand residues in the cylinder liner or cylinder block are not added.\n\u2022 Additional equipment and projects other than the original equipment and project may not be applied on the generators purchased within the warranty period. If additional operations transfer panel, etc.) are performed without the approval of\nKaplan JENERATOR, generator shall be rendered out of warranty.\n\u2022 Genuine spare parts of Kaplan JENERATOR shall be used for\n\nall generator under warranty cover. Customer is responsible for faults that occur when genuine spare parts are not used.\n\u2022 Kaplan JENERATOR shall not be held responsible for faults\n\ncaused by drawing more current than the nominal current of the\n\ngenerator through the mains contactor selected as per the\n\n\u2022 Faults that may occur due to environmental effects shall not be considered under warranty cover. Natural disasters such as earthquakes, floods, torrents and similar events.\n\u2022 Mains lower and upper limits are determined based on the values\n\nwhere our generator and the installation of the customer may operate",
+      "token_count": 703,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:34.301857Z"
+    },
+    {
+      "id": "d9bfe0e3-3179-485e-a4ae-1dcd22dbdb3d",
+      "source_id": "2e4076f3-faec-4c21-89ee-7fcb9ba507c7",
+      "chunk_index": 105,
+      "heading": "WARRANTY CONDITIONS / RESPONSIBILITIES OF THE CUSTOMER",
+      "content": "properly for all our generators. If customer asks for changing of the\n\nmains voltage limits, this change may be performed as charged and out of warranty cover when a report declaring that customer assumes\n\nall responsibilities that may be caused by such a change is issued.\n\n\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\n\n[\n07]",
+      "token_count": 90,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:36:34.494749Z"
+    }
+  ],
+  "summary": {
+    "total_chunks": 106,
+    "total_tokens": 22597,
+    "processing_timestamp": "2025-12-31T16:36:35.318247Z"
+  }
+}
