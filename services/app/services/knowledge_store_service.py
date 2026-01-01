@@ -70,3 +70,76 @@ class KnowledgeStoreService:
             if conn:
                 cur.close()
                 conn.close()
+
+    @staticmethod
+    def get_chunks_by_source_id(source_id: str):
+        """
+        Source ID se saare chunks fetch karta hai
+        Returns: List of dicts with id, chunk_index, content
+        """
+        conn = None
+        try:
+            conn = psycopg2.connect(KnowledgeStoreService.DB_URL)
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            query = """
+                SELECT id, chunk_index, content 
+                FROM knowledge_chunks 
+                WHERE source_id = %s 
+                ORDER BY chunk_index ASC;
+            """
+            
+            cur.execute(query, (source_id,))
+            chunks = cur.fetchall()
+            
+            print(f"Fetched {len(chunks)} chunks for source_id: {source_id}")
+            return chunks
+            
+        except Exception as e:
+            print(f"Error fetching chunks: {e}")
+            return None
+        finally:
+            if conn:
+                cur.close()
+                conn.close()
+
+    @staticmethod
+    def update_chunk_embeddings(chunk_embeddings: list):
+        """
+        Har chunk ki embedding update karta hai
+        chunk_embeddings: List of dicts with 'chunk_id' and 'embedding'
+        """
+        conn = None
+        try:
+            conn = psycopg2.connect(KnowledgeStoreService.DB_URL)
+            cur = conn.cursor()
+            
+            updated_count = 0
+            
+            for item in chunk_embeddings:
+                chunk_id = item['chunk_id']
+                embedding = item['embedding']
+                
+                # pgvector format mein embedding store karna
+                query = """
+                    UPDATE knowledge_chunks 
+                    SET embedding = %s::vector
+                    WHERE id = %s;
+                """
+                
+                cur.execute(query, (str(embedding), chunk_id))
+                updated_count += 1
+            
+            conn.commit()
+            print(f"Successfully updated {updated_count} chunk embeddings")
+            return {"updated": updated_count, "status": "success"}
+            
+        except Exception as e:
+            if conn:
+                conn.rollback()
+            print(f"Error updating embeddings: {e}")
+            return None
+        finally:
+            if conn:
+                cur.close()
+                conn.close()
