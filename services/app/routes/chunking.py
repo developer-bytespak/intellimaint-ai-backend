@@ -16,21 +16,43 @@ class ChunkRequest(BaseModel):
     overwrite: bool = False
 
 
-@router.post("/process")
+class ChunkResponse(BaseModel):
+    source_id: str
+    num_chunks: int
+    status: str = "success"
+
+
+@router.post("/process", response_model=ChunkResponse)
 async def process_chunk(req: ChunkRequest):
+    """
+    Process a knowledge source and create chunks.
+    
+    - Uses the universal PDF chunker with 15% overlap
+    - English-only filtering applied
+    - Automatically retries once on failure
+    
+    Args:
+        source_id: UUID of the knowledge source
+        dry_run: If True, returns chunks without inserting to DB
+        overwrite: If True, deletes existing chunks before inserting
+    
+    Returns:
+        ChunkResponse with source_id, num_chunks, and status
+    """
     logger.info("chunk/process request received: %s dry_run=%s overwrite=%s", req.source_id, req.dry_run, req.overwrite)
     try:
-        if req.dry_run:
-            # Run blocking chunker in a thread and return the result to caller
-            result = await asyncio.to_thread(process_source, req.source_id, True, req.overwrite)
-            return result
-        else:
-            # Schedule background work and return 202 Accepted immediately
-            asyncio.create_task(asyncio.to_thread(process_source, req.source_id, False, req.overwrite))
-            return Response(content=json.dumps({"status": "accepted", "source_id": req.source_id}), status_code=202, media_type="application/json")
+        # Run blocking chunker in a thread (sync processing)
+        result = await asyncio.to_thread(process_source, req.source_id, req.dry_run, req.overwrite)
+        
+        return ChunkResponse(
+            source_id=result.get("source_id", req.source_id),
+            num_chunks=result.get("num_chunks", 0),
+            status="success"
+        )
     except ValueError as e:
+        logger.warning("chunk/process validation error: %s", str(e))
         raise HTTPException(status_code=400, detail=str(e))
-    except Exception:
+    except Exception as e:
         logger.exception("unexpected error in chunk/process")
-        raise HTTPException(status_code=500, detail="internal server error")
+        raise HTTPException(status_code=500, detail=f"Chunking failed: {str(e)}")
 

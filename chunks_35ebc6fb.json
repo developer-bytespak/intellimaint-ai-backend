@@ -1,0 +1,795 @@
+{
+  "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+  "source_title": "Generator_manual27.pdf",
+  "chunks": [
+    {
+      "id": "663c2669-f51c-4780-be42-1e1822c92b0f",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 0,
+      "heading": "Extracted PDF Content",
+      "content": "Read all safety precautions and instructions carefully before operating equipment.\nEnsure engine is stopped and level before performing any maintenance or service.\n\nRecord product information to reference when ordering parts or obtaining warranty coverage.",
+      "token_count": 64,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:06.930440Z"
+    },
+    {
+      "id": "22571705-5185-4e60-ac25-9208dc01c7e1",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 1,
+      "heading": "Table of Contents",
+      "content": "Introduction\n\nOperation at High Altitude\n\nInspect Muffler and Spark Arrester\n\nTrouble Shooting\n\nConnecting to a Building\u2019s Electrical\n\nEnglish Customer Service: 1-844-FIRMAN1\n\nThank you for purchasing a FIRMAN generator.\n\nThis manual covers operation and maintenance of the FIRMAN generators. All information in this publication is based on the latest production information available at the time of approval for printing.\nThe manufacturer reserves the right to change, alter or other wise improve the generator and this documentation at any time without prior change.\n\nThis manual contains safety information to make you aware of the hazards and risks associated with generator products and how to avoid them. This generator is designed and intended only for supplying electrical power for operating compatible electrical lighting, appliances, tools and motor loads, and is not intended for any other purpose. It is important that you read and understand these instructions thoroughly before attempting to start or operate this equipment.\nSave these original instructions for future reference.\n\nImportant Safety Information\n\nThe manufacturer cannot possibly anticipate every possible circumstance that might involve a hazard. The warnings in this manual and the tags and decals affixed to the unit are therefore not all-inclusive. If you use a procedure, work method or operating technique that the manufacturer does not specifically recommend you must satisfy yourself that it is safe for you and others. You must also make sure that the procedure work method or operating technique that you choose does not render the generator unsafe.",
+      "token_count": 409,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:07.119332Z"
+    },
+    {
+      "id": "b05c074f-abfa-4a23-b6e9-07049615fb38",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 2,
+      "heading": "CAUTION",
+      "content": "DANGER indicates a potentially hazardous situation which, if not death or serious injury.\n\nWARNING indicates a potentially hazardous situation which, if not avoided, could result in death or serious injury.\n\nCAUTION indicates a potentially hazardous situation which, if not avoided, may result in minor or moderate personal injury, or property damage.\n\nHot Surface.\nDo Not Touch the Surface.\n\nRisk of Electric Shock\n\nRotating Parts Entanglement\n\nOperator\u2019s Manual\n\nDANGER indicates a potentially hazardous situation which, if not avoided. WILL result in death or serious injury., , WARNING indicates a potentially hazardous situation which, if not avoided, could result in death or serious injury., , CAUTION indicates a potentially hazardous situation which, if not avoided, may result in minor or moderate personal injury, or property damage.\n\nHot Surface.\nDo Not Touch the Surface.\n\ncolumns: Risk of Electric Shock\nRotating Parts Entanglement",
+      "token_count": 236,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:07.308224Z"
+    },
+    {
+      "id": "d596391c-177f-4c18-8d4a-af6038ace522",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 3,
+      "heading": "it off and get to fresh air RIGHT AWAY. See a",
+      "content": "Avoid other generator hazards.\n\nThe engine exhaust from this product contains chemicals known to the State of California to cause cancer, birth defects, or other reproductive",
+      "token_count": 43,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:07.498115Z"
+    },
+    {
+      "id": "ef544331-bf0f-4a29-9589-30bfa283e21f",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 4,
+      "heading": "INCORRECT USAGE",
+      "content": "Do not operate in any of the following locations:\n\nNear any door, window or vent\n\nwhich causes fuel to spill.\n\nFuel and its vapors are extremely flammable and explosive which could cause burns, fire, or explosion resulting in death or serious injury and/or property damage.",
+      "token_count": 68,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:07.687008Z"
+    },
+    {
+      "id": "604d08d7-2777-4b1c-bbe3-4664d3fd5868",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 5,
+      "heading": null,
+      "content": "Keep fuel away from sparks, open flames, pilot lights, heat, and other ignition sources.\nCheck fuel lines, tank, cap, and fittings frequently for cracks or leaks. Replace if necessary.\nDO NOT light a cigarette or smoke.\n\nfor the intended use, to prevent backfeed by isolating generator from electric utility\n\nStarter and other rotating parts could entangle hands, hair, clothing, or accessories resulting in serious injury.\nNEVER operate generator without protective housing or covers.\nDO NOT wear loose clothing, jewelry or anything that could be caught in the starter or other rotating parts.\nTie up long hair and remove jewelry.\n\nExcessively high operating speeds could result in minor injury. Excessively low operating speeds impose a heavy load.",
+      "token_count": 187,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:07.876899Z"
+    },
+    {
+      "id": "8b4a5f38-9312-4f22-bbb0-62a274d41d0f",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 6,
+      "heading": null,
+      "content": "DO NOT exceed the generator\u2019s wattage amperage capacity.\nbefore connecting electrical loads.\n\nCAUTION\n\nExceeding generators wattage/amperage capacity could damage generator and/or electrical devices connected to it.\n\nConnect electrical loads in OFF position, then turn ON for operation.\nTurn electrical loads OFF and disconnect",
+      "token_count": 81,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:08.064666Z"
+    },
+    {
+      "id": "88ff5eae-aa03-404c-a0ed-5f68825006e4",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 7,
+      "heading": null,
+      "content": "Exhaust heat/gases could ignite combustibles, structures or damage fuel tank causing a fire, resulting in death or serious injury and/or property damage.\nContact with muffler area could cause burns resulting in serious injury.\nDO NOT touch hot parts and AVOID hot\nAllow equipment to cool before touching.\nIt is a violation of California Public Resource\nCode, Section 4442, to use or operate the engine on any forest-covered, brush-covered, or grass-covered land unless the exhaust system is equipped with a spark arrester, as defined in Section 4442, maintained in effective working order. Other states or federal jurisdictions may have similar laws.\nContact the original equipment manufacturer, retailer, or dealer to obtain a spark arrester designed for the exhaust system installed on this engine.\nReplacement parts must be the same and installed in the same position as the original",
+      "token_count": 221,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:08.259222Z"
+    },
+    {
+      "id": "b1e2ffd7-bc00-4dc7-a158-89095ab8033d",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 8,
+      "heading": null,
+      "content": "When using generator for backup power, notify utility company.\nin any damp or highly conductive area,\nDO NOT touch bare wires or receptacles.\n\nUse generator only for intended uses.\nask dealer or contact local service center.\nOperate generator only on level surfaces.\nDO NOT insert any objects through cooling\nIf connected devices overheat, turn them off and disconnect them from generator.\nShut off generator if:\n-Electrical output is lost.\n-Unit vibrates excessively.",
+      "token_count": 117,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:08.448114Z"
+    },
+    {
+      "id": "5a1e3cf3-83b4-4f7f-a7d6-440e3451e3e6",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 9,
+      "heading": null,
+      "content": "Medical and Life Support Uses.\n\nIn case of emergency, call 911 immediately.\nNEVER use this product to power life support\nNEVER use this product to power medical\nInform your electricity provider immediately if you or anyone in your household depends\nInform your electrical provider immediately if a loss of power would cause you or anyone in your household to experience a medical\n\nImproper treatment of generator could damage it and shorten its life.",
+      "token_count": 112,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:08.637005Z"
+    },
+    {
+      "id": "8fa4a810-ddd5-4f85-b442-1fdd34106d55",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 10,
+      "heading": "Parts Included",
+      "content": "Your gasoline powered inverter generator ships with the following parts:\n\nReference\n\n*We are always working to improve our products. Therefore, the enclosed product may differ slightly from the image on this page.",
+      "token_count": 53,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:08.829384Z"
+    },
+    {
+      "id": "e51b4936-3725-407e-a6cb-e4c1de05cfb1",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 11,
+      "heading": null,
+      "content": "7- Muffler Maintenance Cover\n9- Maintenance Cover \u2013 Oil filler and air filter access.\n\nTotal power drawn from all receptacles must not exceed the name plate rating.\n\nOil Warning Indicator Light \u2013 Check oil level when this light turns \u201c ON \u201d. Engine will not run when indicator is lit.\n\nOverload Indicator Light \u2013 This light turns \u201c ON \u201d when the generator is overloaded and will cut power to the receptacles.\n\nOutput Ready Indicator Light \u2013 Remains \u201c ON \u201d during normal operating conditions. Shuts \u201c OFF \u201d when generator is overloaded.",
+      "token_count": 133,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:09.018290Z"
+    },
+    {
+      "id": "14ec43ee-d51a-45ca-8d8c-61c3f5119b46",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 12,
+      "heading": "Economy Control Switch",
+      "content": "The Economy Control switch can be activated in order to minimize fuel consumption and noise while operating the unit during times of reduced electrical output, allowing the engine speed to idle during periods of non-use. The engine speed returns to normal when an electrical load is connected. When the economy switch is off, the engine runs at normal speed continuously.\n\nWhen the oil falls below the minimum level, the oil warning indicator light comes on and the engine stops automatically. The engine will not start until the proper amount of oil is in the crank case.\n\nThe green AC Power Indicator Light comes on when the engine starts and generates power.\n\nIf the engine overload indicator light comes on, the generator\u2019s wattage / amperage capacity has been exceeded by connected electrical devices or by a power surge. When this occurs, the green AC Power\n\nIndicator Light(Item 7) will go off. The engine will continue to run, but the red Engine Overload Indicator\nLight will stay on and power will no longer be supplied to connected electronic devices.\n\n3 - 1 Data - Minder ( Multi - Meter ) \u2013 Push the SELECT button to show the Voltage, Hertz and running hours.\n\n120V, 20A Duplex \u2013 (NEMA 5-20R) 20 Amp of current may be drawn from this 120 Volt receptacle.",
+      "token_count": 316,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:09.209167Z"
+    },
+    {
+      "id": "7dff0b05-8e6a-4adf-b342-eff6141a8041",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 13,
+      "heading": "120V , 30A RV (NEMA TT-30R)",
+      "content": "30 Amp current may be drawn from this 120 Volt receptacle.\n\u2013\n\nCircuit Breakers \u2013 The receptacles are protected by an AC circuit protector. If the generator is overloaded or an external short circuit occurs, the circuit protector will trip. If this occurs, disconnect all electrical loads and try to determine the cause of the problem before attempting to use the generator again. If overloading causes the circuit protector to trip, reduce the load.\nN ote: Continuous tripping of the circuit protector may cause damage to generator or equipment. The circuit protector may be reset by pushing the button of the protector.\n\nEngine Switch \u2013 Flip the switch to the \u201c ON \u201d( l ) position and pull the recoil starter to start the generator. Turn to the \u201c OFF \u201d( O ) position to turn off the generator.\n\nDC Circuit Breaker - The circuit protector may be reset by pushing the button of the protector.\n\nEnglish Customer Service: 1-844-FIRMAN1\n\nParallel Operation Outlets - These outlets are used for connecting two FIRMAN inverter generators for\n\n12V DC outlet \u2013 8 . 3 Amp of DC current may be drawn from this receptacle.\nUse this outlet to charge 12V automotive type batteries ONLY . See 12V DC outlet (Battery\nCharger) section.\n\nGround Terminal \u2013 Consult an electrician for local grounding regulations.\n\nOutlet Cover - Protect the receptacles from dust",
+      "token_count": 336,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:09.398069Z"
+    },
+    {
+      "id": "02d37b79-ffa0-4f57-be55-e80fa0f290ab",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 14,
+      "heading": "in a well-ventilated area and away from doors, windows and other vents.",
+      "content": "When operated above 77\u00b0F(25\u00b0C) there may be a decrease in power.\nMaximum wattage and current are subject to and limited by such factors as fuel BTU content ambient temperature, altitude, engine condition and etc. Maximum power decreases about\n3.5% for each 1,000 feet above sea level; and will also decrease about 1% for each 10\u00b0F(-12.2 \u00b0C )",
+      "token_count": 85,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:09.587951Z"
+    },
+    {
+      "id": "680dabff-d327-4599-8808-8c7a475ebf47",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 15,
+      "heading": null,
+      "content": "Rated AC Voltage\n\nPhase\n\nPower Factor\n\nEngine Type\n\nLow Oil Shutdown\n\nIgnition System\n\nCapacity\n\nCapacity\n\nAir Cleaner\n\nP.T.O. shaft rotation\n\nBreakless Ignition Type, Flywheel Magneto\n\nUnleaded Automotive Gasoline\n\nCounter Clockwise (Facing P.T.O.)\n\nPolyurethane Type\n\nRated Fequency\n\nSee \u201cAdd Engine Oil\u201d Section\n\nMagneto Inductor\n\nP.T.O. shaft rotation, Counter Clockwise (Facing P.T.O.)",
+      "token_count": 97,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:09.778840Z"
+    },
+    {
+      "id": "ed2113c2-208c-4993-a64f-723b776df395",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 16,
+      "heading": "Oil Type, See \u201cAdd Engine Oil\u201d Section",
+      "content": "Spark Plug, TORCH F6RTC/NGK BPR6ES/CHAMPION RN9YC\n\nAdd Engine Oil\n\nDO NOT attempt to crank or start the engine before it has been properly filled with the recommended type and amount of oil. Damage to the generator as a result of failure to follow these instructions will void your warranty.\n\n1.Place generator on a flat and level surface.\n2.Loosen the cover screw and remove the\n\nThe recommended oil type is 10W-30 automotive oil. However outdoor temperatures will determine the space proper oil viscosity for the engine. Use the chart to select the best for the outdoor temperature range expected.\n\nThe engine is equipped with a low oil shut-off and will stop when the oil level in the crankcase falls below the threshold level.\nWe consider the first 5 hours of run time to be the break-in period for the unit. During the break in period stay at or below 50% of the running watt rating and vary the load occasionally to allow stator windings to heat and cool. Adjusting the load will also cause engine speed to vary and help seat piston rings.\n\nThe unit is equipped with a low oil shutdown.If the oil level becomes lower than required,the sensor will activate a warning device or stop the\nIf generator shuts off and the oil level is within specifications, check to see if generator is sitting at an angle that forces oil to shift. Place on an even surface to correct this. If engine fails to start, the oil level may not be sufficient to deactivate low oil level switch. Make sure the sump is completely full of oil.\n\n5.Replace oil fill cap/dipstick and fully tighten.\n6.Reinstall maintenance cover and tighten screws.\n\n4.Using oil funnel, slowly pour contents of provided oil bottle into oil fill opening to the overfill. Overfilling with oil could cause the\nLow oil shutdown\n\nFull Synthetic 5W-30\n\n7.Oil Level should be checked prior to each use or at least 8 hours or operation. Keep oil level maintained.\n\nH\n\nL\n\nFailure to follow Operator's Manual for fuel recommendations voids warranty.",
+      "token_count": 498,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:09.971594Z"
+    },
+    {
+      "id": "ac4f7cca-54dc-40cd-a2f7-f592a8e1b70f",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 17,
+      "heading": "\u2022\u2022\u2022",
+      "content": "Fuel and its vapors are extremely flammable and explosive which could cause burns, fire or explosion resulting in death, serious injury and/or property damage.\n\nFill fuel tank outdoors.\nDO NOT overfill tank. Allow space for fuel expansion. If the tank is overfilled, fuel can overflow onto a hot engine and cause fire or explosion. Wipe up any spilled fuel immediately.\nIf fuel spills, wait until it evaporates before\nKeep fuel away from sparks, open flames, pilot lights, heat, and other ignition sources.\nCheck fuel lines, tank, cap and fittings frequently for cracks or leaks. Replace if necessary.\nDO NOT light a cigarette or smoke when filling the fuel tank.\n\n1.Clean area around fuel fill cap, remove cap.\n2.Slowly add unleaded fuel to fuel tank. Be careful not to fill above the red fuel level indicator . This allows adequate space for\n\n3.Install fuel cap and let any spilled fuel evaporate before starting engine or wipe up any spilled gasoline.",
+      "token_count": 238,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:10.163320Z"
+    },
+    {
+      "id": "0d7c8bd2-bd1b-4863-ac35-d0bb3105541a",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 18,
+      "heading": "\u2022\u2022\u2022",
+      "content": "is acceptable.\nThe density of air at high altitude is lower than at sea level . Engine power is reduced as the air mass and air-fuel ratio decrease .\nEngine power and generator output will be reduced approximately 3.5% for every 1000 feet of elevation above sea level . This is a natural trend and cannot be changed by adjusting the engine . At high altitudes increased exhaust emissions can also result due to the increased enrichment of the air\nOther high altitude issues can include hard starting , increased fuel consumption and spark plug fouling . To alleviate high altitude issues other than the natural power loss , FIRMAN can provide a high altitude carburetor main jet . The alternative\n\nDo not fill above the red fuel level indicator.\nThis will allow expansion in hot weather and prevent overflow.\n\n\u2022\nSlowly add unleaded gasoline to fuel tank.\n\u2022\n\u2022\nDo not fill above the red fuel level indicator.\nThis will allow expansion in hot weather and prevent overflow.\n\nEnglish Customer Service: 1-844-FIRMAN1\n\nThe part number and recommended minimum altitude for the application of the high altitude carburetor main jet is listed in the table below .\n\nmain jet and installation instructions can be obtained by contacting Customer Support .\nInstallation instructions are also available in the\nTechnical Bulletin area of the FIRMAN internet site .\n\nGrounding\nThe National Electric Code requires your generator must be properly connected to an appropriate ground to help prevent electric shock.\n\nFailure to properly ground the shock.\n\nA ground terminal connected to the frame of the generator has been provided on the control panel. For remote grounding, connect of a length of heavy gauge (12 AWG minimum) copper wire between the generator ground terminal and a copper rod driven into the ground. We strongly recommend that you consult with a qualified electrician to ensure compliance with local electrical codes.",
+      "token_count": 478,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:10.355211Z"
+    },
+    {
+      "id": "4967cdb0-0a22-4087-8222-2e91deb302e0",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 19,
+      "heading": "THERE IS A PERMANENT CONDUCTOR BETWEEN",
+      "content": "FRAME.\n\nbackfeed by isolating generator from electric utility workers.\nWhen using generator for backup power, notify utility company.\nUse a ground fault circuit interrupter (GFCI) in any damp or highly conductive area, such as\nDO NOT touch bare wires or receptacles.\nDO NOT use generator with electrical cords which are worn,frayed, bare or otherwise\nDO NOT operate generator in the rain or wet weather.\nDO NOT handle generator or electrical cords while standing in water, while barefoot, or while hands or feet are wet.\nDO NOT allow unqualified persons or children to operate or service generator.\n\nConnecting to a Building's Electrical System\n\nConnections for standby power to a building's electrical system must be made by a qualified electrician. The connection must isolate the generator power from utility power or other alternative power sources and must comply with all applicable laws and electrical codes.\n\ncolumns: 330717002 3000-6000Feet\n\nSurge Protection\n\nVoltage fluctuation may impair the proper functioning of sensitive electronic equipment.\n\nElectronic devices, including computers and that are designed to operate within a narrow voltage range and may be affected by momentary voltage fluctuations. While there is no way to prevent voltage fluctuations, you can take steps\n\nInstall UL1449, CSA-listed, plug-in surge suppressors on the outlets feeding your in single- or multi-outlet styles. They\u2019re designed to protect against virtually all short-duration voltage fluctuations.",
+      "token_count": 373,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:10.545103Z"
+    },
+    {
+      "id": "1b1b8c91-351c-4186-b7ce-3638b98f464a",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 20,
+      "heading": null,
+      "content": "Make sure you review each warning in order to\n\nprevent fire hazard.\n\nKeep area clear of inflammables or other\n\nSelect a site that is dry, well ventilated and\n\nprotected from the weather.\n\nKeep exhaust pipe clear of foreign objects.\n\nKeep generator away from open flame.\n\nKeep generator on a stable and level surface.\n\nmonoxide, a poisonous gas that could kill you in minutes. You\nCANNOT smell it, see it, or taste\n\nDo not block generator air vents with paper or\n\nother material.\n\nCAUTION\nTilting can cause fuel spillage.",
+      "token_count": 130,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:10.735995Z"
+    },
+    {
+      "id": "5ca613f0-e4b9-4e39-b673-275818d420d1",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 21,
+      "heading": "9. Allow generator to run at no load for few minutes upon each initial start-up to permit",
+      "content": "Starter cord kickback(rapid retraction) will pull hand and arm toward engine faster than you can let go which could cause broken\n\nWhen starting engine, pull cord slowly until resistance is felt and then pull rapidly to avoid\n\nbones, fractures, bruises, or sprains resulting in serious injury.\n\nStarting the Generator",
+      "token_count": 79,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:10.926633Z"
+    },
+    {
+      "id": "4ecd5739-9f5c-4c50-84e7-3fbad3098f03",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 22,
+      "heading": "8. Push the choke button to the \u201c RUN \u201d position .",
+      "content": "English Customer Service: 1-844-FIRMAN1\n\nConnecting Electrical Loads\n\n1.Let engine stabilize and warm up for a few\n2.Ensure circuit breaker on control panel is in\n\nThis unit has been pretested and adjusted to handle its full capacity. Before starting the generator, disconnect all load. Apply load only via the engine speed adjusted at the factory for correct output. Readjusting will void warranty.\n\nWhen applying a load, do not exceed the maximum wattage rating of the generator when using one or more receptacles. Also, do not exceed the amperage rating of any one receptacle.\nDo not apply heavy electrical load during break-in period (the first five hours of operations).\n\nIf engine starts after 3 pulls but fails to run, or if unit shuts down during operation, make sure unit is on a level surface and check for proper oil level in crankcase. This unit may be equipped with a low oil protection device. If so, oil must\n\npull of the recoil starter. After first pull, move choke lever to the \u201c RUN \u201d position for up to the next 3 pulls of the recoil starter. Too much choke leads to sparkplug fouling/engine flooding due to the lack of incoming air. This will cause the engine not to start.\n\n3.Plug in and turn on the desired 120 Volt AC, single phase, 60Hz electrical loads. It is better to attach the item with largest load first.\n\nelectrical system, consult your local utility company or a qualified electrician. Connections must isolate generator power from utility power and must comply with all applicable laws and codes.\n\nConnecting a generator to your electric utility company\u2019s power lines or to another power source may be against the law. In addition this action, if done incorrectly, could damage your generator and appliances and could cause serious injury or even death to you or a utility worker who may be working on nearby power generator during an outage, please notify your electric utility company immediately and remember to plug your appliances directly into the generator. Do not plug the generator into any electric outlet in your home. Doing so could create a connection to the utility company that your generator\u2019s electricity does not feed back into the electric utility power lines.\nIf the generator will be connected to a building",
+      "token_count": 565,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:11.115542Z"
+    },
+    {
+      "id": "f3469aae-eaf9-43c7-873d-3d25b1215363",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 23,
+      "heading": "Economy Control Switch",
+      "content": "The Economy Control switch can be activated in order to minimize fuel consumption and noise while operating the unit during times of reduced electrical output, allowing the engine speed to idle during periods of non-use. The engine speed returns to normal when an electrical load is connected. When the economy switch is off, the engine runs at normal speed continuously.\n\nFor periods of high electrical load or momentary fluctuations, the Economy Control Switch should be turned OFF.\n\nEnglish Customer Service: 1-844-FIRMAN1\n\nThe 12V DC outlet is ONLY to be used with the supplied 12V battery charging cable. The DC output is unregulated and will damage other\n12V DC products.\nThe amount of current flowing will depend on the charging voltage and battery's state of charge. As the battery becomes more fully charged, the output current to the battery decreases and nearly becomes constant. Taper chargers are intended to be used with the provision that they will be disconnected from the battery after a maximum time on charge.\nNormally a period of 30 to 120 minutes is sufficient to recharge a weak battery. The charge level of the battery should be checked periodically.\n\ngas while charging. Do not allow smoking, open flames, sparks, or spark producing equipment in the area while charging.\n\nDo not start the vehicle while the battery charging\nCable is connected and the generator is running.\nIt will not give the battery a boost of power. The\nVehicle or the generator may be damaged. Charge only vented wet lead acid batteries. Other types of batteries may burst, causing personal injury\n\nBattery electrolyte fluid is comprised of sulfuric acid that can be very dangerous and cause severe burns. Do not allow this fluid to contact eyes, skin, clothing, etc. If contact or spillage does occur, flush the area with water immediately.",
+      "token_count": 459,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:11.304418Z"
+    },
+    {
+      "id": "421fa68e-5b49-4279-8d2f-afe8cf63e93b",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 24,
+      "heading": "1. Before connecting the battery charging cable to a battery that is installed in a vehicle, disconnect the vehicle battery ground cable from the negative (\u2013) battery terminal.",
+      "content": "Do not continue to charge a battery that becomes hot or is fully charged.\n\nA DC circuit protector has been provided to protect the circuit from overloads. If an overload occurs, the circuit protector will trip. The circuit protector may be reset by pushing the button of the protector.",
+      "token_count": 71,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:11.494309Z"
+    },
+    {
+      "id": "4131f14f-c6b3-49da-a3f7-c45407c707a0",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 25,
+      "heading": "DC CIRCUIT PROTECTOR",
+      "content": "Charging a large capacity battery or a totally discharged battery may cause the DC breaker to turn off. In these cases, a separate battery charger unit connected to an AC power source is recommended instead of the DC receptacle on the generator.\n\nWhen the battery circuit is in use the AC capacity is reduced by 60 watts. Make sure the combined load is within the rated limits.",
+      "token_count": 94,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:11.686200Z"
+    },
+    {
+      "id": "b7a34e1d-ef3e-4889-8f7b-066e291e2661",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 26,
+      "heading": "1. Turn off and remove entire electrical loads.",
+      "content": "Never start or stop the generator with electrical devices plugged in or turned on.\n\nLet the generator run at no-load for two minutes to stabilize internal temperatures of the engine and generator.\n\nEnglish Customer Service: 1-844-FIRMAN1",
+      "token_count": 59,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:11.881088Z"
+    },
+    {
+      "id": "d6b90a54-4d67-453a-86a3-0a98708ec182",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 27,
+      "heading": "Low Oil Shutdown",
+      "content": "If the engine oil drops below a preset level, an oil switch will stop the engine. Check oil level with dipstick.\nIf oil level is between the LOW and HIGH mark on\n\n1.Add oil to bring level to HIGH mark.\n2.Restart engine and if the engine stops again a low oil condition may still exist. DO NOT try to restart the engine.\n3.Contact an Authorized FIRMAN Service Dealer.\ncorrected.\n\nDo Not Overload Generator\n\nOverloading a generator in excess of its rated wattage capacity can result in damage to the generator and to connected electrical devices.\n\nTo prolong the life of your generator and attached devices, follow these steps to add\n\nOverload Operation\n\nThe overload indicator light will turn on when the load exceeds 3000W(approximately). If the load exceeds 3200W(approximately), the light seconds.\n\nTwo FIRMAN model W03081 generators can be operated in parallel to increase the total available electrical power to 5500 watts. A FIRMAN parallel kit (optional equipment) is required for parallel operation. For kit availability, call Customer Service at 1-844- 347-6261 or visit:www.firmangenerators.com.\n\n1.DO NOT try to restart the engine.\n2.Contact an Authorized FIRMAN Service Dealer.\n3.DO NOT operate engine until oil level is corrected.\n\nIf oil level is below the LOW mark on dipstick:\n\nHow to Correct\n\nIf a cover is used, do not install until unit has cooled.",
+      "token_count": 341,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:12.125948Z"
+    },
+    {
+      "id": "f00ce8e3-b89a-4485-b82e-a19e8048444c",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 28,
+      "heading": "3. Turn the fuel valve to the \u201c OFF \u201d( O ) position.",
+      "content": "If the engine will not be used for a period of two weeks or longer, please see the Storage section\n\nDO NOT disconnect parallel cable while\n\ncolumns: ITEM, NOTES, Daily(Before operation), Initial\n25 hours, Every\n50 hours, Every\n100 hours\n(or annual)\nSpark Plug, Check condition. Adjust gap and clean. Replace if necessary., , , , \u221a\nEngine Oil, Check oil level., \u221a, , ,\nNone, Replace., , \u221a, , \u221a\nAir Filter, Clean, replace if necessary., , , \u221a, strainer. Replace if necessary., , , , \u221a\nFuel Line, Check fuel hose for cracks or other damage. Replace if necessary., \u221a, , ,\nSystem, Check for leakage. Retighten or replace gasket if necessary., \u221a, , ,\nNone, Check spark arrester screen.\nClean/Replace if necessary., , , , \u221a\nCarburetor, Check choke operation., \u221a, , ,\nStarting\nSystem, Check recoil starter operation., \u221a, , ,\nFasteners, Check. Replace if necessary., , , , \u221a\n\nEvery\n100 hours\n(or annual)\n\nStarting\n\nCheck condition. Adjust gap and clean. Replace if necessary.\n\nCheck oil level.\n\nClean, replace if necessary.\n\nstrainer. Replace if necessary.\n\nCheck for leakage. Retighten or replace gasket if necessary.\n\nCheck choke operation.\n\nCheck recoil starter operation.\n\nCheck. Replace if necessary.\n\nCheck fuel hose for cracks or other damage. Replace if necessary.\n\n\u221a",
+      "token_count": 316,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:12.341798Z"
+    },
+    {
+      "id": "fc95e3f9-be7e-4f46-bd2c-0ebfd84fb82e",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 29,
+      "heading": "General Recommendations",
+      "content": "Regular maintenance will improve the performance and extend the life of the generator. See any authorized dealer for service.\nThe generator's warranty does not cover items that have been subjected to operator abuse or negligence. To receive full value from the warranty, the operator must maintain the generator as instructed in this manual.\nSome adjustments will need to be made periodically to properly maintain your generator.\nAll service and adjustments should be made at least once each season. Follow the requirements in the Maintenance Schedule chart above.\n\nNotice Once a year you should clean or replace the spark plug and replace the air filter. New spark plugs and clean air filter assure proper fuel-air mixture and help your engine run better and last longer.\n\nCheck spark arrester screen.\nClean/Replace if necessary.\n\nEnglish Customer Service: 1-844-FIRMAN1\n\nUse fresh and high quality lubricating oil to the specified quantity.\nIf contaminated or deteriorated oil is used or the quantity of the engine oil is not sufficient, the engine damage will result and its life will be greatly shortened.\n\nTo prevent accidental starting, remove and ground spark plug wire before performing any service.\n\nIf you are using your generator under extremely dirty or dusty conditions, or in extremely hot weather, change the oil more often.\n\nAvoid prolonged or repeated skin contact with used motor oil.",
+      "token_count": 350,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:12.548745Z"
+    },
+    {
+      "id": "cf922916-a311-403f-8d68-cc5d6583d2f7",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 30,
+      "heading": null,
+      "content": "Change engine oil every 100 hours.\n(for a new engine, change oil after 25 hours.)\n\nMaintaining an air filter in proper condition is very important. Dirt induced through improperly installed, improperly serviced, or inadequate elements damages and wears out engines.\nAlways keep the element clean.\n\n(d) Put the element in the case and install it securely.\n\n(a) Remove the air cleaner cover and locate the air filter plastic cover.\n\n(e) Reattach the air filter cover.\n(f) Reinstall the air cleaner cover and tighten the cover screw securely.\n\nc) After wetting the element by clean engine oil squeeze it tight by hand.\n\n(b) Remove the foam element.\n\n(a) Loosen the cover screws and remove the\n\n(b) Pop up the rubber plug from below yellow\n\n(d) Tilt the generator on its side and allow the oil to drain completely.\n(e) Replace yellow drain bolt.\nFill the engine with oil until it reaches the HIGH\n( H ) level on the oil filler cap",
+      "token_count": 231,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:12.737742Z"
+    },
+    {
+      "id": "f25d7901-0db2-4d67-bd0d-77c080a73d50",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 31,
+      "heading": "Air Cleaner",
+      "content": "Cover\n\n(g) Reinstall the maintenance cover and tighten the cover screws.\n(h) Dispose of used oil at an approved waste management facility.\n\nChanging the spark plug will help your engine\n\n(e) Adjust the electrode gap to 0.7 to 0.8 mm\n(f) Seat spark plug in position and thread by hand to prevent cross threading.\n(g) Tighten plug with provided wrench and put the cap back on spark plug.\n\nwith a wire brush before reinstalling nspect spark plug for damage and clean\n\nInspect the muffler for cracks, corrosion, or other damage. Remove the spark arrester, if equipped, and inspect for damage or carbon blockage. If replacement parts are required, make sure to use only original equipment\n\nExhaust heat/gases could ignite combustibles, structures or damage fuel tank causing a fire, resulting in death or serious injury and/or property. Contact with muffler area could cause burns resulting in serious injury.\n\n(a) Remove the spark plug cover.\n\n(b) Remove the spark plug cable from the spark\n\nDO NOT touch hot parts and AVOID hot exhaust\n\nAllow equipment to cool before touching .\n\nKeep at least 5 feet (1.5 m) of clearance on all sides of generator including overhead.\nReplacement parts must be the same and installed in the same position as the original",
+      "token_count": 312,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:12.926439Z"
+    },
+    {
+      "id": "e2878081-08b9-4c28-b593-8b16cc4a3de6",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 32,
+      "heading": null,
+      "content": "Clean or replace spark arrester as follows:\nDepending on the type fuel used ,the type and amount of lubricant used, and/or your operating conditions, the exhaust part and muffler may become blocked with carbon deposits. If you notice power loss, you may need to remove these",
+      "token_count": 68,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:13.114331Z"
+    },
+    {
+      "id": "fa743fa8-68ae-4f23-bf2d-4801f43b40f8",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 33,
+      "heading": "2. Loosen the spark arrester screws, remove the spark arrester cover, and with a thin blade screwdriver remove the spark arrester.",
+      "content": "Failure to clean the spark arrester will result in\n\nMake certain that the generator is kept clean and stored properly. Only operate the unit on a flat, level surface in a clean, dry operating environment. DO NOT expose the unit to\n\nDO NOT use a garden hose to clean the generator.\nWater can enter the generator through the cooling slots and damage the generator windings.\n\nUse a damp cloth to clean exterior surfaces of the generator.\nUse a soft bristle brush to remove dirt and oil.\nUse an air compressor (25 PSI) to clear dirt and debris from the generator.\nInspect all air vents and cooling slots to ensure that they are clean and unobstructed.",
+      "token_count": 161,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:13.305239Z"
+    },
+    {
+      "id": "fe6d5c62-0c43-4ae5-b536-71bbbb9d50e1",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 34,
+      "heading": "NEVER USE WATER TO CLEAN GENERATOR.",
+      "content": "handle in that position.\nStore generator in a well ventilated, low humidity\n\nyour generator during periods of storage, the following precautions should be followed:\nWhen storing the generator for short or extended periods of time make sure that the\nEngine Switch and the Fuel Valve are set in the\n\nIf the unit is used infrequently, difficult starting may result. To eliminate hard starting, follow these instructions:",
+      "token_count": 104,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:13.497112Z"
+    },
+    {
+      "id": "3bde9107-8ec3-4f19-b500-cf3813a4e9f5",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 35,
+      "heading": null,
+      "content": "NOTE : We recommend always using a fuel stabilizer. A fuel stabilizer will minimize the formulation of fuel gum deposits during storage. The fuel stabilizer can be added to the gasoline in the fuel tank, or into the gasoline in a storage container.",
+      "token_count": 62,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:13.687029Z"
+    },
+    {
+      "id": "e7cc149a-048c-41ac-94f4-63177e71e040",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 36,
+      "heading": "TROUBLE SHOOTING",
+      "content": "Correction\n\nEngine is running, but no\n\nEngine runs good at no-load but \u201cbogs down\u201d when loads are connected.\n\nEngine will not start; starts and runs rough or shuts down when running.\n\n2 . Fuel shutoff lever is in OFF (O)\n\nplace generator on level surface .\n\n10 . Wait 5 minutes and re - crank engine .\n\nEngine lacks power.\n\nEngine\u201chunts\u201dor falters.",
+      "token_count": 87,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:13.876122Z"
+    },
+    {
+      "id": "7f6c72e3-cccc-40f3-8e0f-7abfe3859ba8",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 37,
+      "heading": "2. Clean or replace fuel filter.",
+      "content": "Engine shuts down when\n\ngenerator on level surface.\n\nEngine is running, but no\nAC output is available., 1. Circuit breaker is open.\n\nEngine runs good at no-load but \u201cbogs down\u201d when loads are connected., 1. Short circuit in a connected load.\n\nEngine will not start; starts and runs rough or shuts down when running., 1. Engine switch set to OFF (O)",
+      "token_count": 87,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:14.065013Z"
+    },
+    {
+      "id": "60906fad-f06e-4ce0-a0a2-95032bd52f71",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 38,
+      "heading": "13. Contact authorized service facility.",
+      "content": "Engine lacks power., 1. Load is too high.\n\nEngine\u201chunts\u201dor falters., 1. Carburetor is running too rich or too lean.\n\nEngine shuts down when running., 1. Out of fuel.",
+      "token_count": 41,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:14.256906Z"
+    },
+    {
+      "id": "6aa1bdce-c1bc-4d6a-995c-44005d667767",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 39,
+      "heading": "3. Fill crankcase to proper level or place.",
+      "content": "generator on level surface.\n\nEnglish Customer Service: 1-844-FIRMAN1\n\n\u2469\n\n171cc Engine Parts Diagram\n\ncolumns: NO., Part Number, Description, Qty.\n2, 330713501, Spillway,Fuel Tank, 1\n3, 330713502, Screw M5\u00d720, 6\n6, 330713505, Screw M6\u00d712, 4\n16, 330713515, Muffler Protector Assembly,Lower, 1\n17, 330713516, Muffler Assembly, 1\n19, 330713518, Screw/Washer Assembly M5\u00d714, 2\n23, 330713522, Muffler Protector Assembly,Upper, 1\n24, 330713523, Screw ST4.2\u00d716, 6\n25, 330713524, Supporter,Maintenance Cover, 1\n26, 330713525, Cage Nut M5, 12\n27, 330713526, Maintenance Cover, 1\n29, 330713528, Handle,Right, 1\n31, 330713530, Washer(\u00d813\u00d7\u00d820\u00d72.5), 2\n33, 330713532, Handle Bracket,Right, 1\n37, 330713536, Supporter,Right, 1\n43, 330713542, Screw M5\u00d714, 35\n45, 330713544, Screw M6\u00d720, 4\n46, 330713545, Cover\uff0cRight Side, 1\n47, 330713546, Fixed Handle,Right, 1\n49, 330713548, Screw ST3.5\u00d79.5, 6\n52, 330713551, Screw ST4.8\u00d716, 1\n53, 330713552, Generator End Cover, 1\n57, 330713556, Rotor Assembly, 1\n\ncolumns: NO., Part Number, Description, Qty.\n59, 330713558, Stator Assembly, 1\n61, 330713560, Engine End Cover, 1\n65, 330713564, Supporter,Right, 1\n66, 330713565, Motor Mount, 4\n69, 330713568, Supporter,Handle Right(Engine), 1\n71, 330713570, Screw ST4.8\u00d713, 1\n72, 330713571, Cover Plate,Left, 1\n73, 330713572, Air Cleaner Cover, 1\n75, 330713574, Rectifier, 1\n81, 330713580, Pull Chock Assembly, 1\n83, 330713582, Screw/Washer Assembly M4\u00d714, 3\n86, 330713585, Washer \u00d812, 2\n89, 330713588, Base Assy., 1\n92, 330713591, Screw/Washer Assembly M5\u00d738, 2\n95, 330713594, 20A Breaker,Push Button, 1\n96, 330713595, LED Indicator Assy., 1\n99, 330713598, Ignition Switch, 1\n100, 330713599, Switch,Economy(ECO), 1\n106, 330713605, Screw/Washer Assembly M3\u00d710, 3\n115, 330713614, D.C 10A Breaker,Push Button, 1\n116, 330713633, Battery Charge Cable, 1",
+      "token_count": 454,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:14.449016Z"
+    },
+    {
+      "id": "7f9cb342-a1bf-4548-a36a-1fb4532c1003",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 40,
+      "heading": "Screw M5\u00d720",
+      "content": "Cover \uff0c top\nScrew M6\u00d712\n\nMuffler Assembly\n\nScrew ST4.2\u00d716\n\nWasher(\u00d813\u00d7\u00d820\u00d72.5)\n\nSupporter,Right\n\nRotor Assembly\n\nSupporter,Right\nMotor Mount\n\nPull Chock Assembly\n\nBase Assy.\n\n20A Breaker,Push Button\nLED Indicator Assy.",
+      "token_count": 54,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:14.637900Z"
+    },
+    {
+      "id": "343b5969-a13a-4d05-b812-877406d0276a",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 41,
+      "heading": "Ignition Switch",
+      "content": "Switch,Economy(ECO)\n\nMuffler Protector Assembly,Lower\n\nScrew/Washer Assembly M5\u00d714\n\nMuffler Protector Assembly,Upper\n\nScrew/Washer Assembly M4\u00d714\n\nScrew/Washer Assembly M5\u00d738\n\nScrew/Washer Assembly M3\u00d710\n\nD.C 10A Breaker,Push Button\n\nSupporter,Handle Right(Engine)\n\nSupporter,Maintenance Cover\n\nSPE175 171cc Engine Parts List\n\ncolumns: NO., Part Number, Description, Qty.\n3, 330723502, Cover,crankcase, 1\n10, 330723509, Woodruff key(4\u00d76.5\u00d716), 1\n13, 330723512, Seal Strip,Crankcase Cover, 2\n15, 330723514, Pulley,Starter, 1\n17, 330723516, Fan cover, 1\n18, 330723517, Screw,Pawl Guide, 1\n25, 330723524, Reciol Starter Cover, 1\n29, 330723528, Wire Clip, 1\n32, 330723531, Oil Dipstick Assembly, 1\n33, 330723532, Camshafe Comp, 1\n34, 330723533, Screw/Washer Assembly M5\u00d710, 1\n40, 330723539, Connecting Rod, 1\n45, 330723544, Ring ,Second Piston, 1\n46, 330723545, Ring ,First Piston, 1\n\ncolumns: NO., Part Number, Description, Qty.\n53, 330723552, Guide Plate,Push Rod, 1\n54, 330723553, Push Rod, 2\n69, 330723568, Cylinder Head Cover Assembly, 1\n70, 330723569, Breather Tube, 1\n73, 330723572, Carburetor,Assembly, 1\n75, 330723574, Base,Air Cleaner, 1\n80, 330723579, Cover,Air Cleaner, 1\n81, 330723580, Connecter,Throttle Valve Axis, 1\n82, 330723581, Spring,Connecter, 1\n83, 330723582, Screw M5\u00d710, 1\n84, 330723583, Screw/Washer Assembly M5\u00d710, 2\n86, 330723585, Clamp Board,Choke Control Line, 1\n87, 330723586, Screw/Washer Assembly M5\u00d78, 1\n88, 330723587, Stepper Motor Base, 1\n89, 330723588, Screw/Washer Assembly M4\u00d78, 2\n90, 330723589, Stepper Motor ,Throttle Valve, 1\n91, 330723590, Screw M3\u00d76, 2\n93, 330723592, Crankcase, 1\n96, 330423501, Air Cleaner Set, 1\n, , ,\n, , ,\n, , ,\n, , ,\n, , ,\n, , ,\n\nQty.\nCover,crankcase\nWoodruff key(4\u00d76.5\u00d716)",
+      "token_count": 433,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:14.826819Z"
+    },
+    {
+      "id": "57d145f5-ce7a-4e78-b8c3-ff3426b3ded8",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 42,
+      "heading": "Cooling Fan",
+      "content": "Pulley,Starter\nFan cover\n\nCamshafe Comp\n\nRing ,First Piston\n\nQty.\n\nCarburetor,Assembly\n\nCover,Air Cleaner\n\nSpring,Connecter\nScrew M5\u00d710\n\nStepper Motor Base\n\nCrankcase\nAir Cleaner Set\n\nScrew/Washer Assembly M5\u00d710\n\nSeal Strip,Crankcase Cover\n\nCylinder Head Cover Assembly\n\nConnecter,Throttle Valve Axis\n\nScrew/Washer Assembly M5\u00d78\n\nStepper Motor ,Throttle Valve",
+      "token_count": 89,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:15.016693Z"
+    },
+    {
+      "id": "ff6d8628-24bd-4201-8c9a-a1de9eba7f75",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 43,
+      "heading": "1-844-347-6261",
+      "content": "or at www.firmangenerators.com to obtain warranty service information or to order\n\nEven quality built equipment such as the electric generator you have purchased might need occasional replacement parts to maintain it in good condition over the years. To order replacement parts, please give the following information:\n\nat www.firmangenerators.com",
+      "token_count": 86,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:15.204577Z"
+    },
+    {
+      "id": "f9441f00-909c-47cb-b006-710095f6d3ec",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 44,
+      "heading": "Warranty Qualifications",
+      "content": "FIRMAN GENERATOR will register the warranty upon receipt of your Warranty Registration Card and a copy of your sales receipt from one of FIRMAN's retail locations as proof of purchase. Please submit your warranty registration and your proof of purchase within ten (10) days of the date of purchase.\n\nFIRMAN Three (3) Year Limited Warranty",
+      "token_count": 84,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:15.396466Z"
+    },
+    {
+      "id": "5a92fe4e-be54-4bef-8c8a-4ffcf29179f0",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 45,
+      "heading": "Do Not Return the Unit to the Place of Purchase",
+      "content": "Contact the FIRMAN Service Center and FIRMAN will troubleshoot any issue via phone or e-mail.\nIf the problem is not corrected by this method,\nFIRMAN will, at its option, authorize evaluation, repair or replacement of the defective part or component at a FIRMAN Service Center. FIRMAN will provide you with a case number for warranty service. Please keep it for future reference.\nRepairs or replacements without prior authoriz\n-ation, or at an unauthorized repair facility, will not be covered by this warranty.",
+      "token_count": 127,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:15.585357Z"
+    },
+    {
+      "id": "9f1bb651-a7c9-4237-b531-eaf2ac6a4c71",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 46,
+      "heading": "Repair/Replacement Warranty",
+      "content": "FIRMAN warrants to the original purchaser that the mechanical and electrical components will be free of defects in material and workmanship for a period of one (1) year (parts and labor) and three (3) years (parts) from the original date of purchase 90 days [parts and labor] and 180 days\n[parts] for commercial & industrial use.\nTransportation charges on product submitted for repair or replacement under this warranty are the sole responsibility of the purchaser.\nThis warranty only applies to the original purchaser and is not transferable.",
+      "token_count": 135,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:15.775249Z"
+    },
+    {
+      "id": "7943b06e-0032-418f-8821-1ef7f51339a0",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 47,
+      "heading": "Warranty Exclusions",
+      "content": "This warranty does not cover the following\n\nYour product needs periodic parts and service to perform well. This warranty does not cover repair when normal use has exhausted the life of a part or the equipment as a whole.",
+      "token_count": 55,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:15.964823Z"
+    },
+    {
+      "id": "920fe8d9-09d5-473a-9c52-d692790f4942",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 48,
+      "heading": "Installation, Use and Maintenance",
+      "content": "This warranty will not apply to parts and/or labor if your product is deemed to have been misused, neglected, involved in an accident, abused, loaded beyond the generator's limits, modified, installed improperly or connected incorrectly to\nNormal maintenance is not covered by this warranty.",
+      "token_count": 72,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:16.154715Z"
+    },
+    {
+      "id": "11a0dc6f-dae2-4d55-8117-945bff85f137",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 49,
+      "heading": "Other Exclusions",
+      "content": "This warranty excludes:\n\u2013 wear items\n\u2013 accessory parts\n\u2013 failures due to acts of God and other force majeure events beyond the manufacturer\u2019s\n\u2013 problems caused by parts that are not original\n\nLimits of Implied Warranty and",
+      "token_count": 55,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:16.343593Z"
+    },
+    {
+      "id": "b545cb9a-daa3-41f2-bffa-63559be6c402",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 50,
+      "heading": "Contact Information",
+      "content": "You may contact FIRMAN at:\n\nAttn: Customer Service www.firmangenerators.com\n\nFIRMAN disclaims any obligation to cover any loss of time, use of this product, freight, or any from using this product. THIS WARRANTY IS IN",
+      "token_count": 54,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:16.531483Z"
+    },
+    {
+      "id": "e9c61888-ccf4-45d4-b94d-5bf2f0285cf8",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 51,
+      "heading": "IMPLIED, INCLUDING WARRANTIES OF",
+      "content": "A unit provided as an exchange will be subject to the warranty of the original unit. The length of the warranty governing the exchanged unit will remain calculated by reference to the purchase date of the original unit.\n\nThis warranty gives you certain legal rights which may change from state to state. Your state may also have other rights you may be entitled to that are not listed within this warranty.\n\nWe are FIRMAN POWER - And we are here for you.\n\n24/7 Tech Support - 1-844-347-6261(844-FIRMAN1)",
+      "token_count": 125,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:16.722383Z"
+    },
+    {
+      "id": "f581c2a6-33cd-4fa2-b897-1e510ee368a5",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 52,
+      "heading": "FIRMAN POWER EQUIPMENT INC.",
+      "content": "Emission Control System Warranty\n\nThe California Air Resources Board, US Environmental Protection Agency (\u201cUS EPA\u201d) and FIRMAN POWER EQUIPMENT INC.(FIRMAN) are pleased to explain the exhaust and evaporative emissions control systems warranty on your 2016-2017 or later Small Off-Road\nEngine (\u201cSORE\u201d) and engine powered equipment as applicable. In California and the USA, SORE and engine powered equipment must be designed, built and equipped to meet California as applicable. In California and the USA, SORE and engine powered equipment must be designed, built and equipped to meet California and US EPA stringent anti-smog standards. FIRMAN must warrant the emissions control systems on your SORE and engine powered equipment for the period listed below provided there has been no abuse, neglect or improper maintenance of your SORE or engine powered equipment. Your exhaust emission control systems may include parts such as carburetors, fuel-injection systems, the ignition system, and catalytic converters. Also included may be an evaporative emission control system which may include fuel tanks, fuel lines, fuel caps, valves, canisters, filters, vapor hoses, clamps, connectors, belts and other associated components. For engines less than or equal to 80 cc, only the fuel tank is subject to the evaporative emission control warranty requirements of this section (California only).\n\nAs the SORE or engine powered equipment owner, you are responsible for the performance of the required maintenance listed in your owner\u2019s manual. FIRMAN recommends that you retain all receipts covering maintenance on your SORE or engine powered equipment, but FIRMAN cannot deny warranty solely for the lack of receipts.\nAs the SORE or engine powered equipment owner, you should however be aware that FIRMAN may deny you warranty coverage if your SORE or engine powered equipment or a part has failed due to abuse, neglect, improper maintenance or unapproved",
+      "token_count": 486,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:16.911790Z"
+    },
+    {
+      "id": "da19ff5d-af47-48f3-bf28-400438897496",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 53,
+      "heading": "FIRMAN POWER EQUIPMENT INC.",
+      "content": "This emission control system is warranted for three years. The warranty period begins on the date the engine or equipment is delivered to an ultimate purchaser. FIRMAN warrants to the ultimate purchaser and each subsequent purchaser that the engine is:\nDesigned, built, and equipped so as to conform with all applicable regulations adopted by the Air Resources Board and US EPA;\nand Free from defects in materials and workmanship that cause the failure of a warranted part to be identical in all material respects to the part as described in the engine manufacturers application for certification.\nThe warranty on emissions-related parts is as follows:\n(1) Any warranted part that is not scheduled for replacement as required maintenance in the owner's manual supplied, is warranted for the warranty period stated above. If any such part fails during the period of warranty coverage, the part will be repaired or replaced by FIRMAN at no charge to the owner. Any such part repaired or replaced under the warranty will be warranted for the remaining warranty period.\n(2) Any warranted part that is scheduled only for regular inspection in the owner's manual supplied, is warranted for the warranty period stated above. Any such part repaired or replaced under warranty will be warranted for the remaining warranty period.\n(3) Any warranted part that is scheduled for replacement as required maintenance in the owner's manual supplied, is warranted for the period of time prior to the first scheduled replacement point for that part. If the part fails prior to the first scheduled replacement, the part will be repaired or replaced by FIRMAN at no charge to the owner. Any such part repaired or replaced under warranty will be warranted for the remainder of the period prior to the first scheduled replacement point for the part.\n(4) Repair or replacement of any warranted part under the warranty must be performed at no charge to the owner at a warranty station.\n(5) Notwithstanding the provisions of Subsection (4) above, warranty services or repairs must be provided by FIRMAN that are franchised to service the subject engines.\n(6) The owner must not be charged for diagnostic labor that leads to the determination that a warranted part is in fact defective, provided that such diagnostic work is performed at a warranty station.\n(7) FIRMAN is liable for damages to other engine components proximately caused by a failure under warranty of any warranted\n(8) Throughout the emissions warranty period defined in Subsection (b)(2), FIRMAN will maintain a supply of warranted parts sufficient to meet the expected demand for such parts.\n(9) Any replacement part may be used in the performance of any warranty maintenance or repairs and must be provided without charge to the owner. Such use will not reduce the warranty obligations of the manufacturer.\n(10) Add-on or modified parts that are not exempted by the Air Resources Board may not be used. The use of any non-exempted add-on or modified parts by the ultimate purchaser will be grounds for disallowing a warranty claim.",
+      "token_count": 768,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:17.105663Z"
+    },
+    {
+      "id": "adec76bc-36b6-4bfd-b752-2087a3ae48d9",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 54,
+      "heading": "FIRMAN POWER EQUIPMENT INC.",
+      "content": "The manufacturer will not be liable to warrant failures of warranted parts caused by the use of a non-exempted add-on or modified\n\nYou are responsible for presenting your SORE or engine powered equipment to a FIRMAN distribution or service center as soon as a problem exists. The warranty repairs should be completed in a reasonable amount of time, not to exceed 30 days. If you have a question regarding your warranty coverage, you should contact FIRMAN at 1-844-347-6261 or firmangenerators@sumec-na.com.\n\nListed below are the parts (if equipped) covered by the Federal and California Emission Control Systems Warranty. Some parts listed below may require scheduled maintenance and are warranted up to the first scheduled replacement point for that part.\n\nThis Emission Control Systems Warranty shall not cover any of the following:\n(a) Consequential damages such as loss of time, inconvenience, loss of use of the engine or equipment, etc.\n(b) Diagnosis and inspection fees that do not result in eligible warranty service being performed.",
+      "token_count": 260,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:17.294554Z"
+    },
+    {
+      "id": "c0f4fc5c-96f9-43c6-acbc-babea706a7d5",
+      "source_id": "35ebc6fb-ad28-43cc-bf94-39f0f63cd4a4",
+      "chunk_index": 55,
+      "heading": "1. Ignition system including:",
+      "content": "- Fuel line and related fittings/clamps\n- Carburator assembly including internal parts and gaskets\n\n- Catalytic converter\n\n- Air cleaner\n\n- Breather connection tube\n\n- Vapor hoses and fitting/clamps\n\nwww.firmangenerators.com",
+      "token_count": 56,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null,
+      "created_at": "2025-12-31T16:45:17.488444Z"
+    }
+  ],
+  "summary": {
+    "total_chunks": 56,
+    "total_tokens": 11155,
+    "processing_timestamp": "2025-12-31T16:45:18.365463Z"
+  }
+}
