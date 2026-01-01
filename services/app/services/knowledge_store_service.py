@@ -1,15 +1,34 @@
 import os
 import psycopg2
 import json
+import logging
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
+
 
 class KnowledgeStoreService:
     # Neon DATABASE_URL environment variable se lein
     DB_URL = os.getenv("DATABASE_URL")
 
     @staticmethod
-    def create_knowledge_source(title, raw_content, source_type="pdf", model_id=None, user_id=None, email=None, role=None, name=None):
+    def create_knowledge_source(title, raw_content, source_type="pdf", model_id=None, user_id=None, email=None, role=None, name=None, auto_chunk=True):
+        """
+        Create a knowledge source and optionally trigger chunking.
+        
+        Args:
+            title: Document title
+            raw_content: Extracted text content
+            source_type: Type of source (pdf, etc.)
+            model_id: Associated model ID
+            user_id: User who uploaded
+            email, role, name: User metadata
+            auto_chunk: If True, automatically create chunks after saving (default: True)
+        
+        Returns:
+            Dict with id, status, and chunks_created (if auto_chunk)
+        """
         conn = None
         try:
             # Metadata object taiyar karein kyunke email/role ke liye alag columns nahi hain
@@ -55,11 +74,32 @@ class KnowledgeStoreService:
 
             cur.execute(query, params)
             result = cur.fetchone()
-            new_id = result['id']
+            new_id = str(result['id'])
             
             conn.commit()
             print(f"Successfully saved to Neon DB with ID: {new_id}")
-            return {"id": str(new_id), "status": "success"}
+            
+            # Close cursor before chunking
+            cur.close()
+            conn.close()
+            conn = None
+            
+            # Auto-trigger chunking if enabled
+            chunks_created = 0
+            if auto_chunk:
+                try:
+                    chunks_created = KnowledgeStoreService._trigger_chunking(new_id)
+                    logger.info(f"Auto-chunking completed: {chunks_created} chunks created for {new_id}")
+                except Exception as chunk_err:
+                    logger.error(f"Auto-chunking failed for {new_id}: {chunk_err}")
+                    # Don't fail the whole operation, just log the error
+                    chunks_created = -1  # Indicates error
+            
+            return {
+                "id": new_id, 
+                "status": "success",
+                "chunks_created": chunks_created
+            }
 
         except Exception as e:
             if conn:
@@ -68,5 +108,28 @@ class KnowledgeStoreService:
             return None
         finally:
             if conn:
-                cur.close()
+                try:
+                    cur.close()
+                except:
+                    pass
                 conn.close()
+    
+    @staticmethod
+    def _trigger_chunking(source_id: str) -> int:
+        """
+        Trigger chunking for a knowledge source.
+        
+        Args:
+            source_id: UUID of the knowledge source
+            
+        Returns:
+            Number of chunks created
+        """
+        from .chunker import process_source
+        
+        try:
+            result = process_source(source_id, dry_run=False, overwrite=True)
+            return result.get("num_chunks", 0)
+        except Exception as e:
+            logger.error(f"Chunking failed for {source_id}: {e}")
+            raise
