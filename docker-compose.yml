@@ -92,8 +92,8 @@ services:
   # AI Services (FastAPI)
   services:
     build:
-      context: .
-      dockerfile: services/Dockerfile
+      context: ./services
+      dockerfile: Dockerfile
     container_name: intellimaint-services
     ports:
       - "8000:8000"
