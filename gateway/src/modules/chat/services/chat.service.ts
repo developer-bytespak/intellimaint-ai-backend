@@ -33,6 +33,42 @@ export class ChatService {
   ) {}
 
   /**
+   * Retry helper with exponential backoff
+   * Retries async function N times before throwing
+   * Used for transient database errors
+   *
+   * @param fn - Async function to retry
+   * @param maxRetries - Maximum number of attempts (default: 3)
+   * @param delayMs - Initial delay in ms, doubles each attempt (default: 100)
+   */
+  private async retryAsync<T>(
+    fn: () => Promise<T>,
+    maxRetries: number = 3,
+    delayMs: number = 100,
+  ): Promise<T> {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (attempt === maxRetries - 1) {
+          this.logger.error(
+            `❌ Retry failed after ${maxRetries} attempts:`,
+            error.message,
+          );
+          throw error;
+        }
+        const delay = delayMs * Math.pow(2, attempt);
+        this.logger.warn(
+          `⚠️ Attempt ${attempt + 1} failed, retrying in ${delay}ms:`,
+          error.message,
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+    throw new Error('Retry exhausted');
+  }
+
+  /**
    * Register a new SSE request with an abort controller
    * This allows the request to be cancelled if the client disconnects
    */
@@ -1607,61 +1643,140 @@ export class ChatService {
 
   /**
    * Helper: Store user message in database
-   * Creates ChatMessage and MessageAttachment records
+   * Creates ChatMessage record with optional image attachments
+   *
+   * Uses Prisma transactions for atomicity + retry logic for transient DB errors
+   *
+   * @param userId - User ID
+   * @param sessionId - Chat session ID
+   * @param dto - Pipeline message with content and images
+   * @returns Created ChatMessage with attachments
    */
   private async storeUserMessage(
     userId: string,
     sessionId: string,
     dto: PipelineMessageDto,
   ): Promise<ChatMessage> {
-    this.logger.debug(`Storing user message for session ${sessionId}`);
+    this.logger.debug(
+      `Storing user message for session ${sessionId}, ${dto.images?.length || 0} images`,
+    );
 
-    // TODO: Implement user message storage
-    // 1. Create ChatMessage record (role: 'user', content: dto.content)
-    // 2. If dto.images exist:
-    //    - Upload images to Vercel Blob (using existing vercelBlobService)
-    //    - Create MessageAttachment records for each image
-    // 3. Return ChatMessage object
+    return this.retryAsync(async () => {
+      return await this.prisma.$transaction(async (tx) => {
+        // Create user message
+        const userMessage = await tx.chatMessage.create({
+          data: {
+            sessionId,
+            role: MessageRole.user,
+            content: dto.content,
+          },
+        });
 
-    return null;
+        // Upload and attach images if present
+        if (dto.images && dto.images.length > 0) {
+          for (const imageData of dto.images) {
+            try {
+              // Upload image to Vercel Blob
+              const fileUrl =
+                await this.vercelBlobService.uploadBase64Image(imageData);
+
+              // Create attachment record
+              await tx.messageAttachment.create({
+                data: {
+                  messageId: userMessage.id,
+                  attachmentType: AttachmentType.image,
+                  fileUrl,
+                },
+              });
+            } catch (error) {
+              this.logger.warn(
+                `Failed to upload image, continuing without attachment: ${error.message}`,
+              );
+              // Continue without this image - non-critical failure
+            }
+          }
+        }
+
+        this.logger.debug(`✅ User message stored: ${userMessage.id}`);
+        return userMessage;
+      });
+    });
   }
 
   /**
-   * Helper: Fetch all messages for a session
-   * Returns messages ordered by creation time
+   * Helper: Fetch conversation history
+   * Retrieves all messages in a session in chronological order
+   *
+   * Wrapped in retry logic for transient DB errors
+   *
+   * @param sessionId - Chat session ID
+   * @returns Array of ChatMessage objects with attachments
    */
-  private async fetchSessionHistory(sessionId: string): Promise<ChatMessage[]> {
-    this.logger.debug(`Fetching session history for ${sessionId}`);
+  private async fetchSessionHistory(
+    sessionId: string,
+  ): Promise<ChatMessage[]> {
+    this.logger.debug(`Fetching history for session ${sessionId}`);
 
-    // TODO: Query database
-    // SELECT all ChatMessage records for session
-    // ORDER BY createdAt ASC
-    // INCLUDE related data if needed
+    return this.retryAsync(async () => {
+      const messages = await this.prisma.chatMessage.findMany({
+        where: { sessionId },
+        include: {
+          attachments: true,
+        },
+        orderBy: { createdAt: 'asc' },
+      });
 
-    return [];
+      this.logger.debug(`✅ Fetched ${messages.length} messages from history`);
+      return messages;
+    });
   }
 
   /**
    * Helper: Store assistant response in database
-   * Creates ChatMessage record with token usage
+   * Creates ChatMessage record with token usage tracking
+   *
+   * Updates session timestamp and tracks token consumption for billing
+   *
+   * @param sessionId - Chat session ID
+   * @param content - LLM response text
+   * @param tokenUsage - Token usage statistics
+   * @returns Created ChatMessage with token data
    */
   private async storeAssistantMessage(
     sessionId: string,
     content: string,
     tokenUsage: TokenUsage,
   ): Promise<ChatMessage> {
-    this.logger.debug(`Storing assistant message for session ${sessionId}`);
+    this.logger.debug(
+      `Storing assistant message for session ${sessionId}, tokens: ${tokenUsage.totalTokens}`,
+    );
 
-    // TODO: Implement assistant message storage
-    // 1. Create ChatMessage record (role: 'assistant', content)
-    // 2. Store tokenUsage data if applicable:
-    //    - promptTokens
-    //    - completionTokens
-    //    - totalTokens
-    //    - cachedTokens (if any)
-    // 3. Update ChatSession.updatedAt timestamp
-    // 4. Return ChatMessage object
+    return this.retryAsync(async () => {
+      return await this.prisma.$transaction(async (tx) => {
+        // Create assistant message with token tracking
+        const assistantMessage = await tx.chatMessage.create({
+          data: {
+            sessionId,
+            role: MessageRole.assistant,
+            content,
+            promptTokens: tokenUsage.promptTokens,
+            completionTokens: tokenUsage.completionTokens,
+            totalTokens: tokenUsage.totalTokens,
+            cachedTokens: tokenUsage.cachedTokens || 0,
+          },
+        });
 
-    return null;
+        // Update session timestamp to mark last activity
+        await tx.chatSession.update({
+          where: { id: sessionId },
+          data: { updatedAt: new Date() },
+        });
+
+        this.logger.debug(
+          `✅ Assistant message stored: ${assistantMessage.id} (${tokenUsage.totalTokens} tokens)`,
+        );
+        return assistantMessage;
+      });
+    });
   }
 }

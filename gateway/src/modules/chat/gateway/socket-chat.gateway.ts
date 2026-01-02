@@ -370,4 +370,141 @@ export class SocketChatGateway implements OnGatewayConnection, OnGatewayDisconne
       this.logger.log(`✅ Stream abort signal sent for ${socketId}`);
     }
   }
+
+  /**
+   * Handle RAG Pipeline Message Streaming
+   *
+   * Processes user prompt through complete pipeline:
+   * 1. Image analysis
+   * 2. Embedding generation
+   * 3. RAG retrieval
+   * 4. Context preparation
+   * 5. LLM streaming
+   * 6. Response storage
+   * 7. Context summarization
+   *
+   * Streams pipeline chunks back to frontend in real-time
+   */
+  @SubscribeMessage('stream-pipeline-message')
+  async handlePipelineMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: StreamMessagePayload,
+  ) {
+    this.logger.log(`📨 [stream-pipeline-message] Received from ${client.id}`);
+    this.logger.log(`📦 Payload: ${JSON.stringify({
+      sessionId: payload.sessionId,
+      contentLength: payload.content?.length,
+      imagesCount: payload.images?.length,
+      userId: payload.userId,
+    })}`);
+
+    client.emit('server-ack', {
+      event: 'stream-pipeline-message',
+      received: true,
+      timestamp: new Date().toISOString(),
+    });
+
+    const { sessionId, content, images, userId } = payload;
+
+    // Validation
+    if (!sessionId) {
+      this.logger.error('❌ Missing sessionId');
+      client.emit('pipeline-error', { error: 'Session ID is required' });
+      return;
+    }
+
+    if (!userId) {
+      this.logger.error('❌ Missing userId');
+      client.emit('pipeline-error', { error: 'Unauthorized - userId required' });
+      return;
+    }
+
+    if ((!content || content.trim() === '') && (!images || images.length === 0)) {
+      this.logger.error('❌ Empty content and no images');
+      client.emit('pipeline-error', { error: 'Message content or images are required' });
+      return;
+    }
+
+    const startTime = Date.now();
+    const abortController = new AbortController();
+    const streamMeta = {
+      controller: abortController,
+      buffer: '',
+      tokenCount: 0,
+      sessionId,
+      messageId: undefined as string | undefined,
+      startTime,
+    };
+    this.activeStreams.set(client.id, streamMeta);
+    const requestId = `pipeline-${client.id}-${Date.now()}`;
+
+    try {
+      this.logger.log(`🚀 Starting pipeline for session ${sessionId}`);
+      this.chatService.registerRequest(requestId, abortController);
+
+      for await (const chunk of this.chatService.streamPipelineMessage(
+        userId,
+        sessionId,
+        { content, images: images || [] },
+      )) {
+        if (abortController.signal.aborted) {
+          this.logger.log(`⏹️ Pipeline aborted for ${client.id}`);
+          const duration = Date.now() - startTime;
+          this.logger.log(`⏱️ Pipeline duration: ${duration}ms`);
+
+          client.emit('pipeline-chunk', {
+            stage: 'error',
+            errorMessage: 'Pipeline aborted',
+            done: true,
+          });
+          break;
+        }
+
+        // Stream chunk to frontend
+        if (chunk.stage === 'llm-generation' && chunk.token) {
+          streamMeta.tokenCount++;
+          streamMeta.buffer += chunk.token;
+          client.emit('pipeline-chunk', {
+            stage: chunk.stage,
+            token: chunk.token,
+          });
+        } else if (chunk.stage === 'complete') {
+          streamMeta.messageId = chunk.messageId;
+          const duration = Date.now() - startTime;
+          this.logger.log(`✅ Pipeline completed. Duration: ${duration}ms, Tokens: ${streamMeta.tokenCount}`);
+          client.emit('pipeline-chunk', {
+            stage: chunk.stage,
+            messageId: chunk.messageId,
+            tokenCount: streamMeta.tokenCount,
+            done: true,
+          });
+          break;
+        } else if (chunk.stage === 'error') {
+          this.logger.error(`❌ Pipeline error at stage: ${chunk.errorMessage}`);
+          client.emit('pipeline-chunk', {
+            stage: 'error',
+            errorMessage: chunk.errorMessage,
+            done: true,
+          });
+          break;
+        } else {
+          // Other stages: image-analysis, embedding, retrieval, context
+          this.logger.debug(`📍 Stage: ${chunk.stage}`);
+          client.emit('pipeline-chunk', {
+            stage: chunk.stage,
+            metadata: chunk.metadata,
+          });
+        }
+      }
+    } catch (error) {
+      this.logger.error(`❌ Pipeline error for ${client.id}:`, error.stack || error);
+      client.emit('pipeline-error', {
+        error: error.message || 'Pipeline error occurred',
+      });
+    } finally {
+      this.chatService.unregisterRequest(requestId);
+      this.activeStreams.delete(client.id);
+      this.logger.log(`🧹 Pipeline cleanup completed for ${client.id}`);
+    }
+  }
 }
