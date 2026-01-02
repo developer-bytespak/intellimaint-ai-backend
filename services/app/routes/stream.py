@@ -12,11 +12,37 @@ router = APIRouter()
 DEBUG = True
 JWT_SECRET = os.getenv("JWT_SECRET")
 
+# Get allowed origins for WebSocket connections
+def get_allowed_origins():
+    allowed_origins_str = os.getenv(
+        "ALLOWED_ORIGINS", "http://localhost:3001,http://localhost:3000"
+    )
+    origins = [origin.strip() for origin in allowed_origins_str.split(",")]
+    # Add production frontend
+    production_frontend = "https://intellimaint-ai.vercel.app"
+    if production_frontend not in origins:
+        origins.append(production_frontend)
+    return origins
+
+def check_origin(websocket: WebSocket) -> bool:
+    """Check if the WebSocket origin is allowed"""
+    origin = websocket.headers.get("origin")
+    if not origin:
+        # Allow connections without origin header (same-origin or non-browser clients)
+        return True
+    allowed = get_allowed_origins()
+    return origin in allowed
+
 @router.websocket("/stream")
 async def websocket_endpoint(websocket: WebSocket):
+    origin = websocket.headers.get("origin", "no-origin")
+    user_id = None
+    
+    if DEBUG:
+        print(f"🔌 WebSocket connection attempt from origin: {origin}")
+
     # 1. Ticket extraction from query params
     ticket = websocket.query_params.get("ticket")
-    user_id = None
 
     try:
         if not ticket:
