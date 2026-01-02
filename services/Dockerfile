@@ -9,11 +9,14 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install dependencies
-COPY requirements.txt .
+COPY services/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt --retries 5
 
 # Copy application code
-COPY . .
+COPY services/ .
+
+# Copy chunking scripts needed for PDF processing
+COPY scripts/chunking/pdf_universal_chunker.py /app/scripts/chunking/
 
 # Expose port 8000
 EXPOSE 8000
