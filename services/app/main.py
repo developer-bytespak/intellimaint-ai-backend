@@ -2,7 +2,7 @@
 
 from pprint import pp
 from fastapi import FastAPI, Request
-from starlette.types import ASGIApp, Receive, Scope, Send
+from fastapi.middleware.cors import CORSMiddleware
 
 
 from .routes import orchestrator, vision, rag, asr_tts, doc_extract, stream, chunking, batches, doc_extract_worker , embedding_routes
@@ -24,122 +24,66 @@ if production_frontend not in allowed_origins:
 print(f"CORS enabled for origins: {allowed_origins}")
 
 
-class CORSMiddlewareWithWebSocket:
-    """Custom CORS middleware that properly handles WebSocket connections.
-    
-    The standard FastAPI CORSMiddleware returns 403 for WebSocket connections
-    from origins not in the allowed list. This middleware allows WebSocket
-    connections to pass through (origin validation is done in the WS endpoint).
-    """
-    
-    def __init__(self, app: ASGIApp, allowed_origins: list[str]):
-        self.app = app
-        self.allowed_origins = set(allowed_origins)
-    
-    async def __call__(self, scope: Scope, receive: Receive, send: Send):
-        if scope["type"] == "websocket":
-            # For WebSocket, just pass through - origin check happens in the endpoint
-            await self.app(scope, receive, send)
-            return
-        
-        if scope["type"] != "http":
-            await self.app(scope, receive, send)
-            return
-        
-        # Handle HTTP requests with CORS
-        headers_list = scope.get("headers", [])
-        headers = {k: v for k, v in headers_list}
-        origin = headers.get(b"origin", b"").decode()
-        method = scope.get("method", "GET")
-        
-        # Check if origin is allowed
-        origin_allowed = origin in self.allowed_origins or "*" in self.allowed_origins or not origin
-        
-        # Handle preflight OPTIONS request
-        if method == "OPTIONS":
-            response_headers = [
-                (b"access-control-allow-methods", b"GET, POST, PUT, DELETE, PATCH, OPTIONS"),
-                (b"access-control-allow-headers", b"*"),
-                (b"access-control-max-age", b"600"),
-            ]
-            if origin_allowed and origin:
-                response_headers.append((b"access-control-allow-origin", origin.encode()))
-                response_headers.append((b"access-control-allow-credentials", b"true"))
-            
-            await send({
-                "type": "http.response.start",
-                "status": 200,
-                "headers": response_headers,
-            })
-            await send({
-                "type": "http.response.body",
-                "body": b"",
-            })
-            return
-        
-        # For other requests, add CORS headers to response
-        async def send_with_cors(message):
-            if message["type"] == "http.response.start":
-                resp_headers = list(message.get("headers", []))
-                if origin_allowed and origin:
-                    resp_headers.append((b"access-control-allow-origin", origin.encode()))
-                    resp_headers.append((b"access-control-allow-credentials", b"true"))
-                    resp_headers.append((b"access-control-expose-headers", b"*, Cache-Control, Content-Type"))
-                message = {**message, "headers": resp_headers}
-            await send(message)
-        
-        await self.app(scope, receive, send_with_cors)
-
-
 # Create the FastAPI app
-fastapi_app = FastAPI(
+app = FastAPI(
     title="IntelliMaint AI Service",
     description="Combined AI service for vision, RAG, ASR/TTS, and orchestration",
     version="1.0.0",
 )
 
+# Use allow_origins=["*"] to prevent CORSMiddleware from rejecting WebSocket connections
+# Origin validation for security is done in the WebSocket endpoint itself
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins - WebSocket origin check is done in endpoint
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allow_headers=["*"],
+    expose_headers=["*", "Cache-Control", "Content-Type"],
+)
+
 # Include all routers with appropriate prefixes
-fastapi_app.include_router(
+app.include_router(
     orchestrator.router, prefix="/api/v1/orchestrate", tags=["orchestrator"]
 )
 
-fastapi_app.include_router(vision.router, prefix="/api/v1/vision", tags=["vision"])
+app.include_router(vision.router, prefix="/api/v1/vision", tags=["vision"])
 
-fastapi_app.include_router(rag.router, prefix="/api/v1/rag", tags=["rag"])
+app.include_router(rag.router, prefix="/api/v1/rag", tags=["rag"])
 
-fastapi_app.include_router(asr_tts.router, prefix="/api/v1/asr", tags=["asr-tts"])
+app.include_router(asr_tts.router, prefix="/api/v1/asr", tags=["asr-tts"])
 
-fastapi_app.include_router(stream.router, prefix="/api/v1", tags=["stream"])
+app.include_router(stream.router, prefix="/api/v1", tags=["stream"])
 
-fastapi_app.include_router(doc_extract.router, prefix="/api/v1/extract", tags=["doc_extract"])
+app.include_router(doc_extract.router, prefix="/api/v1/extract", tags=["doc_extract"])
 
 
-fastapi_app.include_router(
+app.include_router(
     chunking.router,
     prefix="/api/v1/chunk",
     tags=["chunking"]
 )
 
-fastapi_app.include_router(
+app.include_router(
     batches.router,
     prefix="/api/v1",
     tags=["batches"]
 )
 
-fastapi_app.include_router(
+app.include_router(
     doc_extract_worker.router,
     prefix="/api/v1/extract/internal",
     tags=["worker"]
 )
 
-fastapi_app.include_router(
+app.include_router(
     embedding_routes.router,
     prefix="/api/v1",
     tags=["embedding_routes"]
 )
 
 
-@fastapi_app.get("/")
+@app.get("/")
 async def root():
     """Health check endpoint"""
     return {
@@ -149,12 +93,7 @@ async def root():
     }
 
 
-@fastapi_app.get("/health")
+@app.get("/health")
 async def health():
     """Health check endpoint"""
     return {"status": "healthy"}
-
-
-# Wrap with custom CORS middleware that handles WebSocket properly
-# This is the app that uvicorn will use
-app = CORSMiddlewareWithWebSocket(fastapi_app, allowed_origins)
