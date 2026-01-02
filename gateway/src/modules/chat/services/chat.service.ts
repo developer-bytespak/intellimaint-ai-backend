@@ -7,6 +7,12 @@ import { ChatSessionStatus, MessageRole, AttachmentType, ChatMessage } from '@pr
 import { GeminiChatService } from './gemini-chat.service';
 import { ImageUtilService } from './image-util.service';
 import { VercelBlobService } from './vercel-blob.service';
+import { PipelineMessageDto, PipelineChunk, TokenUsage } from '../dto/pipeline-message.dto';
+import { OpenAIVisionService } from './openai-vision.service';
+import { OpenAIEmbeddingService } from './openai-embedding.service';
+import { RagRetrievalService } from './rag-retrieval.service';
+import { ContextManagerService } from './context-manager.service';
+import { OpenAILLMService } from './openai-llm.service';
 
 @Injectable()
 export class ChatService {
@@ -19,6 +25,11 @@ export class ChatService {
     private geminiChatService: GeminiChatService,
     private imageUtilService: ImageUtilService,
     private vercelBlobService: VercelBlobService,
+    private openaiVisionService: OpenAIVisionService,
+    private openaiEmbeddingService: OpenAIEmbeddingService,
+    private ragRetrievalService: RagRetrievalService,
+    private contextManagerService: ContextManagerService,
+    private openaiLLMService: OpenAILLMService,
   ) {}
 
   /**
@@ -1449,5 +1460,208 @@ export class ChatService {
       this.logger.error('Error cleaning up stopped messages:', error);
       return { deletedCount: 0, messageIds: [] };
     }
+  }
+
+  /**
+   * ============================================
+   * RAG CHAT PIPELINE - NEW METHODS
+   * ============================================
+   */
+
+  /**
+   * Main Pipeline Orchestrator
+   *
+   * Orchestrates the complete RAG chat pipeline:
+   * 1. Store user message
+   * 2. Analyze images (if any)
+   * 3. Generate embeddings for semantic search
+   * 4. Retrieve relevant knowledge chunks via pgvector
+   * 5. Prepare conversation context (with summarization)
+   * 6. Stream LLM response with context awareness
+   * 7. Store assistant response
+   * 8. Update context summary incrementally
+   *
+   * @param userId - Authenticated user ID
+   * @param sessionId - Chat session ID
+   * @param dto - Pipeline message request with content and images
+   * @returns Async generator yielding pipeline chunks for streaming
+   */
+  async *streamPipelineMessage(
+    userId: string,
+    sessionId: string,
+    dto: PipelineMessageDto,
+  ): AsyncGenerator<PipelineChunk> {
+    this.logger.debug(`Starting pipeline message for session ${sessionId}`);
+
+    try {
+      // Verify session ownership
+      const session = await this.prisma.chatSession.findUnique({
+        where: { id: sessionId },
+      });
+
+      if (!session || session.userId !== userId) {
+        throw new ForbiddenException('Not authorized to access this session');
+      }
+
+      // Stage 0: Store user message
+      const userMessage = await this.storeUserMessage(userId, sessionId, dto);
+      this.logger.debug(`User message stored: ${userMessage.id}`);
+
+      // Stage 1: Process images (if any)
+      let imageDescriptions = '';
+      if (dto.images?.length > 0) {
+        try {
+          const analyses = await this.openaiVisionService.analyzeAndStoreImages(
+            userMessage.id,
+            dto.images,
+          );
+          imageDescriptions = analyses.map((a) => a.description).join('\n');
+          yield {
+            stage: 'image-analysis',
+            metadata: { analyses },
+          };
+          this.logger.debug(`Analyzed ${analyses.length} images`);
+        } catch (error) {
+          this.logger.warn(`Image analysis failed, continuing without images: ${error}`);
+          // Continue pipeline without image descriptions on non-critical failure
+        }
+      }
+
+      // Stage 2: Generate embeddings
+      const promptWithImages = dto.content + '\n' + imageDescriptions;
+      const embedding = await this.openaiEmbeddingService.generate(promptWithImages);
+      yield { stage: 'embedding' };
+      this.logger.debug(`Embedding generated`);
+
+      // Stage 3: Retrieve knowledge chunks
+      const chunks = await this.ragRetrievalService.retrieveTopK(embedding, 10);
+      yield {
+        stage: 'retrieval',
+        metadata: { chunkCount: chunks.length },
+      };
+      this.logger.debug(`Retrieved ${chunks.length} knowledge chunks`);
+
+      // Fetch session history for context
+      const messages = await this.fetchSessionHistory(sessionId);
+
+      // Stage 4: Prepare context (includes summary generation if needed)
+      const contextData = await this.contextManagerService.prepareContext(
+        sessionId,
+        messages,
+      );
+      this.logger.debug(
+        `Context prepared with ${contextData.recentMessages.length} recent messages`,
+      );
+
+      // Stage 5: Stream LLM response
+      let fullResponse = '';
+      let tokenUsage: TokenUsage = {
+        promptTokens: 0,
+        completionTokens: 0,
+        totalTokens: 0,
+      };
+
+      for await (const token of this.openaiLLMService.streamCompletion(
+        dto.content,
+        contextData.summary,
+        chunks,
+        dto.images || [],
+      )) {
+        fullResponse += token;
+        yield {
+          stage: 'llm-generation',
+          token,
+        };
+      }
+      this.logger.debug(`LLM streaming completed, response length: ${fullResponse.length}`);
+
+      // Stage 6: Store assistant response
+      const assistantMessage = await this.storeAssistantMessage(
+        sessionId,
+        fullResponse,
+        tokenUsage,
+      );
+      this.logger.debug(`Assistant message stored: ${assistantMessage.id}`);
+
+      // Stage 7: Update context summary if needed
+      await this.contextManagerService.updateContextSummary(
+        sessionId,
+        userMessage,
+        assistantMessage,
+      );
+      this.logger.debug(`Context summary updated`);
+
+      // Final: Complete signal
+      yield {
+        stage: 'complete',
+        messageId: assistantMessage.id,
+      };
+    } catch (error) {
+      this.logger.error(`Pipeline error: ${error.message}`, error.stack);
+      yield {
+        stage: 'error',
+        errorMessage: error.message,
+      };
+    }
+  }
+
+  /**
+   * Helper: Store user message in database
+   * Creates ChatMessage and MessageAttachment records
+   */
+  private async storeUserMessage(
+    userId: string,
+    sessionId: string,
+    dto: PipelineMessageDto,
+  ): Promise<ChatMessage> {
+    this.logger.debug(`Storing user message for session ${sessionId}`);
+
+    // TODO: Implement user message storage
+    // 1. Create ChatMessage record (role: 'user', content: dto.content)
+    // 2. If dto.images exist:
+    //    - Upload images to Vercel Blob (using existing vercelBlobService)
+    //    - Create MessageAttachment records for each image
+    // 3. Return ChatMessage object
+
+    return null;
+  }
+
+  /**
+   * Helper: Fetch all messages for a session
+   * Returns messages ordered by creation time
+   */
+  private async fetchSessionHistory(sessionId: string): Promise<ChatMessage[]> {
+    this.logger.debug(`Fetching session history for ${sessionId}`);
+
+    // TODO: Query database
+    // SELECT all ChatMessage records for session
+    // ORDER BY createdAt ASC
+    // INCLUDE related data if needed
+
+    return [];
+  }
+
+  /**
+   * Helper: Store assistant response in database
+   * Creates ChatMessage record with token usage
+   */
+  private async storeAssistantMessage(
+    sessionId: string,
+    content: string,
+    tokenUsage: TokenUsage,
+  ): Promise<ChatMessage> {
+    this.logger.debug(`Storing assistant message for session ${sessionId}`);
+
+    // TODO: Implement assistant message storage
+    // 1. Create ChatMessage record (role: 'assistant', content)
+    // 2. Store tokenUsage data if applicable:
+    //    - promptTokens
+    //    - completionTokens
+    //    - totalTokens
+    //    - cachedTokens (if any)
+    // 3. Update ChatSession.updatedAt timestamp
+    // 4. Return ChatMessage object
+
+    return null;
   }
 }

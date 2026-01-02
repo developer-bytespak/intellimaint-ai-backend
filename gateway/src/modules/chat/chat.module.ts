@@ -7,6 +7,11 @@ import { VercelBlobService } from './services/vercel-blob.service';
 import { ChatGateway } from './gateway/chat.gateway';
 import { SocketChatGateway } from './gateway/socket-chat.gateway';
 import { PrismaService } from 'prisma/prisma.service';
+import { OpenAIVisionService } from './services/openai-vision.service';
+import { OpenAIEmbeddingService } from './services/openai-embedding.service';
+import { RagRetrievalService } from './services/rag-retrieval.service';
+import { ContextManagerService } from './services/context-manager.service';
+import { OpenAILLMService } from './services/openai-llm.service';
 
 @Module({
   controllers: [ChatController],
@@ -18,6 +23,11 @@ import { PrismaService } from 'prisma/prisma.service';
     ChatGateway,
     SocketChatGateway,
     PrismaService,
+    OpenAIVisionService,
+    OpenAIEmbeddingService,
+    RagRetrievalService,
+    ContextManagerService,
+    OpenAILLMService,
   ],
   exports: [ChatService],
 })
