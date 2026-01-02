@@ -2,7 +2,8 @@
 
 from pprint import pp
 from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
 
 
 from .routes import orchestrator, vision, rag, asr_tts, doc_extract, stream, chunking, batches, doc_extract_worker , embedding_routes
@@ -10,7 +11,6 @@ from .routes import orchestrator, vision, rag, asr_tts, doc_extract, stream, chu
 import os
 
 # Get allowed origins from environment variable
-# Format: comma-separated URLs, e.g., "https://app1.com,https://app2.com"
 allowed_origins_str = os.getenv(
     "ALLOWED_ORIGINS", "http://localhost:3001,http://localhost:3000"
 )
@@ -24,6 +24,35 @@ if production_frontend not in allowed_origins:
 print(f"CORS enabled for origins: {allowed_origins}")
 
 
+class SimpleCORSMiddleware(BaseHTTPMiddleware):
+    """Simple CORS middleware that doesn't interfere with WebSocket connections"""
+    
+    async def dispatch(self, request: Request, call_next):
+        # Get origin
+        origin = request.headers.get("origin", "")
+        
+        # Handle preflight
+        if request.method == "OPTIONS":
+            response = Response(status_code=200)
+            response.headers["Access-Control-Allow-Origin"] = origin or "*"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+            response.headers["Access-Control-Allow-Headers"] = "*"
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Max-Age"] = "600"
+            return response
+        
+        # Process request
+        response = await call_next(request)
+        
+        # Add CORS headers to response
+        if origin:
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Expose-Headers"] = "*, Cache-Control, Content-Type"
+        
+        return response
+
+
 # Create the FastAPI app
 app = FastAPI(
     title="IntelliMaint AI Service",
@@ -31,16 +60,8 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Use allow_origins=["*"] to prevent CORSMiddleware from rejecting WebSocket connections
-# Origin validation for security is done in the WebSocket endpoint itself
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins - WebSocket origin check is done in endpoint
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allow_headers=["*"],
-    expose_headers=["*", "Cache-Control", "Content-Type"],
-)
+# Use simple CORS middleware - BaseHTTPMiddleware doesn't affect WebSocket
+app.add_middleware(SimpleCORSMiddleware)
 
 # Include all routers with appropriate prefixes
 app.include_router(
