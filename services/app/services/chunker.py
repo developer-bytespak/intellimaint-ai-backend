@@ -2,11 +2,27 @@ import os
 import re
 import uuid
 import json
+import sys
+import logging
 from typing import List, Optional, Tuple, Dict, Any
 
 import psycopg2
 from psycopg2.extras import RealDictCursor, execute_values
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
+
+# Add the chunking scripts to path for importing the universal chunker
+SCRIPTS_CHUNKING_PATH = Path(__file__).parent.parent.parent.parent / "scripts" / "chunking"
+if str(SCRIPTS_CHUNKING_PATH) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_CHUNKING_PATH))
+
+try:
+    from pdf_universal_chunker import UniversalChunkingPipeline
+    HAS_UNIVERSAL_CHUNKER = True
+except ImportError as e:
+    logger.warning(f"Could not import UniversalChunkingPipeline: {e}")
+    HAS_UNIVERSAL_CHUNKER = False
 
 try:
     import importlib.util
@@ -347,69 +363,64 @@ def extract_images_by_step(md_text: str) -> Dict[int, List[Dict[str, Any]]]:
     return images_by_step
 
 
-def process_source(source_id: str, dry_run: bool = False, overwrite: bool = False) -> Dict[str, Any]:
+def process_source(source_id: str, dry_run: bool = False, overwrite: bool = False, max_retries: int = 1) -> Dict[str, Any]:
+    """
+    Process a knowledge source and create chunks with 15% overlap.
+    
+    Uses the universal PDF chunker with English-only filtering and overlap logic.
+    
+    Args:
+        source_id: UUID of the knowledge source
+        dry_run: If True, returns chunks without inserting to DB
+        overwrite: If True, deletes existing chunks before inserting
+        max_retries: Number of retries on failure (default 1)
+    
+    Returns:
+        Dict with source_id and num_chunks (or full chunks if dry_run)
+    """
     dsn = os.getenv("DATABASE_URL")
     if not dsn:
         raise ValueError("DATABASE_URL not set in environment")
 
+    retry_count = 0
+    last_error = None
+    
+    while retry_count <= max_retries:
+        try:
+            return _process_source_internal(source_id, dry_run, overwrite, dsn)
+        except Exception as e:
+            last_error = e
+            retry_count += 1
+            if retry_count <= max_retries:
+                logger.warning(f"Chunking failed for {source_id}, retrying ({retry_count}/{max_retries}): {e}")
+            else:
+                logger.error(f"Chunking failed for {source_id} after {max_retries} retries: {e}")
+    
+    raise last_error
+
+
+def _process_source_internal(source_id: str, dry_run: bool, overwrite: bool, dsn: str) -> Dict[str, Any]:
+    """Internal processing function (called by process_source with retry logic)."""
+    
     # Connect to Neon/Postgres
     conn = psycopg2.connect(dsn, sslmode="require")
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute("SELECT raw_content FROM knowledge_sources WHERE id = %s", (source_id,))
+            cur.execute("SELECT title, raw_content FROM knowledge_sources WHERE id = %s", (source_id,))
             row = cur.fetchone()
             if not row:
                 raise ValueError(f"knowledge_source not found: {source_id}")
             raw = row.get("raw_content")
+            title = row.get("title", "Untitled")
             if raw is None:
                 raise ValueError("raw_content is empty")
 
-        counter = TokenCounter()
-
-        # Use the in-file iFixit chunking functions
-        try:
-            title, intro_text, sections = parse_guide_sections(raw)
-            raw_chunks = chunk_sections(title, intro_text, sections)
-        except Exception as e:
-            raise ValueError(f"error while running chunker: {e}")
-
-        # Map raw_chunks to expected schema: add token/char/word counts and metadata
-        images_by_step = extract_images_by_step(raw)
-
-        chunks: List[Dict[str, Any]] = []
-        for c in raw_chunks:
-            content = c.get("content", "")
-            step_indices = c.get("step_indices", [])
-            headings = c.get("headings", [])
-            heading = headings[0] if headings else None
-            token_count = counter.count(content)
-
-            # collect images belonging to this chunk's steps (deduplicated)
-            chunk_images: List[Dict[str, Any]] = []
-            seen_keys = set()
-            for step_idx in step_indices:
-                for img in images_by_step.get(step_idx, []):
-                    key = (img.get("url"), img.get("step_index"), img.get("order"))
-                    if key in seen_keys:
-                        continue
-                    seen_keys.add(key)
-                    chunk_images.append(img)
-
-            metadata = {
-                "step_indices": step_indices,
-                "images": chunk_images,
-                "char_count": len(content),
-                "word_count": len(content.split()),
-                "chunker_version": "v1",
-            }
-
-            chunks.append({
-                "chunk_index": c.get("chunk_index", 0),
-                "heading": None,
-                "content": content,
-                "token_count": token_count,
-                "metadata": metadata,
-            })
+        # Use the universal chunker with overlap (preferred) or fall back to iFixit-style
+        if HAS_UNIVERSAL_CHUNKER:
+            chunks = _process_with_universal_chunker(raw, source_id)
+        else:
+            logger.warning("Universal chunker not available, falling back to iFixit-style chunking")
+            chunks = _process_with_ifixit_chunker(raw, source_id)
 
         if dry_run:
             return {"source_id": source_id, "num_chunks": len(chunks), "chunks": chunks}
@@ -432,9 +443,9 @@ def process_source(source_id: str, dry_run: bool = False, overwrite: bool = Fals
                         c["chunk_index"],
                         c["content"],
                         c.get("heading"),
-                        None,
+                        None,  # embedding
                         c.get("token_count"),
-                        json.dumps(c.get("metadata", {"char_count": c.get("char_count"), "word_count": c.get("word_count"), "chunker_version": "v1"}))
+                        json.dumps(c.get("metadata", {"chunker_version": "v2"}))
                     ))
 
                 insert_sql = (
@@ -445,7 +456,83 @@ def process_source(source_id: str, dry_run: bool = False, overwrite: bool = Fals
                 if values:
                     execute_values(cur, insert_sql, values, template=None, page_size=100)
 
+        logger.info(f"Successfully created {len(chunks)} chunks for source {source_id}")
         return {"source_id": source_id, "num_chunks": len(chunks)}
 
     finally:
         conn.close()
+
+
+def _process_with_universal_chunker(raw_content: str, source_id: str) -> List[Dict[str, Any]]:
+    """
+    Process raw content using the universal PDF chunker.
+    Includes English-only filtering and 15% overlap.
+    """
+    pipeline = UniversalChunkingPipeline()
+    chunk_objects = pipeline.process(raw_content, source_id=source_id)
+    
+    chunks = []
+    for chunk in chunk_objects:
+        chunk_data = {
+            "chunk_index": chunk.chunk_index,
+            "heading": chunk.heading,
+            "content": chunk.content,
+            "token_count": chunk.token_count,
+            "metadata": chunk.metadata,
+        }
+        chunks.append(chunk_data)
+    
+    return chunks
+
+
+def _process_with_ifixit_chunker(raw_content: str, source_id: str) -> List[Dict[str, Any]]:
+    """
+    Fallback: Process using the iFixit-style chunker (legacy).
+    """
+    counter = TokenCounter()
+    
+    try:
+        title, intro_text, sections = parse_guide_sections(raw_content)
+        raw_chunks = chunk_sections(title, intro_text, sections)
+    except Exception as e:
+        raise ValueError(f"error while running chunker: {e}")
+
+    # Map raw_chunks to expected schema
+    images_by_step = extract_images_by_step(raw_content)
+
+    chunks: List[Dict[str, Any]] = []
+    for c in raw_chunks:
+        content = c.get("content", "")
+        step_indices = c.get("step_indices", [])
+        headings = c.get("headings", [])
+        heading = headings[0] if headings else None
+        token_count = counter.count(content)
+
+        # collect images belonging to this chunk's steps
+        chunk_images: List[Dict[str, Any]] = []
+        seen_keys = set()
+        for step_idx in step_indices:
+            for img in images_by_step.get(step_idx, []):
+                key = (img.get("url"), img.get("step_index"), img.get("order"))
+                if key in seen_keys:
+                    continue
+                seen_keys.add(key)
+                chunk_images.append(img)
+
+        metadata = {
+            "step_indices": step_indices,
+            "images": chunk_images,
+            "char_count": len(content),
+            "word_count": len(content.split()),
+            "chunker_version": "v1_ifixit",
+        }
+
+        chunks.append({
+            "chunk_index": c.get("chunk_index", 0),
+            "heading": heading,
+            "content": content,
+            "token_count": token_count,
+            "metadata": metadata,
+        })
+
+    return chunks

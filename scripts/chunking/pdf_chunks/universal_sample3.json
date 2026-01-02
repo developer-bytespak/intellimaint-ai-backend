@@ -1,0 +1,413 @@
+{
+  "metadata": {
+    "total_chunks": 36,
+    "total_chars": 25302,
+    "total_words": 4027,
+    "total_tokens": 6311,
+    "embeddable_chunks": 5,
+    "reference_chunks": 31,
+    "source_id": null
+  },
+  "chunks": [
+    {
+      "chunk_index": 0,
+      "content": "English Original Instructions 6-2020 A050F726 (Issue 5)",
+      "heading": "C900 D5 (Spec F−G)",
+      "token_count": 13,
+      "metadata": {
+        "image_urls": [
+          "https://csbahcwtjhxfqpvlqzqn.supabase.co/storage/v1/object/public/pics/image_2_44c188bb.png",
+          "https://csbahcwtjhxfqpvlqzqn.supabase.co/storage/v1/object/public/pics/image_3_6c744b65.png",
+          "https://csbahcwtjhxfqpvlqzqn.supabase.co/storage/v1/object/public/pics/image_1_2006e7fc.png"
+        ],
+        "content_type": "image_only"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 1,
+      "content": "Parts Manual Publication A050F726 Model: C750 D6 − C900 D5 Issue 5 − 6-2020\n\nThe following symbols are used in Cummins manuals to alert users to the potentially dangerous conditions relating to maintenance of equipment and replacement of parts. Please read and observe.\n\nThis symbol warns of immediate hazards which will result in severe personal injury or death.\n\nThis symbol refers to a hazard or unsafe practice which can result in severe personal injury or death.\n\nThis symbol refers to a hazard or unsafe practice which can result in severe personal in- jury or product or property damage.\n\nContact with USED ENGINE OILS has been identified by a United States federal agency and some USA state agencies as causing CANCER or REPRODUCTIVE TOXICITY. When checking or changing engine oils take all necessary precautions not to ingest, breathe the fumes or contact the used oil.\n\nContact with ASBESTOS has been identified by a United States federal agency and some USA state agencies as causing CANCER or REPRODUCTIVE TOXICITY. When handling engine gaskets take all necessary precautions not to ingest, breathe or contact the dust from the gaskets! Use adequate ventilation and wear protective gloves, masks and clothing!\n\nContact with BENZINE and LEAD, found in gasoline, fuel additives and solvents has been identified by a United States federal agency and some USA state agencies as caus- ing CANCER or REPRODUCTIVE TOXICITY. When checking, draining or adding gaso- line and fuel additives or using solvents take all necessary precautions not to ingest, breathe the fumes or contact the liquids. Use adequate ventilation and wear protective gloves, masks and protective clothing!\n\nService and repair of Cummins equipment must be performed by trained, experienced personnel only. Improper service, repair or replacement of parts may result in damage to equipment & property, severe personal injury or death. Do not use this catalog as a guide to servicing your equipment. Read and follow the IMPORTANT SAFETY INSTRUC-\nTIONS in the Service Manual appropriate for the equipment you are working on.\n\nIt is in the Operator’s interest to read and understand all Health and Safety information together with all Warnings and Cautions contained within the documentation relevant to the generator set, its operation and daily maintenance.\n\nNote:\n\nBefore operating the generator set, read the manuals and become familiar with them and the equipment.\nSafe and efficient operation can be achieved only if the equipment is properly operated and maintained.\nMany accidents are caused by failure to follow fundamental rules and precautions.\n\nImproper operation and maintenance can lead to severe personal injury or loss of life and property by fire, electrocution, mechanical breakdown or exhaust gas asphyxiation.\nRead and follow all safety precautions in the health and safety manual 0908−0110.",
+      "heading": null,
+      "token_count": 720,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 2,
+      "content": "This manual applies to the generator models C750 D6 − C900 D5. Parts illustrations are arranged in groups relating to their position and function on the generator set. Each part illustrated is identified by a reference number corresponding to the list of part numbers in the accompanying table.\n\nEngine and alternator parts that have been modified or added by Cummins are identified in this catalogue.\nContact your nearest authorized distributor for assistance in ordering replacement parts. All other replace- ment parts must be ordered from the engine/alternator manufacturer by referring to the item nameplate and supplying all available information.\n\nCummins Generator Model\n\nCummins Engine Model",
+      "heading": "About This Manual",
+      "token_count": 175,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 3,
+      "content": "Documentation and operator manuals pertaining to the generator set are available on QuickServe Online.\n\nQuickServe Online: https://quickserve.cummins.com/info/index.html\n\nThe information contained within this manual is based on information available at the time of going to print.\nIn line with Cummins policy of continuous development and improvement, information may change at any time without notice. Obtain the most up to date version available on QuickServe Online or contact your authorized distributor for assistance.",
+      "heading": "Quick Serve Online (QSOL)",
+      "token_count": 130,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 4,
+      "content": "The related literature that is appropriate to your generator set includes:\n\n Operator Manual for QSK23−G3 with PowerCommand 3.3 (A045E611)\n\n Operator Manual for QSK23−G3 with PowerCommand 3.3 MLD (A045E652)\n\n Installation Manual for QSK23−G3 with PowerCommand 3.3 or 3.3 MLD (A045E599)\n\n Generator Set Service Manual for QSK23−G3 with PowerCommand 3.3 or 3.3 MLD (A045L346)\n\n Recommended Spares List (RSL) for C750 D6 and C750 D6 (Spec F−G) (A050F729)\n\n Recommended Spares List (RSL) for C825 D5 and C825 D5 (Spec F−G) (A050F730)\n\n Recommended Spares List (RSL) for C800 D6 and C800 D6 (Spec F−G) (A050F731)\n\n Recommended Spares List (RSL) for C900 D5 and C900 D5 (Spec F−G) (A050F732)\n\n Standard Repair Times − ET Family (A030M221)\n\n Service Tool Manual (A043D529)\n\n Failure Code Manual (F1115C)\n\n Application Manual T−030, Liquid Cooled Generator Sets − for application information (A040S369)\n\n Engine Operation & Maintenance Manual for QSK23 (4021374)\n\n Warranty Manual (A040W374)\n\n Global Commercial Warranty Statement (A028U870)\n\nIf further information is required, contact your authorized distributor.",
+      "heading": "Related Literature",
+      "token_count": 280,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 5,
+      "content": "This manual covers generator set models produced under the Cummins brand.\n\nTo avoid errors or delay in filling your parts order, always state the MODEL and SERIAL NUMBER from the\nCummins nameplate.\n\nThe engine serial number is located on a data tag on the engine or is stamped on the engine block.\n\nThe control software number is located on the electronic control module (ECM) or can be obtained via the digital interface if one is available.\n\nFor reference document your generator set information in the spaces below.\n\nGenerator Set Model Number: _________________________________\n\nGenerator Set Serial Number: _________________________________\n\nGenerator Spec Letter: _________________________________\n\nEngine Serial Number: _________________________________\n\nDigital Control Software: _________________________________",
+      "heading": "Model Identification",
+      "token_count": 205,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 6,
+      "content": "Some of the following abbreviations may be used throughout this Parts Manual:\nAC Alternating Current ACB Air Circuit Breaker ACH Anti−Condensations Heaters ATS Automatic Transfer Switch Amp Ampere A/R As Required AVR Automatic Voltage Regulator AWG American Wire Gauge\n\nBHP Brake Horsepower BMS Building Measurement System BST Busnar Sensing Transformer\n\nCAN Controlled Area Network CB Circuit Breaker CCA Cold Cranking Amps CHP Combined Heat and Power COP Continuous Power Rating CT Current Transformer\n\ndB(A) Unit of noise level DC Direct Current Deg Degree DIP Dual In−line Package DMC Digital Master Control DMSU Demand Load Standby Unit\n\nECM Engine Control Module EFC Electronic Fuel Control EIT External/Internal Tooth EMCU Engine Monitoring and Control Unit EMF Electromotive Force EPROM Erasable Programmable Read Only Memory EPU Engine Protection Unit ET External Tooth\n\nFAE Full Authority Engine FSS First Start Sensor\n\nGCP Generator Control Panel GFI Ground Fault Interrupter GKWT Global Kilowatt Transducer\n\nHMI Human/Machine Interface HV High Voltage\n\nIC Integrated Circuit ID Inside Diameter IEC International Electrotechnical Commission I/O Input / Output IT Internal Tooth\n\nkVA Apparent Power kVAR Reactive Power kW Active / Real Power (Kilowatt) kWh Unit of electrical energy or work\n\nLED Light−Emitting Diode LTP Limited Time Power Rating LTA Low Temperature Aftercooling LV Low Voltage\n\nM Meter MCB Miniature Circuit Breaker MCCB Moulded Case Circuit Breaker MF Mains Failed MFSS Master First Start Sensor mm Millimeter MOH Mobile Off Highway MR Mains Returned MST Mains Sensing Transformer MSU Mains Sensing Unit MV Medium Voltage\n\nNEC Neutral Earthing Contact NFS Not For Sale NPT National Pipe Thread\n\nPC PowerCommand 3.3 PC Printed Circuit PF Power Factor Ph Phase PFC Power Factor Controller PLC Programmable Logic Controller PMG Permanent Magnet Generator PRP Prime Power Rating PSU Power Supply Unit PT/CT Potential Transformer/Current Transformer PTC Power Transfer Control\n\nQCC Quadrature Current Control\n\nSpec Specification\n\nThk Thick\n\nUL Underwriters Laboratories Inc. UNC Union National Coarse UNF Union National Fine\n\nW/(ET, IT, EIT) With",
+      "heading": "Abbreviations",
+      "token_count": 542,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 7,
+      "content": "11 Label, Panel Insert\n\n0098−7883−01 Portugese 1\n\n0098−7883−02 French 1\n\n0098−7883−03 Spanish 1\n\n0098−7883−04 Dutch 1\n\n0098−7883−05 German 1\n\n0098−7883−06 Danish 1\n\n0098−7883−07 Swedish 1\n\n0098−7883−08 Italian 1\n\n0098−7883−09 Czech 1\n\n0098−7883−10 Finnish 1",
+      "heading": "Labels",
+      "token_count": 64,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 8,
+      "content": "A051J626 Engine\n\n6 Washer, Flat 8\n\n0526−2400−58 Up to Spec F\n\n0526−0399−62 Begin Spec G\n\n8 Screw, Hex Head 8\n\n0800−3017−37 Up to (Spec F)\n\n0800−6494−44 Begin (Spec G)\n\n9 Screw, Hex Head 8\n\n0800−3017−53 Up to (Spec F)\n\n0800−6494−60 Begin (Spec G)\n\n11 Washer, Flat 14\n\n0526−0399−64 Up to (Spec F)\n\n0526−2400−61 Begin (Spec G)",
+      "heading": null,
+      "token_count": 80,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 9,
+      "content": "5 Nut, Flange Lock 4\n\n0870−2054 Up to (Spec F)\n\nA056U272 Begin (Spec G)\n\n8 Screw, Hex Head 4\n\n0821−5004−02 Up to (Spec F)\n\nA056U160 Begin (Spec G)\n\n12 Clamp, Battery 4\n\n0416−1203 Up to (Spec F)\n\nA056U119 Begin (Spec G)\n\n13 Clamp, Battery 4\n\n0416−1204 Up to (Spec F)\n\nA056U125 Begin (Spec G)\n\n18 Boot, Insulation 4\n\n0332−3985 Up to (Spec F)\n\nA057M072 Begin (Spec G)",
+      "heading": "Engine Accessories (Illustration #3)",
+      "token_count": 91,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 10,
+      "content": "15 Screw, Hex Head 8\n\n0800−3017−54 Up to (Spec F)\n\n0800−6494−61 Begin (Spec G)\n\n0140−3684−03 *Clamp, Air Cleaner (6” Minimum) 1\n\n0140−3684−06 *Clamp, Air Cleaner (7-1/2” Minimum) 1\n\n0140−3684−08 *Clamp, Air Cleaner (8-1/2” Minimum) 4\n\n0503−2455 *Elbow (90  x 8” I.D.) 2\n\n*Hose, Reducer 1\n\n0503−1675 Up to (Spec F) 1\n\n0140−3370 *Cover, Air Cleaner (10”) 2\n\n0140−3357 *Band, Mounting (18” Dia.) 4\n\n0140−3230 *Cleaner, Air 2\n\nPrimary Element\n\nNelson: 70781N\n\nFleetguard: AF25544\n\nSafety Element\n\nNelson: 70782N\n\nFleetguard: AF25545\n\n1 Kit, Coolant Heater (See Page 21 for Components)\n\n1 Heater, Coolant",
+      "heading": "Air Cleaner − Heavy Duty",
+      "token_count": 150,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 11,
+      "content": "5 Washer, Flat 4\n\n0526−0399−65 Up to (Spec F)\n\n0526−2400−63 Begin (Spec G) 4\n\n6 Washer, Flat 7\n\n0526−0399−63 Up to (Spec F)\n\n0526−2400−60 Begin (Spec G) 7\n\n7 Screw, Hex Head 4\n\n0800−3017−55 Up to (Spec F)\n\n0800−6494−62 Begin (Spec G) 4\n\n0800−3017−40 Up to (Spec F)\n\n0800−6494−47 Begin (Spec G) 4\n\n9 Washer, Flat 8\n\n0526−0399−67 Up to (Spec F)\n\n0526−2400−69 Begin (Spec G) 8\n\n13 Screw, Hex Head 6\n\n0800−0095 Up to (Spec F)\n\n0800−6622−54 Begin (Spec G) 6\n\n16 Screw, Flange Head Lock 2\n\n0821−2076 Up to (Spec F)\n\n0800−6526−60 Begin (Spec G) 2",
+      "heading": "Radiator",
+      "token_count": 134,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 12,
+      "content": "1 Kit, Complete P.M.G. Upfit\n\n45−0060A To (01/05/01) 1\n\n45−0341A From (01/05/01) 1\n\n6 Cap, N.D.E. Bearing\n\n660−10071 To (25/04/98) 1\n\n660−10864 From (25/04/98) 1\n\n7 Bracket, N.D.E.\n\n660−10064 To (25/04/98) 1\n\n660−10860 From (25/04/98) 1\n\n8 Kit, N.D.E. Bearing\n\n45−0297 To (25/04/98) 1\n\n45−0340 From (25/04/98) 1\n\n9 Cartridge, N.D.E. Bearing\n\n462−12920 To (25/04/98) 1\n\n660−10862 From (25/04/98) 1\n\n12 Cover, N.D.E. Air Inlet\n\n660−11565 Industrial 1\n\n464−31600 Marine 1\n\n22 Plate, A.V.R. Cover\n\n450−15254 Access 1\n\n450−14310 Blanking 1",
+      "heading": "Alternator − HC634 (1 Bearing, 4 Pole)",
+      "token_count": 133,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 13,
+      "content": "26 Heater\n\n45−0073 110−125 Volt 1\n\n45−0074 220−260 Volt 1\n\n28 Kit, D.E. Adaptor\n\n45−0945 SAE 0 Round 1\n\n29 See Item 28 Screen, D.E. (Included in Adapter Kit) 2\n\n30 Louvre, D.E.\n\n31 Kit, Coupling\n\n* −This part number depends on your machine serial number. Contact your reginal CPG technical support team.\n\n3 Heater, Cartridge",
+      "heading": "24 A.V.R.",
+      "token_count": 81,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 14,
+      "content": "0333−0438−05 Up to (Spec F)\n\n0333−0438−06 Up to (Spec F)\n\n4 Washer, Lock 2\n\n0850−2005 Up to (Spec F)\n\n0850−2114−06 Begin (Spec G) 2\n\n6 Nut, Hex 2\n\n0860−2006 Up to (Spec F)\n\n0860−2127−08 Begin (Spec G) 2\n\n7 Washer, Flat 2\n\n0526−0399−58 Up to (Spec F)\n\n0526−2400−52 Begin (Spec G) 2\n\n11 Tie, Cable 4\n\n0332−1389 Up to (Spec F)",
+      "heading": "120V 1",
+      "token_count": 80,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 15,
+      "content": "2 Screw, Hex Head 16\n\n0800−3017−57 Up to (Spec F)\n\n0800−6494−64 Begin (Spec G)\n\n3 Washer, Flat 6\n\n0526−0416 Up to (Spec F)\n\nA056U250 Begin (Spec G)\n\nFor transportation purposes only, use holes in items 2 and 3 to secure to pallet.",
+      "heading": "Alternator Fasteners",
+      "token_count": 57,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 16,
+      "content": "8 Nut, Hex 1\n\n0862−0026−57 Up to (Spec F)\n\n0860−2127−16 Begin (Spec G)\n\n11 Washer, Flat 2\n\n0526−0399−60 Up to (Spec F)\n\n0526−2400−55 Begin (Spec G)\n\n13 Screw, Hex Head 1\n\n0800−2060 Up to (Spec F)\n\n0800−6494−29 Begin (Spec G)",
+      "heading": "Entrance Box − Left",
+      "token_count": 56,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 17,
+      "content": "3 Washer, Flat 16\n\n0526−0399−70 Up to (Spec F)\n\n0526−2400−70 Begin (Spec G)\n\n7 Nut, Wing 2\n\n0865−0031 Up to (Spec F)\n\nA056Z376 Begin (Spec G)\n\n13 Screw, Hex Head 4\n\n0718−1180 Up to (Spec F)\n\n0800−6527−46 Begin (Spec G)\n\n14 Nut, Hex 4\n\n0860−2024−01 Up to (Spec F)\n\n0860−2127−24 Begin (Spec G)\n\n15 Screw, Head 6\n\n0800−3017−91 Up to (Spec F)\n\nA056U144 Begin (Spec G)\n\n16 Nut, Hex 6\n\n0862−0026−59 Up to (Spec F)\n\n0860−2127−22 Begin (Spec G)\n\n17 Washer, Flat 4\n\n0526−0399−72 Up to (Spec F)\n\n0526−2400−73 Begin (Spec G)",
+      "heading": "Skid",
+      "token_count": 128,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 18,
+      "content": "2 Hose A/R\n\n0503−2208−03 Up to (Spec F)\n\nA056Y499 Begin (Spec G)\n\n8 Nut, Hex 2\n\n0862−0026−56 Up to (Spec F)\n\n0860−2127−14 Begin (Spec G)\n\n0526−0399−59 Up to (Spec F)\n\n0526−2400−53 Begin (Spec G)\n\n6 Nut, Nylon Lock 2\n\n0870−0506 Up to (Spec F)\n\n0870−2322−04 Begin (Spec G)",
+      "heading": "Oil Pump",
+      "token_count": 67,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 19,
+      "content": "10 Washer, Lock 1\n\n0856−0012 Up to (Spec F)\n\n0853−0040−57 Begin (Spec G)\n\nSection F−F F\n\nF\n\n4 Washer, Flat 10\n\n0526−0399−56 Up to (Spec F)\n\n0526−2400−19 Begin (Spec G)\n\n16 Washer, Lock 14\n\n0850−2004 Up to (Spec F)\n\n0850−2114−04 Begin (Spec G)\n\n19 Strap, Electrical 1\n\n0337−0049 Up to (Spec F)\n\nA057D346 Begin (Spec G)\n\n21 Nut, Flange Lock 2\n\n0870−2055 Up to (Spec F)\n\n0860−2137 Begin (Spec G)",
+      "heading": "Ground Strap",
+      "token_count": 98,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 20,
+      "content": "6 Washer, Flat 4\n\n0526−0324 Up to (Spec F)\n\nA056U248 Begin (Spec G)\n\n7 Screw, Hollow Head 4\n\n0815−0776 Up to (Spec F)\n\nA056U168 Begin (Spec G)\n\n9 Box, Control (See Page 60 for Components)",
+      "heading": "Control Box",
+      "token_count": 46,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 21,
+      "content": "5 Panel, Control Box\n\n1 Heater, Thermostat\n\n0862−0026−53 Up to (Spec F)\n\n0860−2127−07 Begin (Spec G)\n\n7 Tie, Cable 4\n\n0332−0941 Up to (Spec F)\n\nA057G720 Begin (Spec G)\n\n2 Tie, Cable 8\n\n0332−3102 Up to (Spec F)\n\nA057P409 Begin (Spec G)",
+      "heading": "Control Box − Components",
+      "token_count": 58,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 22,
+      "content": "4 Screw, Hex Head\n\n6 Screw, Hex Head 4\n\n0800−3017−35 Up to (Spec F)\n\n0800−6494−42 Begin (Spec G)\n\n1 Breaker, Circuit\n\n6 Screw, Hex Head 3\n\n0800−3017−38 Up to (Spec F)\n\n0800−6494−45 Begin (Spec G)\n\n10 Screw, Hex Head 5\n\n0800−3017−58 Up to (Spec F)\n\n0800−6494−65 Begin (Spec G)",
+      "heading": "Neutral Bar",
+      "token_count": 68,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 23,
+      "content": "13 Screw, Hex Head 12\n\n0800−3017−44 Up to (Spec F)\n\n0800−6494−51 Begin (Spec G)\n\n7 Screw, Hex Head 21\n\n0800−3017−46 Up to (Spec F)\n\n0800−6494−53 Begin (Spec G)\n\n11 Screw, Hex Head 2\n\n0800−3017−59 Up to (Spec F)\n\n0800−6494−66 Begin (Spec G)\n\n12 Screw, Hex Head 6\n\n0800−3017−63 Up to (Spec F)\n\n0800−6494−70 Begin (Spec G)",
+      "heading": "Circuit Breaker − 1600A 3P",
+      "token_count": 79,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 24,
+      "content": "HC6 Alternator Arrangement (LH Version Shown)\n\nHC5 Alternator Arrangement (RH Version Shown)\n\n14 Fastener (Supplied with Busbars − 0337−3787−02 − as one part)\n\n15 Fastener (Supplied with Circuit Breaker − 0320 2129 − as one part)\n\n* Do not use bolts supplied with Circuit Breaker to attach to Panel. Only use nuts and washers supplied with Circuit Breaker.",
+      "heading": "Motorized Circuit Breaker − 1250A 3P",
+      "token_count": 89,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "narrative"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 25,
+      "content": "14 Fastener (Supplied with busbars − 0337−3787−02 − as one part)\n\n15 Fastener (Supplied with Circuit Breaker − 0320−2114 − as one part)\n\n3 Pole 1001−1250A\n\n0226−4406−04 Lead, Electrical 6\n\n0226−4406−03 Lead, Electrical 18\n\n4 Pole 1001−1250A\n\n0226−4406−03 Lead, Electrical 24",
+      "heading": "Motorized Circuit Breaker − 1250A 4P",
+      "token_count": 68,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 26,
+      "content": "0226−4498−03 Lead, Electrical 32\n\n0098−8213−01 Label 16\n\n0098−8213−02 Label 16\n\n0098−8213−03 Label 16\n\n0098−8213−04 Label, Information 16\n\n0850−0114−56 Washer, Lock 8\n\n0526−0399−64 Washer, Flat 16\n\n0862−0026−57 Nut, Hex 8\n\n0800−3017−57 Screw, Hex Head 8",
+      "heading": "1600A RHS",
+      "token_count": 63,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 27,
+      "content": "0226−4406−04 Lead, Electrical 32\n\n0226−4498−03 Lead, Electrical 40\n\n0098−8213−01 Label 20\n\n0098−8213−02 Label 20\n\n0098−8213−03 Label 20\n\n0098−8213−04 Label, Information 20\n\n0850−0114−56 Washer, Lock 12\n\n0526−0399−64 Washer, Flat 24\n\n0862−0026−57 Nut, Hex 12\n\n0800−3017−57 Screw, Hex Head 12",
+      "heading": "1600A LHS",
+      "token_count": 72,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 28,
+      "content": "0226−4406−04 Lead, Electrical 40\n\n0226−4406−04 Lead, Electrical 48\n\n0098−8213−01 Label 24\n\n0098−8213−02 Label 24\n\n0098−8213−03 Label 24\n\n0098−8213−04 Label, Information 24\n\n0850−0114−56 Washer, Lock 16\n\n0526−0399−64 Washer, Flat 32\n\n0862−0026−57 Nut, Hex 16\n\n0800−3017−57 Screw, Hex Head 16",
+      "heading": "2000A LHS",
+      "token_count": 72,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 29,
+      "content": "0226−4498−03 Lead, Electrical 48\n\n7 Nut, Lock 8\n\n0810222506 Up to (Spec F)\n\n0860−2127−20 Begin (Spec G) 8\n\n8 Screw, Hex Head 12\n\n0718−1172 Up to (Spec F)\n\n0800−6527−38 Begin (Spec G)\n\n1 Tank, Fuel\n\n13 Bracket, Tank\n\n14 Bracket, Tank\n\n21 Pump, Hand (See Page 102 for Components)",
+      "heading": "2500A RHS",
+      "token_count": 69,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 30,
+      "content": "0179−3265 50Hz Electric Pump Kit\n\n0120−1344−02 Pump, Oil 1\n\n0149−2688 Strainer, Fuel 1\n\n0306−4727 Contactor, Motor 1\n\n0321−0389 Fuse 3\n\n0502−1459 Fitting, Union 10\n\n0503−2386 Hose, Coolant 8\n\n0504−0230 Valve, Fuel 4\n\n0505−2094 Tee, Pipe 1\n\n0505−2105 Bushing, Reducer 2\n\n0505−2080 Adapter, Pipe 2\n\n0179−3266 60Hz Electric Pump Kit\n\n0120−1344−01 Pump, Oil 1",
+      "heading": "Electric Pump − Fuel",
+      "token_count": 88,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 31,
+      "content": "1 Pipe, Exhaust − Bellows 1\n\n0155−4122 Up to (Spec F)\n\nA057D684 Begin (Spec G)\n\n2 Pipe, Exhaust − Flexible 1\n\n0155−4123 Up to (Spec F)\n\nA057D685 Begin (Spec G)\n\n0416−1181−02 Charger, Battery (5 Amp, Type MK2, 24V, Wall Mounted\n\n0416−1182−02 Charger, Battery (10 Amp, Type 5110, 24V, Wall Mounted\n\n1 A052F998 Harness, Wiring − Customer Connections",
+      "heading": "Exhaust Bellows",
+      "token_count": 86,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 32,
+      "content": "0098−5347, 20\n\n0098−6195, 20\n\n0098−7883−01, 9\n\n0098−7883−02, 9\n\n0098−7883−03, 9\n\n0098−7883−04, 9\n\n0098−7883−05, 9\n\n0098−7883−06, 9\n\n0098−7883−07, 9\n\n0098−7883−08, 9\n\n0098−7883−09, 9\n\n0098−7883−10, 9\n\n0098−7895, 9\n\n0098−7902−03, 9\n\n0098−8094, 9\n\n0098−8097, 9 , 45 , 46 , 71 ,\n73 , 75 , 77\n\n0098−8099, 9\n\n0098−8102, 9\n\n0098−8103, 9\n\n0098−8104−05, 9\n\n0098−8130, 9\n\n0098−8213−01, 89 , 91 , 94 ,\n\n0098−8213−02, 89 , 91 , 94 ,\n\n0098−8213−03, 89 , 91 , 94 ,\n\n0098−8213−04, 89 , 91 , 94 ,\n\n0098−8238, 57\n\n0098−8322, 68\n\n0098−8732−01, 9\n\n0120−1344−01, 103\n\n0120−1344−02, 103\n\n0120−1345−02, 51\n\n0130−4546−01, 21\n\n0140−3230, 19\n\n0140−3357, 19\n\n0140−3370, 19\n\n0140−3684−03, 19\n\n0140−3684−06, 19\n\n0140−3684−08, 19\n\n0149−2687, 102\n\n0149−2688, 103\n\n0149−2736, 51\n\n0155−3437, 97 , 98\n\n0155−3451, 21\n\n0155−3483, 98\n\n0155−3710, 98\n\n0155−3723−02, 13\n\n0155−3724−02, 15\n\n0155−4114−01, 97\n\n0155−4114−02, 97\n\n0155−4115−01, 97\n\n0155−4115−02, 97\n\n0155−4117−01, 97\n\n0155−4122, 104\n\n0155−4123, 104\n\n0155−4124, 98\n\n0155−4212−02, 13\n\n0155−4530, 97\n\n0155−4531, 97\n\n0159−1547−02, 101\n\n0159−1548−02, 101\n\n0159−1549−02, 101\n\n0159−1550−02, 101\n\n0159−1551, 101\n\n0159−1552, 101\n\n0159−1554−02, 101\n\n0159−1555−02, 101\n\n0159−1556−02, 101\n\n0159−1557−02, 101\n\n0159−1558−02, 101\n\n0159−1559−02, 101\n\n0159−1560, 101\n\n0159−1625, 101\n\n0179−3265, 103\n\n0179−3266, 103\n\n0193−0537, 101\n\n0193−0602, 32\n\n0193044602, 69\n\n0226−4406−03, 94\n\n0226−4406−04, 94 , 95\n\n0226−4498−03, 94 , 95\n\n0226−4708−01, 23\n\n0226−4708−02, 23\n\n0232−3710−01, 49\n\n0232−3710−02, 49\n\n0232−3710−03, 49\n\n0232−3849, 39\n\n0249−0818, 67\n\n0300−5937, 68\n\n0300−6315−02, 57\n\n0300−6366−02, 57\n\n0300−6608, 81\n\n0300−6622, 82\n\n0302−2057−40, 64\n\n0306−4727, 103\n\n0307−2621−02, 15\n\n0307−2859, 23\n\n0307−3007−01, 67\n\n0307−3009−03, 67\n\n0307−3018, 67\n\n0307−3088, 66\n\n0308−1191, 68\n\n0308−1220, 57\n\n0315−1607−02, 66\n\n0319−2236, 15\n\n0319−2815, 20\n\n0319−4630−02, 71\n\n0319−5084−02, 71 , 77\n\n0319−5171−02, 71 , 77\n\n0319−5315−02, 77\n\n0319−6079−02, 77\n\n0319−6080−02, 71 , 77\n\n0319−6081−02, 71 , 77\n\n0319−6084−02, 71\n\n0320−1981−01, 92 , 93\n\n0320−2062, 80\n\n0320−2063, 79\n\n0320−2065, 79\n\n0320−2066, 80\n\n0320−2067, 81\n\n0320−2068, 82\n\n0320−2078, 93\n\n0320−2079, 79\n\n0320−2080, 80\n\n0320−2089, 81\n\n0320−2090, 82 , 89 , 91\n\n0320−2100, 92\n\n0320−2131, 89 , 91\n\n0320−2233, 83\n\n0320−2234, 84\n\n0320−2282, 85\n\n0320−2283, 86\n\n0321−0389, 103\n\n0321−0402−01, 67\n\n0323−2226−03, 109\n\n0327−1593, 57\n\n0327−1601−01, 57\n\n0332−0941, 63\n\n0332−1389, 39 , 59 , 66\n\n0332−1468, 23\n\n0332−1469, 23\n\n0332−2001, 44 , 46 , 71 , 73 ,\n75 , 77\n\n0332−2879−07, 109\n\n0332−2921, 11\n\n0332−3024−14, 39\n\n0332−3102, 64\n\n0332−3224, 23\n\n0332−3440, 23\n\n0332−3923−01, 109\n\n0332−3926, 109\n\n0332−3985, 11 , 15\n\n0332−4006, 109\n\n0332−4079−03, 109\n\n0332−4079−05, 109\n\n0332−4218−12, 66\n\n0333−0438−05, 39\n\n0333−0438−06, 39\n\n0333−0645−01, 63\n\n0333−0645−02, 63\n\n0337−0049, 57 , 59\n\n0337−3551, 79 , 80 , 81",
+      "heading": "Numerical Index",
+      "token_count": 709,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 33,
+      "content": "0337−3552, 82 , 89 , 91\n\n0337−3582−06, 23 , 57\n\n0337−3585−01, 80\n\n0337−3587−01, 45 , 46 , 54 ,\n73 , 75 , 79 , 85 , 86\n\n0337−3606, 81\n\n0337−3617, 82\n\n0337−3645, 78\n\n0337−3646−01, 71\n\n0337−3646−02, 77\n\n0337−3676, 83 , 84\n\n0337−3677, 83 , 84\n\n0337−3787−01, 85\n\n0337−3787−02, 85 , 86 , 89 ,\n\n0337−3932, 81 , 82 , 83 , 84\n\n0337−3934, 81 , 82\n\n0337−3935, 81\n\n0338−3938, 11\n\n0402−0666−01, 59\n\n0402−0729, 15\n\n0402−0822, 49\n\n0402−0823, 49\n\n0403−4940−02, 101\n\n0403458502, 52\n\n0416−1141, 11 , 15\n\n0416−1142, 15\n\n0416−1181−02, 105\n\n0416−1182−02, 105\n\n0416−1190, 53\n\n0416−1195, 15\n\n0416−1197, 49\n\n0416−1198, 49\n\n0416−1199, 49\n\n0416−1200, 15\n\n0416−1201, 15\n\n0416−1202, 15\n\n0416−1203, 15\n\n0416−1204, 15\n\n0416−1222, 15\n\n0501−0816, 11\n\n0502−1369, 51\n\n0502−1370, 51\n\n0502−1457, 102\n\n0502−1458, 102\n\n0502−1459, 103\n\n0502−1479, 13\n\n0502−1623−02, 20\n\n0503−1675, 19\n\n0503−2208−03, 51\n\n0503−2384, 102\n\n0503−2385, 102\n\n0503−2386, 13 , 51 , 103\n\n0503−2455, 19\n\n0503−2550, 51\n\n05030398, 13\n\n0504−0230, 101 , 103\n\n0504−0251, 13\n\n0505−1492−02, 15\n\n0505−1574, 102\n\n0505−1597, 101\n\n0505−1603, 52\n\n0505−2080, 103\n\n0505−2086, 101\n\n0505−2087, 101\n\n0505−2088, 101\n\n0505−2090, 101\n\n0505−2094, 103\n\n0505−2098, 51\n\n0505−2105, 103\n\n0505−2141, 51\n\n05090353, 13\n\n0517−0138−02, 23\n\n0518−0548−44, 52\n\n0518−0704, 11 , 15\n\n0518−0730, 57\n\n0526−0115, 57\n\n0526−0324, 59\n\n0526−0399−56, 57 , 63\n\n0526−0399−58, 23 , 39 , 77 ,\n81 , 82\n\n0526−0399−59, 52\n\n0526−0399−60, 44 , 46 , 49 ,\n71 , 73 , 77 , 107\n\n0526−0399−60, 75\n\n0526−0399−61, 77\n\n0526−0399−62, 13 , 21 , 51 ,\n54 , 78 , 79 , 80 , 81 , 82 ,\n83 , 84 , 85 , 86 , 98 , 101\n\n0526−0399−63, 25\n\n0526−0399−64, 13 , 19 , 25 ,\n40 , 44 , 54 , 73 , 75 , 79 ,\n80 , 81 , 82 , 83 , 84 , 85 ,\n86 , 89 , 91 , 94 , 95\n\n0526−0399−65, 25\n\n0526−0399−67, 25\n\n0526−0399−68, 11\n\n0526−0399−70, 49 , 97\n\n0526−0399−72, 49 , 98\n\n0526−0416, 40\n\n0526−0460−02, 49\n\n0526−2122, 11\n\n0526−2183, 98\n\n0526−2400−19, 57\n\n0526−2400−52, 39\n\n0526−2400−53, 52\n\n0526−2400−55, 44\n\n0526−2400−58, 13\n\n0526−2400−60, 25\n\n0526−2400−61, 13\n\n0526−2400−63, 25\n\n0526−2400−69, 25\n\n0526−2400−73, 49\n\n0541−1193−01, 19\n\n0718−1172, 98\n\n0718−1180, 49\n\n0720−1146, 97\n\n0725−1008, 57\n\n0800−0095, 25\n\n0800−2008, 39\n\n0800−2060, 44 , 46 , 73 , 75\n\n0800−2063, 71 , 77\n\n0800−2088, 98\n\n0800−2177, 98\n\n0800−3017−04, 23 , 39 , 52 ,\n\n0800−3017−08, 81 , 82\n\n0800−3017−20, 49 , 107\n\n0800−3017−35, 78\n\n0800−3017−37, 13 , 25 , 78\n\n0800−3017−38, 79 , 101\n\n0800−3017−40, 11 , 25 , 51 ,\n54 , 78 , 79\n\n0800−3017−41, 81 , 82\n\n0800−3017−44, 81 , 82 , 84 ,\n85 , 86\n\n0800−3017−46, 83\n\n0800−3017−52, 11\n\n0800−3017−53, 13 , 19\n\n0800−3017−54, 19\n\n0800−3017−55, 25\n\n0800−3017−57, 40 , 54 , 85 ,\n86 , 94 , 95\n\n0800−3017−58, 73 , 75 , 79 ,\n80 , 81 , 82 , 89 , 91\n\n0800−3017−59, 83 , 85\n\n0800−3017−63, 83 , 84 , 85 ,\n\n0800−3017−78, 25\n\n0800−3017−85, 49\n\n0800−3017−90, 49\n\n0800−3017−91, 49\n\n0800−6288−12, 45 , 73\n\n0800−6288−16, 54\n\n0800−6353−01, 40\n\n0800−6494−29, 44\n\n0800−6494−42, 78\n\n0800−6494−44, 13\n\n0800−6494−45, 79\n\n0800−6494−47, 25\n\n0800−6494−51, 81\n\n0800−6494−53, 83\n\n0800−6494−60, 13\n\n0800−6494−61, 19\n\n0800−6494−62, 25\n\n0800−6494−64, 40\n\n0800−6494−65, 79\n\n0800−6494−66, 83\n\n0800−6494−70, 83\n\n0800−6526−60, 25\n\n0800−6527−38, 98\n\n0800−6527−46, 49\n\n0800−6622−54, 25\n\n0810222506, 98\n\n0810222508, 98\n\n0815−0776, 59\n\n0818−0231−02, 59",
+      "heading": "Numerical Index (Continued)",
+      "token_count": 813,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 34,
+      "content": "0818−1172, 57 , 60 , 66\n\n0821−2076, 25\n\n0821−5004−02, 11 , 15\n\n0821−6001−02, 57\n\n0821−6001−03, 57 , 63\n\n0821−6002−03, 71 , 73 , 75 ,\n77 , 101\n\n0821−6003−02, 19 , 20 , 43 ,\n45 , 46 , 59 , 71 , 73 , 75 ,\n\n0821−6004−02, 19\n\n0823−1001−03, 57\n\n0850−0114−52, 57\n\n0850−0114−53, 23 , 39 , 77 ,\n81 , 82\n\n0850−0114−54, 44 , 46 , 49 ,\n71 , 73 , 75 , 77 , 107\n\n0850−0114−55, 13 , 25 , 51 ,\n54 , 78 , 79 , 80 , 81 , 82 ,\n83 , 84 , 85 , 86\n\n0850−0114−56, 13 , 19 , 44 ,\n54 , 75 , 79 , 80 , 81 , 82 ,\n83 , 84 , 85 , 86 , 89 , 91 ,\n94 , 95\n\n0850−0114−56, 73\n\n0850−0114−58, 97\n\n0850−2004, 57\n\n0850−2005, 39 , 63\n\n0850−2114−04, 57\n\n0850−2114−06, 39\n\n0853−0040−55, 59\n\n0853−0040−57, 54\n\n0856−0008, 64\n\n0856−0012, 54\n\n0856−0013, 11 , 44 , 46 , 71 ,\n\n73 , 75 , 77\n\n0860−2006, 39\n\n0860−2010, 13\n\n0860−2024−01, 49\n\n0860−2127−07, 63\n\n0860−2127−08, 39\n\n0860−2127−14, 51\n\n0860−2127−16, 44\n\n0860−2127−20, 98\n\n0860−2127−22, 49\n\n0860−2127−24, 49\n\n0860−2137, 57\n\n0862−0026−53, 63\n\n0862−0026−54, 23 , 77 , 81 ,\n\n0862−0026−55, 45 , 46 , 73 ,\n75 , 77\n\n0862−0026−56, 11 , 21 , 51 ,\n79 , 80 , 81 , 82 , 83 , 84 ,\n85 , 86\n\n0862−0026−57, 19 , 44 , 54 ,\n73 , 75 , 79 , 80 , 81 , 82 ,\n83 , 84 , 85 , 86 , 89 , 91 ,\n94 , 95\n\n0862−0026−59, 49 , 97\n\n0862−0026−76, 29\n\n0865−0031, 49\n\n0870−0506, 52\n\n0870−2054, 15\n\n0870−2055, 57\n\n0870−2225−03, 101\n\n0870−2243, 102\n\n0870−2248−08, 25\n\n0870−2322−04, 52\n\n0872−0013, 78\n\n0898−1254−25, 39\n\n140−1548, 16\n\n140−2052, 16\n\n140−3464−02, 19\n\n140−3468−02, 19\n\n140−3529−02, 19\n\n140−3692, 19\n\n140−3737, 16\n\n140−3739−02, 16\n\n140−3741−02, 16\n\n140−3885−02, 19\n\n140−3886−02, 19\n\n140−4108−02, 19\n\n366−40800, 35\n\n45−0024, 36\n\n45−0073, 36\n\n45−0074, 36\n\n45−0297, 35\n\n45−0340, 35",
+      "heading": "Numerical Index (Continued)",
+      "token_count": 415,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    },
+    {
+      "chunk_index": 35,
+      "content": "45−0657, 36\n\n45−0658, 36\n\n45−0742, 36\n\n45−0788, 36\n\n45−0789, 36\n\n45−0790, 36\n\n45−0791, 36\n\n45−0937, 36\n\n45−0942, 36\n\n45−0943, 36\n\n45−0944, 36\n\n45−0945, 36\n\n45−1082, 35\n\n450−14310, 35 , 36\n\n450−15254, 35 , 36\n\n450−16025, 35\n\n462−12920, 35\n\n464−31600, 35\n\n503−0970−01, 16\n\n503−1675, 16\n\n503−1870−11, 16\n\n503−1870−14, 16\n\n526−0219, 16\n\n526−0399−62, 29 , 31\n\n526−0399−63, 29\n\n562−0399−61, 29\n\n660−1005, 35\n\n660−10064, 35\n\n660−10071, 35\n\n660−1010, 35\n\n660−10650, 35\n\n660−10651, 35 , 36\n\n660−10652, 35\n\n660−10653, 35\n\n660−10860, 35\n\n660−10862, 35\n\n660−10864, 35\n\n660−11565, 35\n\n760−10562, 35\n\n800−2111, 16\n\n800−3017−36, 29\n\n800−3017−37, 29\n\n800−3017−46 , 29\n\n821−5004−03, 16\n\n850−0060, 16\n\n870−0550−09, 16\n\nCummins, the “C” logo, PowerCommand, AmpSentry, and InPower are trademarks of Cummins Inc.\nOther company, product, or service names may be trademarks or service marks of others.\nSpecifications are subject to change without notice.",
+      "heading": "45−0341A, 35",
+      "token_count": 232,
+      "metadata": {
+        "image_urls": [],
+        "content_type": "reference"
+      },
+      "embedding": null
+    }
+  ]
+}
