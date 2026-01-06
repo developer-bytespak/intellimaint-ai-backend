@@ -111,7 +111,8 @@ export class AuthService {
           },
         });
         console.log('Existing session updated');
-        return res.redirect(`${process.env.FRONTEND_URL}/chat`);
+        // Include tokens in URL for cross-domain authentication
+        return res.redirect(`${process.env.FRONTEND_URL}/callback?accessToken=${encodeURIComponent(accessToken)}&refreshToken=${encodeURIComponent(refreshToken)}`);
       } else {
         await this.prisma.session.create({
           data: {
@@ -123,7 +124,8 @@ export class AuthService {
         });
       }
       console.log('New session created');
-      return res.redirect(`${process.env.FRONTEND_URL}/chat`);
+      // Include tokens in URL for cross-domain authentication
+      return res.redirect(`${process.env.FRONTEND_URL}/callback?accessToken=${encodeURIComponent(accessToken)}&refreshToken=${encodeURIComponent(refreshToken)}`);
     }
     const accessToken = jwt.sign(
         { userId: existingUser.id },
@@ -169,7 +171,8 @@ export class AuthService {
           },
         });
         console.log('Existing session updated');
-        return res.redirect(`${process.env.FRONTEND_URL}/chat`);
+        // Include tokens in URL for cross-domain authentication
+        return res.redirect(`${process.env.FRONTEND_URL}/callback?accessToken=${encodeURIComponent(accessToken)}&refreshToken=${encodeURIComponent(refreshToken)}`);
       } else {
         await this.prisma.session.create({
           data: {
@@ -180,7 +183,8 @@ export class AuthService {
           },
         });
         console.log('New session created');
-        return res.redirect(`${process.env.FRONTEND_URL}/chat`);
+        // Include tokens in URL for cross-domain authentication
+        return res.redirect(`${process.env.FRONTEND_URL}/callback?accessToken=${encodeURIComponent(accessToken)}&refreshToken=${encodeURIComponent(refreshToken)}`);
       }
 
   }
@@ -411,7 +415,9 @@ export class AuthService {
     //   return nestError(500, 'Failed to set user active', error)(res);
     // }
 
-    // Return user data along with success
+    // Return user data along with tokens for cross-domain authentication
+    // Tokens are included in response body so frontend can store in localStorage
+    // This is necessary when frontend and backend are on different domains
     const userData = {
       id: user.id,
       email: user.email,
@@ -420,6 +426,10 @@ export class AuthService {
       role: user.role,
       company: user.company,
       profileImageUrl: user.profileImageUrl,
+      // Include tokens for cross-domain authentication (localStorage approach)
+      accessToken,
+      refreshToken,
+      expiresIn: 3600, // 1 hour in seconds
     };
 
     return nestResponse(200, 'Login successful', userData)(res);
