@@ -272,5 +272,29 @@ export class AuthController {
   ) {
     return this.authService.resetPassword(body, res as any);
   }
+
+  // WebSocket Authentication - generates a temporary token for WebSocket connections
+  @UseGuards(JwtAuthGuard)
+  @Get('ws-auth')
+  async wsAuth(@Req() req: Request, @Res() res: Response) {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return nestError(401, 'Unauthorized')(res);
+      }
+
+      // Generate a short-lived token for WebSocket authentication
+      const wsToken = await this.authService.generateWsToken(user);
+      
+      return nestResponse(200, 'WebSocket auth token generated', { 
+        token: wsToken,
+        userId: user.id,
+        expiresIn: 300 // 5 minutes
+      })(res);
+    } catch (error) {
+      console.error('WS Auth error:', error);
+      return nestError(500, 'Failed to generate WebSocket auth token')(res);
+    }
+  }
 }
 

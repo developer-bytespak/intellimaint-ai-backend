@@ -561,4 +561,18 @@ async refreshAccessToken(req: any, res: any) {
     return nestError(500, 'Internal Server Error')(res);
   }
 }
+
+  // Generate a short-lived token for WebSocket authentication
+  async generateWsToken(user: any): Promise<string> {
+    const wsToken = jwt.sign(
+      { 
+        userId: user.id, 
+        email: user.email,
+        type: 'ws_auth' 
+      },
+      appConfig.jwtSecret as string,
+      { expiresIn: '5m' } // Short-lived token for WebSocket connection
+    );
+    return wsToken;
+  }
 }
