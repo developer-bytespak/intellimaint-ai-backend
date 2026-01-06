@@ -1,92 +1,209 @@
 /**
- * OpenAI Vision Service (Helper 1: process_images)
+ * OpenAI Vision Service
  *
- * This service handles image analysis and storage for the chat pipeline.
- * It processes attached images using OpenAI's Vision API, extracts descriptions,
- * and stores analysis results in the database.
+ * Handles image analysis using OpenAI's GPT-4o Vision API.
+ * Analyzes images for scene descriptions and stores results in database.
  *
  * Responsibilities:
- * - Analyze images using OpenAI Vision API (gpt-4o with vision)
- * - Extract scene descriptions, detected components, and OCR text
- * - Store image analysis in ImageAnalysis table
- * - Create MessageAttachment records linking images to messages
- * - Return image descriptions for prompt augmentation
+ * - Call GPT-4o Vision API with base64 images
+ * - Extract detailed scene descriptions
+ * - Store analysis results in ImageAnalysis table
+ * - Return structured analysis for pipeline consumption
  *
- * Team: Teammate 1
- * Your Helper Function: process_images(prompt, images)
+ * Data Flow:
+ * - Input: messageId + Array<{ base64: string, mimeType: string }>
+ * - Output: Array<ImageAnalysisResult> with descriptions
+ * - Storage: ImageAnalysis table with sceneDescription: { description: "..." }
+ *
+ * Error Handling:
+ * - Skip individual failed images (prevents one bad image from blocking pipeline)
+ * - Retry transient failures with exponential backoff
+ * - Log warnings but continue processing
  */
 
 import { Injectable, Logger } from '@nestjs/common';
+import OpenAI from 'openai';
 import { PrismaService } from 'prisma/prisma.service';
 import { ImageAnalysisResult } from '../dto/pipeline-message.dto';
+
+interface ImageData {
+  base64: string;
+  mimeType: string;
+}
 
 @Injectable()
 export class OpenAIVisionService {
   private readonly logger = new Logger(OpenAIVisionService.name);
+  private readonly openai: OpenAI;
+  private readonly maxRetries = 3;
+  private readonly retryBaseDelayMs = 100;
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error('OPENAI_API_KEY environment variable not configured');
+    }
+    this.openai = new OpenAI({ apiKey });
+  }
 
   /**
    * Analyze and store images from user message
    *
-   * @param messageId - FK to ChatMessage for storing attachments
-   * @param images - Array of image URLs or base64 strings
-   * @returns Array of image analysis results with descriptions
+   * Main entry point for image analysis in pipeline:
+   * 1. Convert base64 images to data URLs
+   * 2. Call GPT-4o Vision API for each image
+   * 3. Store analysis results in ImageAnalysis table
+   * 4. Return descriptions for pipeline consumption
    *
-   * Steps:
-   * 1. For each image, call OpenAI Vision API
-   * 2. Extract: sceneDescription, detectedComponents, ocrResults
-   * 3. Store in ImageAnalysis table via Prisma
-   * 4. Create MessageAttachment record linking image to message
-   * 5. Return results with descriptions
+   * @param messageId - FK to ChatMessage for linking analysis results
+   * @param images - Array of base64 images with MIME types
+   * @returns Array of ImageAnalysisResult with descriptions
    */
   async analyzeAndStoreImages(
     messageId: string,
-    images: string[],
+    images: ImageData[],
   ): Promise<ImageAnalysisResult[]> {
+    if (!images || images.length === 0) {
+      this.logger.warn('No images provided for analysis');
+      return [];
+    }
+
     this.logger.debug(`Analyzing ${images.length} images for message ${messageId}`);
 
-    // TODO: Implement image analysis logic
-    // 1. Call OpenAI Vision API for each image
-    // 2. Store results in database
-    // 3. Return analysis results
+    const results: ImageAnalysisResult[] = [];
+    const failedCount = { count: 0 };
 
-    return [];
+    // Process each image sequentially with retry logic
+    for (let i = 0; i < images.length; i++) {
+      try {
+        const result = await this.analyzeImageWithRetry(messageId, images[i], i + 1, images.length);
+        if (result) {
+          results.push(result);
+        }
+      } catch (error) {
+        failedCount.count++;
+        this.logger.error(
+          `Image ${i + 1}/${images.length} failed after ${this.maxRetries} retries: ${error.message}`,
+        );
+        // Continue to next image - non-critical failure
+      }
+    }
+
+    this.logger.debug(
+      `✅ Image analysis complete: ${results.length}/${images.length} successful${failedCount.count > 0 ? `, ${failedCount.count} failed` : ''}`,
+    );
+    return results;
   }
 
   /**
-   * Helper: Call OpenAI Vision API for a single image
-   * Extract scene description, components, and OCR text
+   * Analyze single image with retry logic
+   *
+   * Retries up to maxRetries times with exponential backoff on transient failures.
+   * Logs progress and returns null on permanent failures.
+   *
+   * @param messageId - Message ID for database storage
+   * @param imageData - Base64 image with MIME type
+   * @param index - Current image index (for logging)
+   * @param total - Total images (for logging)
+   * @returns ImageAnalysisResult or null on failure
    */
-  private async callOpenAIVision(imageUrl: string): Promise<any> {
-    // TODO: Implement OpenAI Vision API call
-    // Use gpt-4o model with vision capability
-    // Return parsed response with descriptions
+  private async analyzeImageWithRetry(
+    messageId: string,
+    imageData: ImageData,
+    index: number,
+    total: number,
+  ): Promise<ImageAnalysisResult | null> {
+    let lastError: Error | null = null;
+
+    for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+      try {
+        // Convert base64 to data URL for OpenAI
+        const imageDataUrl = `data:${imageData.mimeType};base64,${imageData.base64}`;
+
+        this.logger.debug(
+          `[${index}/${total}] Calling GPT-4o Vision (attempt ${attempt}/${this.maxRetries})`,
+        );
+
+        // Call OpenAI Vision API
+        const response = await this.openai.chat.completions.create({
+          model: 'gpt-4o',
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: 'Analyze this image in detail. Describe the visible objects, components, context, and any relevant details about what you see.',
+                },
+                {
+                  type: 'image_url',
+                  image_url: {
+                    url: imageDataUrl,
+                  },
+                },
+              ],
+            },
+          ],
+          max_tokens: 1024,
+        });
+
+        const description =
+          response.choices[0]?.message?.content || 'Unable to analyze image';
+
+        // Store in ImageAnalysis table
+        // First, get the attachment ID for this message's image
+        const attachments = await this.prisma.messageAttachment.findMany({
+          where: { messageId },
+          orderBy: { createdAt: 'asc' },
+        });
+
+        const attachment = attachments[index - 1]; // index is 1-based
+        if (!attachment) {
+          throw new Error(`No attachment found for image ${index}`);
+        }
+
+        const analysis = await this.prisma.imageAnalysis.create({
+          data: {
+            attachmentId: attachment.id,
+            sceneDescription: {
+              description,
+            },
+          },
+        });
+
+        this.logger.debug(`✅ [${index}/${total}] Image analyzed and stored: ${analysis.id}`);
+
+        return {
+          attachmentId: analysis.id,
+          description,
+        };
+      } catch (error) {
+        lastError = error;
+
+        // Check if this is a transient error worth retrying
+        const isTransient =
+          error?.status === 429 || // Rate limit
+          error?.status === 500 || // Server error
+          error?.status === 503; // Service unavailable
+
+        if (isTransient && attempt < this.maxRetries) {
+          const delayMs = Math.pow(2, attempt - 1) * this.retryBaseDelayMs;
+          this.logger.warn(
+            `[${index}/${total}] Transient error (attempt ${attempt}/${this.maxRetries}), retrying in ${delayMs}ms: ${error.message}`,
+          );
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+        } else if (attempt === this.maxRetries) {
+          // Final attempt failed
+          this.logger.error(
+            `[${index}/${total}] Failed after ${this.maxRetries} attempts: ${error.message}`,
+          );
+        }
+      }
+    }
+
+    // All retries exhausted
     return null;
-  }
-
-  /**
-   * Helper: Store image analysis in database
-   */
-  private async storeImageAnalysis(
-    attachmentId: string,
-    analysisData: any,
-  ): Promise<void> {
-    // TODO: Store in ImageAnalysis table
-    // TODO: Create MessageAttachment record
-  }
-
-  /**
-   * Helper: Format vision response into analysis result
-   */
-  private formatAnalysisResult(
-    attachmentId: string,
-    visionResponse: any,
-  ): ImageAnalysisResult {
-    // TODO: Extract and format analysis data
-    return {
-      attachmentId,
-      description: '',
-    };
   }
 }
