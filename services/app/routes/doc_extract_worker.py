@@ -44,7 +44,7 @@ async def extract_from_worker(payload: dict):
         image_dir = os.path.join("uploads", "images", payload["jobId"])
         os.makedirs(image_dir, exist_ok=True)
 
-        content = process_pdf_extraction(
+        content = await process_pdf_extraction(
             user=payload.get("user", {}), # Use .get() for safety
             file_path=payload["filePath"],
             image_dir=image_dir,          # Pass the generated path

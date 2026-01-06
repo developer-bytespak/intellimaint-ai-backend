@@ -95,11 +95,11 @@ class KnowledgeStoreService:
             if auto_chunk:
                 try:
                     chunks_created = KnowledgeStoreService._trigger_chunking(new_id)
-                    logger.info(
+                    print(
                         f"Auto-chunking completed: {chunks_created} chunks created for {new_id}"
                     )
                 except Exception as chunk_err:
-                    logger.error(f"Auto-chunking failed for {new_id}: {chunk_err}")
+                    print(f"Auto-chunking failed for {new_id}: {chunk_err}")
                     # Don't fail the whole operation, just log the error
                     chunks_created = -1  # Indicates error
 
@@ -205,8 +205,9 @@ class KnowledgeStoreService:
         from .chunker import process_source
 
         try:
+            print(f"Starting chunking for source_id: {source_id}")
             result = process_source(source_id, dry_run=False, overwrite=True)
             return result.get("num_chunks", 0)
         except Exception as e:
-            logger.error(f"Chunking failed for {source_id}: {e}")
+            print(f"Chunking failed for {source_id}: {e}")
             raise
