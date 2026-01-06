@@ -17,14 +17,43 @@ export class JwtAuthGuard implements CanActivate {
 
     const googleToken = req.cookies?.google_accessToken;
     const localToken = req.cookies?.local_accessToken;
+    
+    // CROSS-DOMAIN FIX: Check Authorization header for Bearer token
+    // This is necessary when frontend and backend are on different domains
+    // and cookies can't be shared cross-domain
+    const authHeader = req.headers.authorization;
+    const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
 
     // Check if this is an API request (not a browser redirect)
     const isApiRequest =
       req.headers.accept?.includes('application/json') || req.path.startsWith('/api/');
 
+    // ==============================
+    // CASE 0: BEARER TOKEN (Authorization header) - for cross-domain auth
+    // ==============================
+    if (bearerToken) {
+      try {
+        const data = jwt.verify(bearerToken, appConfig.jwtSecret as string) as any;
+
+        const user = await this.prisma.user.findUnique({
+          where: { id: data.userId },
+        });
+
+        if (!user) throw new Error("User not found");
+
+        req.user = user;
+        return true;
+      } catch (e) {
+        console.log("Bearer token invalid or expired");
+        if (isApiRequest) {
+          throw new UnauthorizedException('Invalid or expired token');
+        }
+        return false;
+      }
+    }
 
     // ==============================
-    // CASE 1: LOCAL TOKEN
+    // CASE 1: LOCAL TOKEN (cookie)
     // ==============================
     if (localToken) {
       try {
@@ -49,7 +78,7 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     // ==============================
-    // CASE 2: GOOGLE ACCESS TOKEN EXISTS
+    // CASE 2: GOOGLE ACCESS TOKEN EXISTS (cookie)
     // ==============================
     if (googleToken) {
       try {
