@@ -28,6 +28,19 @@ export class AuthService {
     return user;
   }
 
+  // Delete all sessions for a user (used during logout)
+  async deleteUserSessions(userId: string) {
+    try {
+      await this.prisma.session.deleteMany({
+        where: { userId },
+      });
+      console.log(`Sessions deleted for user: ${userId}`);
+    } catch (error) {
+      console.error(`Error deleting sessions for user ${userId}:`, error);
+      // Don't throw - logout should succeed even if session deletion fails
+    }
+  }
+
   // Google Login
   // This is the function that is called when the user clicks the Google Login button
 

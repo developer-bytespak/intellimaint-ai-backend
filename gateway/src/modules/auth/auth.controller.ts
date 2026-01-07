@@ -24,31 +24,11 @@ export class AuthController {
   // Google Login
   @Get('google')
   googleAuth(@Req() req: Request, @Res() res: Response) {
-    const googleToken = req.cookies?.google_accessToken;
-    const localToken = req.cookies?.local_accessToken;
     const role = (req as any).query.role as string;
     const company = (req as any).query.company as string;
 
-    // If user already has a valid token, redirect to chat
-    if (googleToken || localToken) {
-      try {
-        return res.redirect(`${process.env.FRONTEND_URL}/chat`);
-      } catch (e) {
-        // Clear cookies if there's an error
-        res.clearCookie('google_accessToken', {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
-        });
-        res.clearCookie('local_accessToken', {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
-        });
-      }
-    }
+    // Always proceed with OAuth flow to allow re-authentication
+    // The frontend handles the "already logged in" case via useUser hook
     const passportInstance =
       (req as any)._passport?.instance || require('passport');
 
@@ -152,7 +132,9 @@ export class AuthController {
     if (!userId) {
       return nestError(400, 'User not found')(res);
     }
-    // await redisDeleteKey(`user_active:${userId}`);
+
+    // Delete session from database to invalidate refresh token
+    await this.authService.deleteUserSessions(userId);
 
     const clearCookieOptions = {
       httpOnly: true,
