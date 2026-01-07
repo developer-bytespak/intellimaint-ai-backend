@@ -30,6 +30,7 @@
     "@nestjs/websockets": "^11.1.8",
     "@opentelemetry/sdk-node": "^0.207.0",
     "@prisma/client": "^6.19.1",
+    "@sendgrid/mail": "^8.1.6",
     "@types/bcryptjs": "^2.4.6",
     "@vercel/blob": "^2.0.0",
     "axios": "^1.13.2",

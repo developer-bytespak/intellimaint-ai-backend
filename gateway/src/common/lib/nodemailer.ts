@@ -1,42 +1,33 @@
 import { appConfig } from 'src/config/app.config'; 
-import { SEND_EMAIL_LINK, Verification_Email_Template } from './Email_Template';
-import nodemailer from 'nodemailer';
+import { Verification_Email_Template } from './Email_Template';
+import sgMail from '@sendgrid/mail';
 
-const emailConfig = {
-    service: "Gmail",
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: true,
-    auth: {
-        user: appConfig.portalEmail,
-        pass: appConfig.portalPassword,
-    },
-};
+// Initialize SendGrid
+sgMail.setApiKey(appConfig.sendgrid.apiKey);
 
 async function sendEmailOTP(mail: string, otp: string) {
-    const transporter = nodemailer.createTransport(emailConfig);
     const mailOptions = {
-        from: appConfig.portalEmail,
+        from: appConfig.sendgrid.fromEmail,
         to: mail,
         subject: "OTP Verification",
         html: Verification_Email_Template(otp),
     };
 
     try {
-        await transporter.sendMail(mailOptions);
+        const response = await sgMail.send(mailOptions);
+        console.log('SendGrid response:', response);
         return {
             success: true,
             message: `OTP sent to ${mail} via email`,
         };
-    } catch (error) {
+    } catch (error: any) {
+        console.error('SendGrid error:', error.message);
+        console.error('SendGrid error response:', error.response?.body);
         return {
             success: false,
-            message: `Error sending OTP to ${mail} via email: ${error}`,
+            message: `Error sending OTP to ${mail} via email: ${error.message}`,
         };
     }
 }
-
-
-
 
 export { sendEmailOTP }

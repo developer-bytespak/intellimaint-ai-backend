@@ -4,100 +4,78 @@ export const Verification_Email_Template = (code: string) => `
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Email Verification - Uni-Connect</title>
+    <title>Email Verification</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
             margin: 0;
             padding: 0;
         }
         .container {
             max-width: 500px;
-            margin: 40px auto;
+            margin: 20px auto;
             background: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            border: 1px solid #e1e5e9;
+            padding: 20px;
+            border-radius: 4px;
         }
         .header {
-            background: linear(135deg, #667eea 0%, #764ba2 100%);
-            color: #ffffff;
-            padding: 20px;
-            font-size: 24px;
+            color: #333;
+            padding: 15px;
+            font-size: 20px;
             font-weight: bold;
-            border-radius: 8px;
-            margin-bottom: 25px;
-        }
-        .logo {
-            font-size: 28px;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
         }
         .code {
-            font-size: 32px;
-            margin: 30px 0;
-            background: #f8f9fa;
-            padding: 15px 30px;
-            display: inline-block;
-            border-radius: 8px;
-            letter-spacing: 6px;
+            font-size: 28px;
+            margin: 20px 0;
+            background: #f0f0f0;
+            padding: 15px;
+            text-align: center;
+            border-radius: 4px;
+            letter-spacing: 4px;
             font-weight: bold;
-            color: #2d3748;
-            border: 2px dashed #cbd5e0;
+            color: #333;
         }
         .message {
-            color: #4a5568;
-            font-size: 16px;
-            line-height: 1.6;
-            margin: 20px 0;
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 15px 0;
         }
         .expiry-note {
-            color: #e53e3e;
+            color: #d32f2f;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 12px;
             margin: 15px 0;
         }
         .footer {
-            font-size: 12px;
-            color: #718096;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
-        }
-        .support {
-            color: #667eea;
-            text-decoration: none;
+            font-size: 11px;
+            color: #999;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">Uni-Connect</div>
-        <div class="header">Verify Your Email Address</div>
+        <div class="header">Email Verification</div>
         
         <p class="message">
-            Welcome to Uni-Connect! We're excited to have you join our academic community. 
-            To complete your registration and start connecting with fellow students and educators, 
-            please verify your email address using the code below:
+            Please use the code below to verify your email address:
         </p>
         
         <div class="code">${code}</div>
         
-        <p class="expiry-note">This verification code will expire in 5 minutes for security reasons.</p>
+        <p class="expiry-note">This verification code will expire in 5 minutes.</p>
         
         <p class="message">
-            If you didn't create an account with Uni-Connect, please ignore this email. 
-            This verification code can only be used once.
+            If you didn't request this code, please ignore this email.
         </p>
         
         <div class="footer">
-            &copy; ${new Date().getFullYear()} Uni-Connect. All rights reserved.<br>
-            Connecting Students, Building Futures.<br>
-            Need help? Contact us at <a href="mailto:support@uni-connect.com" class="support">support@uni-connect.com</a>
+            &copy; ${new Date().getFullYear()} Bytes Platform. All rights reserved.
         </div>
     </div>
 </body>
