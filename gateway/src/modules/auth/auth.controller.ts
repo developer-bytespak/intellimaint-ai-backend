@@ -54,8 +54,8 @@ export class AuthController {
 
     return passportInstance.authenticate('google', {
       scope: ['email', 'profile'],
-      prompt: 'consent',
       accessType: 'offline',
+      prompt: 'select_account',
       state: JSON.stringify({ role, company }),
     } as any)(req, res);
   }
@@ -154,26 +154,18 @@ export class AuthController {
     }
     // await redisDeleteKey(`user_active:${userId}`);
 
-    res.clearCookie('local_accessToken', {
+    const clearCookieOptions = {
       httpOnly: true,
-      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
       path: '/',
-    });
-    res.clearCookie('google_accessToken', {
-      httpOnly: true,
-      sameSite: 'lax',
-      path: '/',
-    });
-    res.clearCookie('local_refreshToken', {
-      httpOnly: true,
-      sameSite: 'lax',
-      path: '/',
-    });
-    res.clearCookie('google_refreshToken', {
-      httpOnly: true,
-      sameSite: 'lax',
-      path: '/',
-    });
+    };
+
+    res.clearCookie('local_accessToken', clearCookieOptions);
+    res.clearCookie('google_accessToken', clearCookieOptions);
+    res.clearCookie('local_refreshToken', clearCookieOptions);
+    res.clearCookie('google_refreshToken', clearCookieOptions);
+    
     return nestResponse(200, 'Logged out successfully')(res);
   }
 

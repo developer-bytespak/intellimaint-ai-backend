@@ -16,7 +16,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         'profile',
       ],
       accessType: 'offline',
-      prompt: 'consent',
+      prompt: 'select_account',
     }as any);
   }
 
