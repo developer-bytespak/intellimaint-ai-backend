@@ -112,13 +112,10 @@ export class AuthController {
         company,
         res as any,
       );
-      const { accessToken, isNewUser, user } = authResult as {
-        accessToken: string;
-        isNewUser: boolean;
-        user: any;
-      };
-
-      return res.redirect(`${process.env.FRONTEND_URL}/chat`);
+      
+      // authResult is already a redirect response from googleLogin service
+      // Don't override it - just return it
+      return authResult;
     } catch (error) {
       if (error.status === 400) {
         return res.redirect(
