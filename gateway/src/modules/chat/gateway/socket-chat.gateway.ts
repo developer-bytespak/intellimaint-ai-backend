@@ -10,6 +10,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { ChatService } from '../services/chat.service';
+import { PrismaService } from 'prisma/prisma.service';
 
 interface StreamMessagePayload {
   sessionId?: string;
@@ -44,7 +45,7 @@ export class SocketChatGateway implements OnGatewayConnection, OnGatewayDisconne
     startTime: number;
   }>();
 
-  constructor(private chatService: ChatService) {}
+  constructor(private chatService: ChatService, private prisma: PrismaService) {}
 
   handleConnection(client: Socket) {
     this.logger.log(`✅ Client connected: ${client.id} from ${client.handshake.address}`);
@@ -362,6 +363,15 @@ export class SocketChatGateway implements OnGatewayConnection, OnGatewayDisconne
     // Partial content will be emitted in the stream loop when abort is detected
   }
 
+  /**
+   * Stop RAG pipeline streaming
+   */
+  @SubscribeMessage('stop-pipeline')
+  handleStopPipeline(@ConnectedSocket() client: Socket) {
+    this.logger.log(`⏹️ Stop pipeline requested by ${client.id}`);
+    this.stopStreamForSocket(client.id);
+  }
+
   private stopStreamForSocket(socketId: string) {
     const streamMeta = this.activeStreams.get(socketId);
     if (streamMeta) {
@@ -475,6 +485,143 @@ export class SocketChatGateway implements OnGatewayConnection, OnGatewayDisconne
           client.emit('pipeline-chunk', {
             stage: chunk.stage,
             messageId: chunk.messageId,
+            tokenCount: streamMeta.tokenCount,
+            done: true,
+          });
+          break;
+        } else if (chunk.stage === 'error') {
+          this.logger.error(`❌ Pipeline error at stage: ${chunk.errorMessage}`);
+          client.emit('pipeline-chunk', {
+            stage: 'error',
+            errorMessage: chunk.errorMessage,
+            done: true,
+          });
+          break;
+        } else {
+          // Other stages: image-analysis, embedding, retrieval, context
+          this.logger.debug(`📍 Stage: ${chunk.stage}`);
+          client.emit('pipeline-chunk', {
+            stage: chunk.stage,
+            metadata: chunk.metadata,
+          });
+        }
+      }
+    } catch (error) {
+      this.logger.error(`❌ Pipeline error for ${client.id}:`, error.stack || error);
+      client.emit('pipeline-error', {
+        error: error.message || 'Pipeline error occurred',
+      });
+    } finally {
+      this.chatService.unregisterRequest(requestId);
+      this.activeStreams.delete(client.id);
+      this.logger.log(`🧹 Pipeline cleanup completed for ${client.id}`);
+    }
+  }
+
+  /**
+   * Handle RAG Pipeline for NEW session creation
+   * Creates a new ChatSession, then runs the full pipeline and streams 'pipeline-chunk' events.
+   */
+  @SubscribeMessage('stream-pipeline-message-new')
+  async handlePipelineMessageNew(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: StreamMessagePayload,
+  ) {
+    this.logger.log(`📨 [stream-pipeline-message-new] Received from ${client.id}`);
+    this.logger.log(
+      `📦 Payload: ${JSON.stringify({
+        contentLength: payload.content?.length,
+        imagesCount: payload.images?.length,
+        userId: payload.userId,
+      })}`,
+    );
+
+    client.emit('server-ack', {
+      event: 'stream-pipeline-message-new',
+      received: true,
+      timestamp: new Date().toISOString(),
+    });
+
+    const { content, images, userId } = payload;
+
+    // Validation
+    if (!userId) {
+      this.logger.error('❌ Missing userId');
+      client.emit('pipeline-error', { error: 'Unauthorized - userId required' });
+      return;
+    }
+
+    if ((!content || content.trim() === '') && (!images || images.length === 0)) {
+      this.logger.error('❌ Empty content and no images');
+      client.emit('pipeline-error', { error: 'Message content or images are required' });
+      return;
+    }
+
+    const startTime = Date.now();
+    const abortController = new AbortController();
+    const streamMeta = {
+      controller: abortController,
+      buffer: '',
+      tokenCount: 0,
+      sessionId: undefined as string | undefined,
+      messageId: undefined as string | undefined,
+      startTime,
+    };
+    this.activeStreams.set(client.id, streamMeta);
+    const requestId = `pipeline-new-${client.id}-${Date.now()}`;
+
+    try {
+      this.logger.log(`🚀 Creating new session and starting pipeline`);
+      this.chatService.registerRequest(requestId, abortController);
+
+      // Create new chat session (title derived from content)
+      const title = content?.substring(0, 100) || 'New Chat';
+      const session = await this.prisma.chatSession.create({
+        data: {
+          userId,
+          title,
+        },
+      });
+
+      streamMeta.sessionId = session.id;
+
+      // Run pipeline for the newly created session
+      for await (const chunk of this.chatService.streamPipelineMessage(
+        userId,
+        session.id,
+        { content, images: images || [] },
+      )) {
+        if (abortController.signal.aborted) {
+          this.logger.log(`⏹️ Pipeline aborted for ${client.id}`);
+          const duration = Date.now() - startTime;
+          this.logger.log(`⏱️ Pipeline duration: ${duration}ms`);
+
+          client.emit('pipeline-chunk', {
+            stage: 'error',
+            errorMessage: 'Pipeline aborted',
+            done: true,
+          });
+          break;
+        }
+
+        // Stream chunk to frontend
+        if (chunk.stage === 'llm-generation' && chunk.token) {
+          streamMeta.tokenCount++;
+          streamMeta.buffer += chunk.token;
+          client.emit('pipeline-chunk', {
+            stage: chunk.stage,
+            token: chunk.token,
+          });
+        } else if (chunk.stage === 'complete') {
+          streamMeta.messageId = chunk.messageId;
+          const duration = Date.now() - startTime;
+          this.logger.log(
+            `✅ Pipeline completed. Duration: ${duration}ms, Tokens: ${streamMeta.tokenCount}`,
+          );
+          client.emit('pipeline-chunk', {
+            stage: chunk.stage,
+            messageId: chunk.messageId,
+            sessionId: session.id,
             tokenCount: streamMeta.tokenCount,
             done: true,
           });

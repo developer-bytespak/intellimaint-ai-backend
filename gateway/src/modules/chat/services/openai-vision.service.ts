@@ -26,10 +26,8 @@ import OpenAI from 'openai';
 import { PrismaService } from 'prisma/prisma.service';
 import { ImageAnalysisResult } from '../dto/pipeline-message.dto';
 
-interface ImageData {
-  base64: string;
-  mimeType: string;
-}
+// Input can be either a direct URL string or base64 data with MIME type
+type ImageInput = string | { base64: string; mimeType: string };
 
 @Injectable()
 export class OpenAIVisionService {
@@ -58,12 +56,12 @@ export class OpenAIVisionService {
    * 4. Return descriptions for pipeline consumption
    *
    * @param messageId - FK to ChatMessage for linking analysis results
-   * @param images - Array of base64 images with MIME types
+  * @param images - Array of image inputs (URL strings or base64+mimeType)
    * @returns Array of ImageAnalysisResult with descriptions
    */
   async analyzeAndStoreImages(
     messageId: string,
-    images: ImageData[],
+    images: ImageInput[],
   ): Promise<ImageAnalysisResult[]> {
     if (!images || images.length === 0) {
       this.logger.warn('No images provided for analysis');
@@ -104,14 +102,14 @@ export class OpenAIVisionService {
    * Logs progress and returns null on permanent failures.
    *
    * @param messageId - Message ID for database storage
-   * @param imageData - Base64 image with MIME type
+  * @param image - Either URL string or base64 image with MIME type
    * @param index - Current image index (for logging)
    * @param total - Total images (for logging)
    * @returns ImageAnalysisResult or null on failure
    */
   private async analyzeImageWithRetry(
     messageId: string,
-    imageData: ImageData,
+    image: ImageInput,
     index: number,
     total: number,
   ): Promise<ImageAnalysisResult | null> {
@@ -119,8 +117,10 @@ export class OpenAIVisionService {
 
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
       try {
-        // Convert base64 to data URL for OpenAI
-        const imageDataUrl = `data:${imageData.mimeType};base64,${imageData.base64}`;
+        // Determine image URL: use direct URL if string, else convert base64 to data URL
+        const imageUrl = typeof image === 'string'
+          ? image
+          : `data:${image.mimeType};base64,${image.base64}`;
 
         this.logger.debug(
           `[${index}/${total}] Calling GPT-4o Vision (attempt ${attempt}/${this.maxRetries})`,
@@ -140,7 +140,7 @@ export class OpenAIVisionService {
                 {
                   type: 'image_url',
                   image_url: {
-                    url: imageDataUrl,
+                    url: imageUrl,
                   },
                 },
               ],

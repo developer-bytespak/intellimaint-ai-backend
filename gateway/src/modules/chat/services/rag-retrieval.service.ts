@@ -209,12 +209,12 @@ export class RagRetrievalService {
    *
    * Steps:
    * 1. Join numbers with commas (no spaces for safety)
-   * 2. Wrap in square brackets and quotes for SQL literal
-   * 3. Return as PostgreSQL::vector castable string
+   * 2. Wrap in square brackets for vector notation
+   * 3. Return as string that Prisma will cast to ::vector
    *
    * Example:
    * Input:  [0.123, -0.456, 0.789, ...]
-   * Output: "'[0.123,-0.456,0.789,...]'"
+   * Output: "[0.123,-0.456,0.789,...]"
    */
   private formatVectorLiteral(embedding: number[]): string {
     // Join array elements as comma-separated values, no spaces
@@ -231,8 +231,9 @@ export class RagRetrievalService {
       })
       .join(',');
 
-    // Return as PostgreSQL vector literal: '[val1,val2,...]'
-    return `'[${vectorElements}]'`;
+    // Return as PostgreSQL vector literal: [val1,val2,...]
+    // No quotes - Prisma template literal will handle the casting
+    return `[${vectorElements}]`;
   }
 
   /**
