@@ -17,12 +17,24 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
+import OpenAI from 'openai';
+import { KnowledgeChunkData } from '../dto/pipeline-message.dto';
 
 @Injectable()
 export class OpenAILLMService {
   private readonly logger = new Logger(OpenAILLMService.name);
+  private readonly openai: OpenAI;
+  private readonly MODEL_ID = 'gpt-4o';
+  private readonly MAX_TOKENS = 2048;
+  private readonly TEMPERATURE = 0.7;
 
-  constructor() {}
+  constructor() {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error('OPENAI_API_KEY environment variable not configured');
+    }
+    this.openai = new OpenAI({ apiKey });
+  }
 
   /**
    * Stream chat completion from OpenAI with context awareness
@@ -43,20 +55,28 @@ export class OpenAILLMService {
   async *streamCompletion(
     userPrompt: string,
     contextSummary: string,
-    chunks: any[],
+    chunks: KnowledgeChunkData[],
     images: string[],
   ): AsyncGenerator<string> {
     this.logger.debug(
       `Starting LLM stream with ${chunks.length} chunks and ${images.length} images`,
     );
 
-    // TODO: Implement streaming LLM logic
-    // 1. Call buildSystemPrompt() to create system instructions
-    // 2. Call buildUserMessage() to create user content
-    // 3. Open streaming connection to OpenAI gpt-4o
-    // 4. For each token received:
-    //    - yield the token
-    // 5. On error, log and throw
+    // Build prompts
+    const systemPrompt = this.buildSystemPrompt(contextSummary, chunks);
+    const userMessage = this.buildUserMessage(userPrompt, images);
+
+    // Call OpenAI streaming API and yield tokens
+    try {
+      for await (const token of this.callOpenAIStream(systemPrompt, userMessage)) {
+        if (token) {
+          yield token;
+        }
+      }
+    } catch (error: any) {
+      this.logger.error(`OpenAI stream error: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 
   /**
@@ -68,23 +88,37 @@ export class OpenAILLMService {
    * - Retrieved knowledge chunks formatted for reference
    * - Fallback instructions (when to use knowledge vs. own knowledge)
    */
-  private buildSystemPrompt(contextSummary: string, chunks: any[]): string {
+  private buildSystemPrompt(contextSummary: string, chunks: KnowledgeChunkData[]): string {
     this.logger.debug(`Building system prompt with ${chunks.length} chunks`);
+    const lines: string[] = [];
 
-    // TODO: Build comprehensive system prompt
-    // Structure:
-    // 1. Role and instructions
-    // 2. IF contextSummary: Include previous conversation summary
-    // 3. Format chunks as reference material:
-    //    "You have access to the following knowledge base:
-    //     [Chunk 1]: {content}
-    //     [Chunk 2]: {content}
-    //     ..."
-    // 4. Add fallback logic:
-    //    "If relevant information is not in the knowledge base,
-    //     you may use your own knowledge. Always cite sources."
+    // Role and interaction policy: user-focused, no backend/source disclosure
+    lines.push(
+      'You are IntelliMaint, a helpful maintenance assistant. Answer clearly and concisely. '
+      + 'Do not mention internal systems, databases, or sources. '
+      + 'If provided context includes relevant information, use it to ground your answer. '
+      + 'If information is insufficient, respond naturally using your knowledge, or ask clarifying questions. '
+      + 'Do not invent part numbers/specs; ask for more details when uncertain.'
+    );
 
-    return '';
+    // Include brief conversation summary when available
+    if (contextSummary && contextSummary.trim().length > 0) {
+      lines.push('\nConversation summary (for context):');
+      lines.push(contextSummary.trim());
+    }
+
+    // Knowledge chunks formatted for internal grounding (not shown to user)
+    if (chunks && chunks.length > 0) {
+      lines.push('\nInternal reference materials:');
+      lines.push(this.formatChunksForPrompt(chunks));
+    }
+
+    // Output style guidance
+    lines.push(
+      '\nWhen useful, structure your response with a brief answer, then optional steps or troubleshooting guidance.'
+    );
+
+    return lines.join('\n');
   }
 
   /**
@@ -94,26 +128,30 @@ export class OpenAILLMService {
    */
   private buildUserMessage(userPrompt: string, images: string[]): any {
     this.logger.debug(`Building user message with ${images.length} images`);
-
-    // TODO: Build message content array
-    // Structure:
-    // [
-    //   { type: "text", text: userPrompt },
-    //   { type: "image_url", image_url: { url: image1 } },
-    //   { type: "image_url", image_url: { url: image2 } },
-    //   ...
-    // ]
-
-    return [];
+    const content: Array<any> = [];
+    content.push({ type: 'text', text: userPrompt });
+    for (const url of images || []) {
+      if (typeof url === 'string' && url.trim().length > 0) {
+        content.push({ type: 'image_url', image_url: { url } });
+      }
+    }
+    return content;
   }
 
   /**
    * Helper: Format chunks into readable context
    */
-  private formatChunksForPrompt(chunks: any[]): string {
-    // TODO: Format chunks for inclusion in system prompt
-    // Include: heading, content, metadata/source
-    return '';
+  private formatChunksForPrompt(chunks: KnowledgeChunkData[]): string {
+    const MAX_PER_CHUNK_CHARS = 600;
+    const parts: string[] = [];
+    chunks.forEach((c, idx) => {
+      const title = c.heading?.trim() || `Chunk ${idx + 1}`;
+      const source = c.sourceId ? ` (source: ${c.sourceId})` : '';
+      const text = (c.content || '').replace(/\s+/g, ' ').trim();
+      const snippet = text.length > MAX_PER_CHUNK_CHARS ? text.slice(0, MAX_PER_CHUNK_CHARS) + '…' : text;
+      parts.push(`[${title}]${source}: ${snippet}`);
+    });
+    return parts.join('\n');
   }
 
   /**
@@ -123,10 +161,29 @@ export class OpenAILLMService {
     systemPrompt: string,
     userMessage: any,
   ): AsyncGenerator<string> {
-    // TODO: Call OpenAI Chat Completions API with streaming
-    // Model: gpt-4o (supports vision)
-    // Stream: true
-    // For each chunk:
-    //   - yield chunk.choices[0]?.delta?.content || ''
+    const stream = await this.openai.chat.completions.create({
+      model: this.MODEL_ID,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage },
+      ],
+      temperature: this.TEMPERATURE,
+      max_tokens: this.MAX_TOKENS,
+      stream: true,
+    });
+
+    // Iterate over streamed chunks and yield token content
+    for await (const part of stream as any) {
+      try {
+        const delta = part?.choices?.[0]?.delta;
+        const token = delta?.content ?? '';
+        if (token) {
+          yield token;
+        }
+      } catch (err) {
+        // Ignore malformed parts; continue streaming
+        this.logger.warn(`Malformed stream part encountered: ${String(err)}`);
+      }
+    }
   }
 }
