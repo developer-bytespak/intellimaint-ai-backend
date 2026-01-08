@@ -20,7 +20,7 @@ export function startPdfWorker() {
         user?: any;
       };
 
-      console.log(`[worker] 🎯 PICKED JOB jobId=${jobId} file=${fileName}`); // 👈 ENHANCED
+      console.log(`[worker] 🎯 PICKED JOB jobId=${jobId} file=${fileName} user=${user}`); // 👈 ENHANCED
 
       try {
         // -----------------------------
@@ -72,7 +72,7 @@ export function startPdfWorker() {
           { timeout: 1000 * 60 * 30 } // 30 mins
         );
 
-        console.log(`[worker] ✅ Python response:`, res.data); // 👈 ADD
+        // console.log(`[worker] ✅ Python response:`, res.data); // 👈 ADD
 
         // -----------------------------
         // STATUS → completed
