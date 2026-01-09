@@ -4,7 +4,7 @@ import os
 import json
 import httpx
 from typing import List
-from fastapi import APIRouter, UploadFile, File, HTTPException, Form, Request
+from fastapi import APIRouter, UploadFile, File, HTTPException, Form, Request, Query
 from fastapi.responses import JSONResponse
 from app.services.batch_service import create_batch
 from app.redis_client import redis_client
@@ -20,7 +20,11 @@ UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 def get_batch_owner(batch_id: str):
-    return redis_client.hget(f"batch:{batch_id}", "userId")
+    owner = redis_client.hget(f"batch:{batch_id}", "userId")
+    # Redis returns bytes, decode if necessary
+    if isinstance(owner, bytes):
+        return owner.decode('utf-8')
+    return owner
 
 
 
@@ -184,7 +188,7 @@ def get_batch_status(batch_id: str,request: Request,userId:str = Query(...)):
 # ...existing code...
 
 @router.get("/events/{batch_id}")
-async def batch_events(batch_id: str, request: Request,userId):
+async def batch_events(batch_id: str, request: Request, userId: str = Query(...)):
     owner = get_batch_owner(batch_id)
     if not owner or owner != userId:
         raise HTTPException(403, "Forbidden: You do not own this batch")   

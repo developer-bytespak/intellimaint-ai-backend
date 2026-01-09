@@ -15,13 +15,14 @@ JWT_SECRET = os.getenv("JWT_SECRET")
 # Get allowed origins for WebSocket connections
 def get_allowed_origins():
     allowed_origins_str = os.getenv(
-        "ALLOWED_ORIGINS", "http://localhost:3001,http://localhost:3000"
+        "ALLOWED_ORIGINS", "http://localhost:3001,http://localhost:3000,https://intellimaint-ai.onrender.com"
     )
     origins = [origin.strip() for origin in allowed_origins_str.split(",")]
-    # Add production frontend
-    production_frontend = "https://intellimaint-ai.vercel.app"
-    if production_frontend not in origins:
-        origins.append(production_frontend)
+    # Add production frontends
+    production_frontends = ["https://intellimaint-ai.vercel.app", "https://intellimaint-ai.onrender.com"]
+    for frontend in production_frontends:
+        if frontend not in origins:
+            origins.append(frontend)
     return origins
 
 def check_origin(websocket: WebSocket) -> bool:

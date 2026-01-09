@@ -12,14 +12,15 @@ import os
 
 # Get allowed origins from environment variable
 allowed_origins_str = os.getenv(
-    "ALLOWED_ORIGINS", "http://localhost:3001,http://localhost:3000"
+    "ALLOWED_ORIGINS", "http://localhost:3001,http://localhost:3000,https://intellimaint-ai.onrender.com"
 )
 allowed_origins = [origin.strip() for origin in allowed_origins_str.split(",")]
 
-# Add production frontend if not already in the list
-production_frontend = "https://intellimaint-ai.vercel.app"
-if production_frontend not in allowed_origins:
-    allowed_origins.append(production_frontend)
+# Add production frontends if not already in the list
+production_frontends = ["https://intellimaint-ai.vercel.app", "https://intellimaint-ai.onrender.com"]
+for frontend in production_frontends:
+    if frontend not in allowed_origins:
+        allowed_origins.append(frontend)
 
 print(f"CORS enabled for origins: {allowed_origins}")
 
