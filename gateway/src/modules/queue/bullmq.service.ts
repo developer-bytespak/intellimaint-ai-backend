@@ -10,6 +10,9 @@ export const pdfQueue = new Queue(PDF_QUEUE_NAME, {
     backoff: { type: "exponential", delay: 2000 },
     removeOnComplete: true,
     removeOnFail: false,
+    // ⚠️ CRITICAL: Allow long-running PDF extractions
+    // Without this, jobs timeout after 30 seconds by default
+    timeout: 1000 * 60 * 10, // 10 minute timeout per job
   },
 });
 

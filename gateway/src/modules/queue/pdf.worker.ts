@@ -159,12 +159,21 @@ export function startPdfWorker() {
     {
       connection: redis,
       concurrency: 2,
+      // ⚠️ CRITICAL: Extend lock duration for long-running extractions
+      // Default is 30 seconds, but PDF extraction can take 1-5 minutes
+      lockDuration: 1000 * 60 * 10, // 10 minutes - lock won't expire during extraction
+      lockRenewTime: 1000 * 30, // Renew lock every 30 seconds
+      // Prevent BullMQ from marking job as stalled
+      stalledInterval: 1000 * 60 * 5, // Check for stalled jobs every 5 minutes
+      maxStalledCount: 2, // Allow 2 stalls before failing
     }
   );
 
   worker.on("ready", () => {
     console.log("[worker] ✅ pdf worker ready - waiting for jobs");
     console.log(`[worker] Connected to queue: ${PDF_QUEUE_NAME}`);
+    console.log(`[worker] Lock duration: 10 minutes`);
+    console.log(`[worker] Lock renew time: 30 seconds`);
   });
   worker.on("error", (err) => console.error("[worker] ❌ worker error", err));
   worker.on("failed", (job, err) => {
@@ -173,6 +182,10 @@ export function startPdfWorker() {
   });
   worker.on("completed", (job) => {
     console.log(`[worker] ✅ Job completed: ${job?.data?.jobId}`);
+  });
+  // ⚠️ IMPORTANT: Log stalled jobs - this was causing the "failed" status
+  worker.on("stalled", (jobId) => {
+    console.error(`[worker] ⚠️ STALLED jobId=${jobId} - lock expired during long extraction`);
   });
 }
 
