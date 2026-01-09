@@ -69,8 +69,9 @@ services:
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
       
-      # Gemini API (optional)
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      # OpenAI API
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL_NAME: ${OPENAI_MODEL_NAME:-gpt-4o}
       
       # Blob Storage (optional)
       BLOB_READ_WRITE_TOKEN: ${BLOB_READ_WRITE_TOKEN:-}
@@ -111,8 +112,8 @@ services:
       # Deepgram API (optional - set via .env file)
       DEEPGRAM_API_KEY: ${DEEPGRAM_API_KEY:-}
       
-      # Gemini API (optional)
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      # OpenAI API
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
     depends_on:
       postgres:
         condition: service_healthy

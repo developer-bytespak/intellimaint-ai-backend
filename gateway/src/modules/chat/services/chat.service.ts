@@ -4,7 +4,7 @@ import { UpdateSessionDto } from '../dto/update-session.dto';
 import { CreateMessageDto } from '../dto/create-message.dto';
 import { ListSessionsQueryDto } from '../dto/list-sessions-query.dto';
 import { ChatSessionStatus, MessageRole, AttachmentType, ChatMessage } from '@prisma/client';
-import { GeminiChatService } from './gemini-chat.service';
+import { OpenAIChatService } from './openai-chat.service';
 import { ImageUtilService } from './image-util.service';
 import { VercelBlobService } from './vercel-blob.service';
 
@@ -16,7 +16,7 @@ export class ChatService {
 
   constructor(
     private prisma: PrismaService,
-    private geminiChatService: GeminiChatService,
+    private openaiChatService: OpenAIChatService,
     private imageUtilService: ImageUtilService,
     private vercelBlobService: VercelBlobService,
   ) {}
@@ -243,7 +243,7 @@ export class ChatService {
               uploadedImageUrls.push(blobUrl);
             } catch (blobError) {
               this.logger.warn(`Failed to upload image to Vercel Blob, using data URL directly:`, blobError.message);
-              // If Blob upload fails, use the data URL directly (Gemini can handle it)
+              // If Blob upload fails, use the data URL directly (OpenAI can handle it)
               uploadedImageUrls.push(imageUrl);
             }
           } else {
@@ -290,9 +290,9 @@ export class ChatService {
       },
     });
 
-    // Convert messages to format for Gemini
+    // Convert messages to format for OpenAI
     const messages = fullSession.messages.map((msg) => ({
-      role: msg.role === MessageRole.user ? 'user' : 'model',
+      role: msg.role === MessageRole.user ? 'user' : 'assistant',
       content: msg.content,
     }));
 
@@ -314,7 +314,7 @@ export class ChatService {
       // This ensures summary is always up-to-date with all messages except the last 5
       if (olderMessages.length > 0) {
         try {
-          contextSummary = await this.geminiChatService.summarizeMessages(olderMessages);
+          contextSummary = await this.openaiChatService.summarizeMessages(olderMessages);
           // Update session with summary
           await this.prisma.chatSession.update({
             where: { id: sessionId },
@@ -328,7 +328,7 @@ export class ChatService {
       }
     }
 
-    // Download and process images from Vercel Blob URLs for Gemini
+    // Download and process images from Vercel Blob URLs for OpenAI
     const imageDataList: Array<{ base64: string; mimeType: string }> = [];
     if (uploadedImageUrls.length > 0) {
       for (const imageUrl of uploadedImageUrls) {
@@ -342,14 +342,14 @@ export class ChatService {
       }
     }
 
-    // Generate AI response using Gemini with context summary
+    // Generate AI response using OpenAI with context summary
     let assistantMessage;
     try {
       // Use content or default prompt for images
       const prompt = dto.content?.trim() || (imageDataList.length > 0 ? 'Analyze the provided images and provide insights.' : 'Continue the conversation.');
       
       const { response: responseText, tokenUsage } =
-        await this.geminiChatService.generateChatResponse(
+        await this.openaiChatService.generateChatResponse(
           sessionId,
           prompt,
           messages,
@@ -363,7 +363,7 @@ export class ChatService {
           sessionId,
           role: MessageRole.assistant,
           content: responseText,
-          model: 'gemini-2.5-flash',
+          model: 'gpt-4o',
           promptTokens: tokenUsage.promptTokens,
           completionTokens: tokenUsage.completionTokens,
           cachedTokens: tokenUsage.cachedTokens,
@@ -472,7 +472,7 @@ export class ChatService {
       },
     });
 
-    // Convert messages to format for Gemini (only the user message for new session)
+    // Convert messages to format for OpenAI (only the user message for new session)
     const messages = [
       {
         role: 'user' as const,
@@ -480,7 +480,7 @@ export class ChatService {
       },
     ];
 
-    // Download and process images from Vercel Blob URLs for Gemini
+    // Download and process images from Vercel Blob URLs for OpenAI
     const imageDataList: Array<{ base64: string; mimeType: string }> = [];
     if (uploadedImageUrls.length > 0) {
       for (const imageUrl of uploadedImageUrls) {
@@ -494,14 +494,14 @@ export class ChatService {
       }
     }
 
-    // Generate AI response using Gemini (no context summary for new session)
+    // Generate AI response using OpenAI (no context summary for new session)
     let assistantMessage;
     try {
       // Use content or default prompt for images
       const prompt = dto.content?.trim() || (imageDataList.length > 0 ? 'Analyze the provided images and provide insights.' : 'Hello');
       
       const { response: responseText, tokenUsage } =
-        await this.geminiChatService.generateChatResponse(
+        await this.openaiChatService.generateChatResponse(
           session.id,
           prompt,
           messages,
@@ -515,7 +515,7 @@ export class ChatService {
           sessionId: session.id,
           role: MessageRole.assistant,
           content: responseText,
-          model: 'gemini-2.5-flash',
+          model: 'gpt-4o',
           promptTokens: tokenUsage.promptTokens,
           completionTokens: tokenUsage.completionTokens,
           cachedTokens: tokenUsage.cachedTokens,
@@ -638,9 +638,9 @@ export class ChatService {
       },
     });
 
-    // Convert messages to format for Gemini
+    // Convert messages to format for OpenAI
     const messages = fullSession.messages.map((msg) => ({
-      role: msg.role === MessageRole.user ? 'user' : 'model',
+      role: msg.role === MessageRole.user ? 'user' : 'assistant',
       content: msg.content,
     }));
 
@@ -653,7 +653,7 @@ export class ChatService {
       const olderMessages = messages.slice(0, -WINDOW_SIZE);
       if (olderMessages.length > 0) {
         try {
-          contextSummary = await this.geminiChatService.summarizeMessages(olderMessages);
+          contextSummary = await this.openaiChatService.summarizeMessages(olderMessages);
           await this.prisma.chatSession.update({
             where: { id: sessionId },
             data: { contextSummary },
@@ -664,7 +664,7 @@ export class ChatService {
       }
     }
 
-    // Download and process images for Gemini
+    // Download and process images for OpenAI
     const imageDataList: Array<{ base64: string; mimeType: string }> = [];
     if (uploadedImageUrls.length > 0) {
       for (const imageUrl of uploadedImageUrls) {
@@ -678,7 +678,7 @@ export class ChatService {
       }
     }
 
-    // Stream AI response using Gemini
+    // Stream AI response using OpenAI
     const prompt = dto.content?.trim() || (imageDataList.length > 0 ? 'Analyze the provided images and provide insights.' : 'Continue the conversation.');
     
     let assistantMessageId: string | undefined;
@@ -688,7 +688,7 @@ export class ChatService {
     
     // Create AbortController for this stream and register BEFORE starting
     const streamAbortController = new AbortController();
-    this.geminiChatService.registerStream(sessionId, streamAbortController);
+    this.openaiChatService.registerStream(sessionId, streamAbortController);
 
     try {
       // Check if request was already aborted before starting stream
@@ -703,8 +703,8 @@ export class ChatService {
         return;
       }
 
-      // Stream tokens from Gemini with abort signal
-      for await (const chunk of this.geminiChatService.streamChatResponse(
+      // Stream tokens from OpenAI with abort signal
+      for await (const chunk of this.openaiChatService.streamChatResponse(
         sessionId,
         prompt,
         messages,
@@ -760,7 +760,7 @@ export class ChatService {
                 sessionId,
                 role: MessageRole.assistant,
                 content: finalFullText,
-                model: 'gemini-2.5-flash',
+                model: 'gpt-4o',
                 promptTokens: finalTokenUsage?.promptTokens,
                 completionTokens: finalTokenUsage?.completionTokens,
                 totalTokens: finalTokenUsage?.totalTokens,
@@ -815,7 +815,7 @@ export class ChatService {
       throw error;
     } finally {
       // Clean up: unregister stream and clear cache
-      this.geminiChatService.unregisterStream(sessionId);
+      this.openaiChatService.unregisterStream(sessionId);
       
       // If stream was aborted and a message was created, delete it
       if (isAborted && assistantMessageId) {
@@ -894,7 +894,7 @@ export class ChatService {
       },
     });
 
-    // Process images for Gemini
+    // Process images for OpenAI
     const imageDataList: Array<{ base64: string; mimeType: string }> = [];
     if (uploadedImageUrls.length > 0) {
       for (const imageUrl of uploadedImageUrls) {
@@ -918,7 +918,7 @@ export class ChatService {
     
     // Create AbortController for this stream and register BEFORE starting
     const streamAbortController = new AbortController();
-    this.geminiChatService.registerStream(session.id, streamAbortController);
+    this.openaiChatService.registerStream(session.id, streamAbortController);
 
     try {
       // Check if request was already aborted before starting stream
@@ -933,7 +933,7 @@ export class ChatService {
         return;
       }
 
-      for await (const chunk of this.geminiChatService.streamChatResponse(
+      for await (const chunk of this.openaiChatService.streamChatResponse(
         session.id,
         prompt,
         [],
@@ -989,7 +989,7 @@ export class ChatService {
                 sessionId: session.id,
                 role: MessageRole.assistant,
                 content: finalFullText,
-                model: 'gemini-2.5-flash',
+                model: 'gpt-4o',
                 promptTokens: finalTokenUsage?.promptTokens,
                 completionTokens: finalTokenUsage?.completionTokens,
                 totalTokens: finalTokenUsage?.totalTokens,
@@ -1043,7 +1043,7 @@ export class ChatService {
       throw error;
     } finally {
       // Clean up: unregister stream
-      this.geminiChatService.unregisterStream(session.id);
+      this.openaiChatService.unregisterStream(session.id);
       
       // If stream was aborted and a message was created, delete it
       if (isAborted && assistantMessageId) {
@@ -1072,13 +1072,13 @@ export class ChatService {
       // Verify session belongs to user
       await this.verifySessionAccess(userId, sessionId);
       
-      // Abort the Gemini stream FIRST (most important for stopping token usage)
-      const geminiAborted = this.geminiChatService.abortStream(sessionId);
+      // Abort the OpenAI stream FIRST (most important for stopping token usage)
+      const openaiAborted = this.openaiChatService.abortStream(sessionId);
       
       // Then abort any active requests for this session (request-based tracking)
       const requestsAborted = this.abortSessionRequests(sessionId);
       
-      const wasStreaming = requestsAborted > 0 || geminiAborted;
+      const wasStreaming = requestsAborted > 0 || openaiAborted;
       
       // Clean up any recent assistant messages that might be from aborted streams
       // Only delete messages from the last 60 seconds to avoid deleting legitimate messages
@@ -1114,11 +1114,11 @@ export class ChatService {
         }
       }
       
-      this.logger.log(`Stop stream called for session ${sessionId}, requests aborted: ${requestsAborted}, gemini aborted: ${geminiAborted}`);
+      this.logger.log(`Stop stream called for session ${sessionId}, requests aborted: ${requestsAborted}, openai aborted: ${openaiAborted}`);
       
       return {
         requestsAborted,
-        geminiAborted,
+        openaiAborted,
         message: wasStreaming ? 'Stream aborted' : 'No active stream',
       };
     } catch (error) {
@@ -1133,7 +1133,7 @@ export class ChatService {
       const session = await this.verifySessionAccess(userId, sessionId);
       
       // First, abort any active stream for this session
-      const wasStreaming = this.geminiChatService.abortStream(sessionId);
+      const wasStreaming = this.openaiChatService.abortStream(sessionId);
       if (wasStreaming) {
         // Wait a bit for the stream to fully abort
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -1216,7 +1216,7 @@ export class ChatService {
           sessionId,
           role: MessageRole.assistant,
           content: '',
-          model: 'gemini-2.5-flash',
+          model: 'gpt-4o',
           isStopped: false,
         },
       });
@@ -1352,7 +1352,7 @@ export class ChatService {
         sessionId,
         role: MessageRole.assistant,
         content: partialContent,
-        model: 'gemini-2.5-flash',
+        model: 'gpt-4o',
         totalTokens: tokenUsage.totalTokens,
         isStopped: true,
         stoppedAt,

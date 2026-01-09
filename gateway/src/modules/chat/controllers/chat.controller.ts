@@ -39,6 +39,7 @@ export class ChatController {
   ) {
     try {
       const userId = req.user.id;
+      this.logger.log(`📋 Listing sessions for user: ${userId}, query: ${JSON.stringify(query)}`);
       const queryDto = plainToInstance(ListSessionsQueryDto, query);
       const errors = await validate(queryDto);
 
@@ -48,6 +49,7 @@ export class ChatController {
       }
 
       const result = await this.chatService.listSessions(userId, queryDto);
+      this.logger.log(`✅ Found ${result.sessions.length} sessions for user ${userId}`);
       return nestResponse(200, 'Chat sessions retrieved successfully', result)(res);
     } catch (error) {
       console.error('Error listing chat sessions:', error);
@@ -468,7 +470,7 @@ export class ChatController {
         message: 'Stream stopped successfully',
         data: {
           requestsAborted: Number(result.requestsAborted) || 0,
-          geminiAborted: Boolean(result.geminiAborted),
+          openaiAborted: Boolean(result.openaiAborted),
           message: result.message || 'Stream stopped',
         },
       });
