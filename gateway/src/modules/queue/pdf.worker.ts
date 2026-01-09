@@ -25,6 +25,8 @@ export function startPdfWorker() {
 
       console.log(`[worker] 🎯 PICKED JOB jobId=${jobId} file=${fileName} user=${user}`); // 👈 ENHANCED
 
+      const pythonUrl = `${PYTHON_BASE}/api/v1/extract/internal/run`;
+
       try {
         // -----------------------------
         // STATUS → processing
@@ -59,7 +61,6 @@ export function startPdfWorker() {
         // -----------------------------
         // CALL PYTHON EXTRACTION
         // -----------------------------
-        const pythonUrl = `${PYTHON_BASE}/api/v1/extract/internal/run`;
         console.log(`[worker] 📡 Calling Python at: ${pythonUrl}`); // 👈 ADD
         console.log(`[worker] Payload:`, { jobId, batchId, fileName, filePath }); // 👈 ADD
 
