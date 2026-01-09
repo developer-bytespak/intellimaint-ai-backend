@@ -92,6 +92,7 @@ export class RagRetrievalService {
    */
   async retrieveTopK(
     embedding: number[],
+    userId: string,
     topK?: number,
     sourceId?: string,
   ): Promise<KnowledgeChunkData[]> {
@@ -115,6 +116,7 @@ export class RagRetrievalService {
       const chunks = await this.executePgvectorQuery(
         vectorLiteral,
         clampedK,
+        userId,
         sourceId,
       );
 
@@ -162,22 +164,25 @@ export class RagRetrievalService {
   private async executePgvectorQuery(
     vectorLiteral: string,
     topK: number,
+    userId: string,
     sourceId?: string,
   ): Promise<KnowledgeChunkRow[]> {
     // Scoped retrieval: filter by sourceId
     if (sourceId) {
       return this.prisma.$queryRaw`
         SELECT 
-          id, 
-          content, 
-          heading, 
-          metadata, 
-          token_count, 
-          source_id
-        FROM "knowledge_chunks"
-        WHERE embedding IS NOT NULL 
-          AND source_id = ${sourceId}::uuid
-        ORDER BY embedding <=> ${vectorLiteral}::vector ASC
+          kc.id, 
+          kc.content, 
+          kc.heading, 
+          kc.metadata, 
+          kc.token_count, 
+          kc.source_id
+        FROM "knowledge_chunks" kc
+        JOIN "knowledge_sources" ks ON kc.source_id = ks.id
+        WHERE kc.embedding IS NOT NULL 
+          AND kc.source_id = ${sourceId}::uuid
+          AND (ks.user_id IS NULL OR ks.user_id = ${userId}::uuid)
+        ORDER BY kc.embedding <=> ${vectorLiteral}::vector ASC
         LIMIT ${topK}
       `;
     }
@@ -185,15 +190,17 @@ export class RagRetrievalService {
     // Unscoped retrieval: all knowledge chunks ordered by relevance
     return this.prisma.$queryRaw`
       SELECT 
-        id, 
-        content, 
-        heading, 
-        metadata, 
-        token_count, 
-        source_id
-      FROM "knowledge_chunks"
-      WHERE embedding IS NOT NULL
-      ORDER BY embedding <=> ${vectorLiteral}::vector ASC
+        kc.id, 
+        kc.content, 
+        kc.heading, 
+        kc.metadata, 
+        kc.token_count, 
+        kc.source_id
+      FROM "knowledge_chunks" kc
+      JOIN "knowledge_sources" ks ON kc.source_id = ks.id
+      WHERE kc.embedding IS NOT NULL
+        AND (ks.user_id IS NULL OR ks.user_id = ${userId}::uuid)
+      ORDER BY kc.embedding <=> ${vectorLiteral}::vector ASC
       LIMIT ${topK}
     `;
   }

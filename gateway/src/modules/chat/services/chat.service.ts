@@ -1570,7 +1570,7 @@ export class ChatService {
       this.logger.debug(`Embedding generated`);
 
       // Stage 3: Retrieve knowledge chunks
-      const chunks = await this.ragRetrievalService.retrieveTopK(embedding, 10);
+      const chunks = await this.ragRetrievalService.retrieveTopK(embedding, userId, 10);
       yield {
         stage: 'retrieval',
         metadata: { chunkCount: chunks.length },
@@ -1597,21 +1597,51 @@ export class ChatService {
         totalTokens: 0,
       };
 
-      for await (const token of this.openaiLLMService.streamCompletion(
+      for await (const chunk of this.openaiLLMService.streamCompletion(
         dto.content,
         contextData.summary,
         chunks,
         dto.images || [],
       )) {
-        fullResponse += token;
-        yield {
-          stage: 'llm-generation',
-          token,
-        };
+        // Handle token streaming
+        if (chunk.token) {
+          fullResponse += chunk.token;
+          yield {
+            stage: 'llm-generation',
+            token: chunk.token,
+          };
+        }
+        
+        // Capture usage data from final chunk
+        if (chunk.usage) {
+          tokenUsage = {
+            promptTokens: chunk.usage.prompt_tokens || 0,
+            completionTokens: chunk.usage.completion_tokens || 0,
+            totalTokens: chunk.usage.total_tokens || 0,
+            cachedTokens: chunk.usage.cached_tokens,
+          };
+        }
       }
       this.logger.debug(`LLM streaming completed, response length: ${fullResponse.length}`);
+      this.logger.debug(`Token usage: ${JSON.stringify(tokenUsage)}`);
 
-      // Stage 6: Store assistant response
+      // Extract and log RAG usage metadata (internal tracking)
+      const sourceUsageMatch = fullResponse.match(/\[SOURCE_USAGE:\s*(CONTEXT_ONLY|OWN_KNOWLEDGE|BOTH)\]/i);
+      if (sourceUsageMatch) {
+        const usage = sourceUsageMatch[1];
+        this.logger.log(`\n${'='.repeat(60)}`);
+        this.logger.log(`🔍 RAG USAGE ANALYSIS`);
+        this.logger.log(`   Session: ${sessionId}`);
+        this.logger.log(`   Chunks Retrieved: ${chunks.length}`);
+        this.logger.log(`   LLM Source: ${usage}`);
+        this.logger.log(`${'='.repeat(60)}\n`);
+        // Strip metadata from response before storage
+        fullResponse = fullResponse.replace(/\[SOURCE_USAGE:\s*(CONTEXT_ONLY|OWN_KNOWLEDGE|BOTH)\]/i, '').trim();
+      } else {
+        this.logger.warn(`⚠️  RAG usage metadata not found in LLM response`);
+      }
+
+      // Stage 6: Store assistant response (with metadata stripped)
       const assistantMessage = await this.storeAssistantMessage(
         sessionId,
         fullResponse,

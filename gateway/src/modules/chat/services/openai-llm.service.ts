@@ -43,21 +43,22 @@ export class OpenAILLMService {
    * @param contextSummary - Summary of previous conversation (if any)
    * @param chunks - Top 10 relevant knowledge chunks for context
    * @param images - Array of image URLs to include in message
-   * @returns Async generator yielding response tokens
+   * @returns Async generator yielding response tokens and usage data
    *
    * Steps:
    * 1. Build system prompt with role, context, and knowledge chunks
    * 2. Build user message with prompt text and images
    * 3. Open streaming connection to OpenAI gpt-4o
    * 4. Yield each token as received from API
-   * 5. Handle errors gracefully
+   * 5. Yield usage data in final chunk
+   * 6. Handle errors gracefully
    */
   async *streamCompletion(
     userPrompt: string,
     contextSummary: string,
     chunks: KnowledgeChunkData[],
     images: string[],
-  ): AsyncGenerator<string> {
+  ): AsyncGenerator<{ token?: string; usage?: any }> {
     this.logger.debug(
       `Starting LLM stream with ${chunks.length} chunks and ${images.length} images`,
     );
@@ -68,10 +69,8 @@ export class OpenAILLMService {
 
     // Call OpenAI streaming API and yield tokens
     try {
-      for await (const token of this.callOpenAIStream(systemPrompt, userMessage)) {
-        if (token) {
-          yield token;
-        }
+      for await (const chunk of this.callOpenAIStream(systemPrompt, userMessage)) {
+        yield chunk;
       }
     } catch (error: any) {
       this.logger.error(`OpenAI stream error: ${error.message}`, error.stack);
@@ -118,6 +117,15 @@ export class OpenAILLMService {
       '\nWhen useful, structure your response with a brief answer, then optional steps or troubleshooting guidance.'
     );
 
+    // Source usage tracking (internal only - will be stripped before storage)
+    lines.push(
+      '\n\nIMPORTANT: After your response, on a new line, add exactly one of these tags:'
+      + '\n[SOURCE_USAGE: CONTEXT_ONLY] - if you primarily used the provided reference materials'
+      + '\n[SOURCE_USAGE: OWN_KNOWLEDGE] - if you primarily used your own training knowledge'
+      + '\n[SOURCE_USAGE: BOTH] - if you used both context and your own knowledge'
+      + '\nThis tag is for internal tracking and will not be shown to the user.'
+    );
+
     return lines.join('\n');
   }
 
@@ -160,7 +168,7 @@ export class OpenAILLMService {
   private async *callOpenAIStream(
     systemPrompt: string,
     userMessage: any,
-  ): AsyncGenerator<string> {
+  ): AsyncGenerator<{ token?: string; usage?: any }> {
     const stream = await this.openai.chat.completions.create({
       model: this.MODEL_ID,
       messages: [
@@ -170,6 +178,7 @@ export class OpenAILLMService {
       temperature: this.TEMPERATURE,
       max_tokens: this.MAX_TOKENS,
       stream: true,
+      stream_options: { include_usage: true },
     });
 
     // Iterate over streamed chunks and yield token content
@@ -177,8 +186,16 @@ export class OpenAILLMService {
       try {
         const delta = part?.choices?.[0]?.delta;
         const token = delta?.content ?? '';
+        const usage = part?.usage;
+        
         if (token) {
-          yield token;
+          yield { token };
+        }
+        
+        // Usage data comes in the final chunk
+        if (usage) {
+          this.logger.debug(`Token usage: ${JSON.stringify(usage)}`);
+          yield { usage };
         }
       } catch (err) {
         // Ignore malformed parts; continue streaming
