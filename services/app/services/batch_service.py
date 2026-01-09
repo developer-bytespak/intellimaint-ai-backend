@@ -2,6 +2,7 @@ import uuid
 import httpx
 import os
 import json
+import time
 from typing import List
 from fastapi import HTTPException
 from app.redis_client import redis_client
@@ -28,12 +29,24 @@ def create_batch(files_info: List[dict], user_id: str):
         print(f"[batch] Processing file: {file_name}")
         print(f"[batch] File path: {file_path}")
         
-        # Validate file exists
+        # Validate file exists BEFORE sending to gateway
         if not os.path.exists(file_path):
             print(f"[batch] ⚠️ FILE NOT FOUND: {file_path}")
+            # Try to list files in the directory for debugging
+            dir_path = os.path.dirname(file_path)
+            if os.path.exists(dir_path):
+                try:
+                    files_in_dir = os.listdir(dir_path)
+                    print(f"[batch] Files in {dir_path}: {files_in_dir[:5]}")
+                except Exception as e:
+                    print(f"[batch] Could not list directory: {e}")
+            raise HTTPException(404, f"File not found: {file_path}")
         else:
             file_size = os.path.getsize(file_path)
             print(f"[batch] ✅ File found (size: {file_size} bytes)")
+        
+        # Small delay to ensure file is fully written to disk
+        time.sleep(0.1)
 
         redis_client.hset(
             f"job:{job_id}",

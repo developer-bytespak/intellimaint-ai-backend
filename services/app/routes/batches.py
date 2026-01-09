@@ -16,8 +16,11 @@ router = APIRouter(prefix="/batches", tags=["Batches"])
 
 GATEWAY_URL = os.getenv("GATEWAY_URL", "http://localhost:3000/api/v1")
 
-UPLOAD_DIR = "uploads"
+# Use consistent upload directory path
+# Always relative to the project root (src/services)
+UPLOAD_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../uploads"))
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+print(f"[batches] UPLOAD_DIR initialized: {UPLOAD_DIR}")
 
 def get_batch_owner(batch_id: str):
     owner = redis_client.hget(f"batch:{batch_id}", "userId")
@@ -104,20 +107,28 @@ async def upload_pdfs(files: List[UploadFile] = File(...),userId:str=Form(...)):
         
         # Save file to disk
         safe_name = f"{uuid.uuid4()}.pdf"
-        file_path = os.path.join(UPLOAD_DIR, safe_name)
-        # Convert to absolute path for consistency
-        absolute_file_path = os.path.abspath(file_path)
+        absolute_file_path = os.path.join(UPLOAD_DIR, safe_name)
         
-        with open(absolute_file_path, "wb") as buffer:
-            shutil.copyfileobj(f.file, buffer)
-        
-        print(f"[batches] 💾 File saved: {absolute_file_path}")
-        print(f"[batches] 📋 File exists: {os.path.exists(absolute_file_path)}")
+        try:
+            with open(absolute_file_path, "wb") as buffer:
+                shutil.copyfileobj(f.file, buffer)
             
-        file_info.append({
-            "name": f.filename,
-            "path": absolute_file_path  # Use absolute path
-        })
+            # Verify file was written
+            if not os.path.exists(absolute_file_path):
+                raise FileNotFoundError(f"File was not saved: {absolute_file_path}")
+            
+            file_size = os.path.getsize(absolute_file_path)
+            print(f"[batches] 💾 File saved: {absolute_file_path}")
+            print(f"[batches] 📊 File size: {file_size} bytes")
+            print(f"[batches] ✅ File verified to exist")
+                
+            file_info.append({
+                "name": f.filename,
+                "path": absolute_file_path
+            })
+        except Exception as e:
+            print(f"[batches] ❌ Error saving file: {e}")
+            raise HTTPException(500, f"Failed to save file: {str(e)}")
 
     batch_id, jobs = create_batch(file_info,userId)
 

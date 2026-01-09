@@ -14,8 +14,11 @@ from ..services.embedding_service import process_embeddings_for_source
 
 router = APIRouter()
 
-UPLOAD_DIR = "uploads"
+# Use consistent upload directory path
+# Always relative to the project root (src/services)
+UPLOAD_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../uploads"))
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+print(f"[doc_extract] UPLOAD_DIR initialized: {UPLOAD_DIR}")
 
 
 async def process_pdf_extraction(

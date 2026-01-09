@@ -71,6 +71,7 @@ export function startPdfWorker() {
         console.log(`[worker] 📡 Calling Python at: ${pythonUrl}`); // 👈 ADD
         console.log(`[worker] Payload:`, { jobId, batchId, fileName, filePath }); // 👈 ADD
 
+        let startTime = Date.now();
         const res = await axios.post(
           pythonUrl,
           {
@@ -82,13 +83,25 @@ export function startPdfWorker() {
           },
           { timeout: 1000 * 60 * 30 } // 30 mins
         );
+        let elapsedTime = Date.now() - startTime;
 
-        console.log(`[worker] ✅ Python response status: ${res.status}`);
-        console.log(`[worker] ✅ Python response data:`, res.data);
+        console.log(`[worker] ✅ Python response received after ${elapsedTime}ms`);
+        console.log(`[worker] ✅ Response status: ${res.status}`);
+        console.log(`[worker] Response data size: ${JSON.stringify(res.data).length} bytes`);
+        
+        // Don't log huge response data, just confirm it arrived
+        if (res.data?.content) {
+          console.log(`[worker] ✅ Content extracted: ${res.data.content.length} characters`);
+        }
+
+        // ⚠️ IMPORTANT: Don't include full content in Redis publish
+        // The content is already saved in the database by Python
+        // Including it here causes ECONNRESET on large documents
+        // Just confirm extraction was successful
 
         // -----------------------------
         // STATUS → completed
-        // -----------------------------
+        // Don't include content in Redis message (it's already in database)
         await redis.hset(`job:${jobId}`, {
           status: "completed",
           progress: 100,
@@ -100,7 +113,8 @@ export function startPdfWorker() {
           jobId,
           status: "completed",
           progress: 100,
-          content: res.data.content,
+          // ✅ Content is already saved in database by Python
+          // ❌ Don't send it here to avoid ECONNRESET on large docs
         });
 
         console.log(`[worker] ✅ COMPLETED jobId=${jobId}`);
