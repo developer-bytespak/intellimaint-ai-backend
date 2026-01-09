@@ -10,6 +10,8 @@ export function startPdfWorker() {
   console.log("[worker] 🚀 Starting PDF Worker");
   console.log("[worker] PYTHON_BASE_URL env var:", process.env.PYTHON_BASE_URL);
   console.log("[worker] PYTHON_BASE resolved to:", PYTHON_BASE);
+  console.log("[worker] Redis connection:", redis);
+  console.log("[worker] Queue name:", PDF_QUEUE_NAME);
   console.log("[worker] ========================================");
 
   const worker = new Worker(
@@ -23,7 +25,12 @@ export function startPdfWorker() {
         user?: any;
       };
 
-      console.log(`[worker] 🎯 PICKED JOB jobId=${jobId} file=${fileName} user=${user}`); // 👈 ENHANCED
+      console.log(`[worker] ========================================`);
+      console.log(`[worker] 🎯 PICKED JOB jobId=${jobId}`);
+      console.log(`[worker] File: ${fileName}`);
+      console.log(`[worker] Path: ${filePath}`);
+      console.log(`[worker] Batch: ${batchId}`);
+      console.log(`[worker] ========================================`);
 
       const pythonUrl = `${PYTHON_BASE}/api/v1/extract/internal/run`;
 
@@ -141,15 +148,18 @@ export function startPdfWorker() {
     }
   );
 
-  worker.on("ready", () => console.log("[worker] ✅ pdf worker ready"));
+  worker.on("ready", () => {
+    console.log("[worker] ✅ pdf worker ready - waiting for jobs");
+    console.log(`[worker] Connected to queue: ${PDF_QUEUE_NAME}`);
+  });
   worker.on("error", (err) => console.error("[worker] ❌ worker error", err));
-  worker.on("failed", (job, err) =>
-    console.error(`[worker] ❌ failed jobId=${job?.data?.jobId}`, err.message)
-  );
-
-  worker.on("completed", (job) =>
-    console.log(`[worker] ✅ Job completed: ${job?.data?.jobId}`)
-  ); // 👈 ADD THIS
+  worker.on("failed", (job, err) => {
+    console.error(`[worker] ❌ failed jobId=${job?.data?.jobId}`);
+    console.error(`[worker] Error: ${err.message}`);
+  });
+  worker.on("completed", (job) => {
+    console.log(`[worker] ✅ Job completed: ${job?.data?.jobId}`);
+  });
 }
 
 async function publish(batchId: string, payload: any) {

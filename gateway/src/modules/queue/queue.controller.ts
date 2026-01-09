@@ -16,17 +16,29 @@ export class QueueController {
   ) {
     const { batchId, jobId, fileName, filePath, user } = body;
 
+    console.log(`[queue] ======================================`);
     console.log(
-      `[queue] enqueue request batchId=${batchId} jobId=${jobId} file=${fileName}`
+      `[queue] 📥 Enqueue request: batchId=${batchId} jobId=${jobId}`
     );
+    console.log(`[queue] File: ${fileName}`);
+    console.log(`[queue] Path: ${filePath}`);
 
-    await pdfQueue.add(
-      "pdf-job",
-      { batchId, jobId, fileName, filePath, user },
-      { jobId } // IMPORTANT: keep jobId stable
-    );
+    try {
+      const job = await pdfQueue.add(
+        "pdf-job",
+        { batchId, jobId, fileName, filePath, user },
+        { jobId } // IMPORTANT: keep jobId stable
+      );
 
-    return { ok: true, queued: true, jobId };
+      console.log(`[queue] ✅ Job added to queue with ID: ${job.id}`);
+      console.log(`[queue] ======================================`);
+
+      return { ok: true, queued: true, jobId };
+    } catch (err: any) {
+      console.error(`[queue] ❌ Failed to enqueue: ${err.message}`);
+      console.error(`[queue] ======================================`);
+      throw err;
+    }
   }
 
   @Post("pdf/cancel-batch")
