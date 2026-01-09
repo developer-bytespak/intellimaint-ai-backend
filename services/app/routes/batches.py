@@ -103,15 +103,20 @@ async def upload_pdfs(files: List[UploadFile] = File(...),userId:str=Form(...)):
             raise HTTPException(400, f"Invalid file type: {f.filename}")
         
         # Save file to disk
-        # file_path = os.path.join(UPLOAD_DIR, f.filename)
         safe_name = f"{uuid.uuid4()}.pdf"
         file_path = os.path.join(UPLOAD_DIR, safe_name)
-        with open(file_path, "wb") as buffer:
+        # Convert to absolute path for consistency
+        absolute_file_path = os.path.abspath(file_path)
+        
+        with open(absolute_file_path, "wb") as buffer:
             shutil.copyfileobj(f.file, buffer)
+        
+        print(f"[batches] 💾 File saved: {absolute_file_path}")
+        print(f"[batches] 📋 File exists: {os.path.exists(absolute_file_path)}")
             
         file_info.append({
             "name": f.filename,
-            "path": os.path.abspath(file_path)
+            "path": absolute_file_path  # Use absolute path
         })
 
     batch_id, jobs = create_batch(file_info,userId)

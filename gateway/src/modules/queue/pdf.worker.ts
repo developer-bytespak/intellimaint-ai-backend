@@ -6,8 +6,11 @@ import { PDF_QUEUE_NAME } from "./bullmq.service";
 const PYTHON_BASE = process.env.PYTHON_BASE_URL || "http://localhost:8000";
 
 export function startPdfWorker() {
-  console.log("[worker] starting pdf worker");
-  console.log(`[worker] PYTHON_BASE_URL = ${PYTHON_BASE}`); // 👈 ADD THIS
+  console.log("[worker] ========================================");
+  console.log("[worker] 🚀 Starting PDF Worker");
+  console.log("[worker] PYTHON_BASE_URL env var:", process.env.PYTHON_BASE_URL);
+  console.log("[worker] PYTHON_BASE resolved to:", PYTHON_BASE);
+  console.log("[worker] ========================================");
 
   const worker = new Worker(
     PDF_QUEUE_NAME,
@@ -56,7 +59,7 @@ export function startPdfWorker() {
         // -----------------------------
         // CALL PYTHON EXTRACTION
         // -----------------------------
-        const pythonUrl = `http://localhost:8000/api/v1/extract/internal/run`;
+        const pythonUrl = `${PYTHON_BASE}/api/v1/extract/internal/run`;
         console.log(`[worker] 📡 Calling Python at: ${pythonUrl}`); // 👈 ADD
         console.log(`[worker] Payload:`, { jobId, batchId, fileName, filePath }); // 👈 ADD
 
@@ -72,7 +75,8 @@ export function startPdfWorker() {
           { timeout: 1000 * 60 * 30 } // 30 mins
         );
 
-        // console.log(`[worker] ✅ Python response:`, res.data); // 👈 ADD
+        console.log(`[worker] ✅ Python response status: ${res.status}`);
+        console.log(`[worker] ✅ Python response data:`, res.data);
 
         // -----------------------------
         // STATUS → completed
@@ -93,10 +97,26 @@ export function startPdfWorker() {
 
         console.log(`[worker] ✅ COMPLETED jobId=${jobId}`);
       } catch (err: any) {
-        const msg = err?.response?.data?.detail || err.message || "Worker failed";
+        // Extract detailed error information
+        let msg = "Unknown error";
+        let details = "";
 
-        console.error(`[worker] ❌ ERROR jobId=${jobId}:`, msg);
-        console.error(`[worker] Full error:`, err); // 👈 ADD FULL ERROR
+        if (err?.response?.status) {
+          msg = `HTTP ${err.response.status}: ${err.response?.data?.detail || err.response?.statusText || "Request failed"}`;
+          details = `Response data: ${JSON.stringify(err.response.data)}`;
+        } else if (err?.code) {
+          msg = `${err.code}: ${err.message}`;
+          details = `Connection error - ${err.message}`;
+        } else if (err?.message) {
+          msg = err.message;
+          details = err.toString();
+        }
+
+        console.error(`[worker] ❌ ERROR jobId=${jobId}:`);
+        console.error(`[worker] URL: ${pythonUrl}`);
+        console.error(`[worker] Error: ${msg}`);
+        console.error(`[worker] Details: ${details}`);
+        console.error(`[worker] Stack:`, err?.stack);
 
         await redis.hset(`job:${jobId}`, {
           status: "failed",
