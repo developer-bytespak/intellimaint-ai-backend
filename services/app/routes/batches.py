@@ -204,6 +204,7 @@ async def batch_events(batch_id: str, request: Request, userId: str = Query(...)
         iteration = 0
         no_change_count = 0
         batch_completed = False  # Track if batch finished normally
+        last_status_log = 0  # For logging every 5 seconds
 
         try:
             while True:
@@ -213,13 +214,15 @@ async def batch_events(batch_id: str, request: Request, userId: str = Query(...)
                     break
                 
                 iteration += 1
+                now = __import__("time").time()
                 
                 job_ids = redis_client.lrange(f"batch:{batch_id}:jobs", 0, -1)
                 
                 if not job_ids:
                     no_change_count += 1
-                    if no_change_count > 50:
-                        print(f"⚠️ [SSE] No jobs found for 10s, closing")
+                    # Only close after 2 minutes of no jobs (extraction can take time)
+                    if no_change_count > 600:  # 600 * 0.2s = 120 seconds
+                        print(f"⚠️ [SSE] No jobs found for 120s, closing")
                         break
                     await asyncio.sleep(0.2)
                     continue
@@ -234,12 +237,18 @@ async def batch_events(batch_id: str, request: Request, userId: str = Query(...)
 
                 if snapshot != last_snapshot:
                     print(f"🚀 [SSE] DATA CHANGED! Sending to frontend...")
+                    for job in snapshot:
+                        print(f"   Job {job.get('jobId')}: status={job.get('status')}, progress={job.get('progress')}, error={job.get('error')}")
                     event_data = json.dumps(snapshot)
                     yield {
                         "event": "batch_update",
                         "data": event_data
                     }
                     last_snapshot = snapshot
+                else:
+                    # Log periodically even when no changes, to show we're still polling
+                    if iteration % 50 == 0:  # Every 10 seconds (50 * 0.2s)
+                        print(f"📋 [SSE] Still monitoring... {len(snapshot)} jobs, status: {[j.get('status') for j in snapshot]}")
 
                 # 🆕 Check if all jobs are done
                 all_done = all(

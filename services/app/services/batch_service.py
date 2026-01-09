@@ -71,7 +71,7 @@ def create_batch(files_info: List[dict], user_id: str):
         try:
             response = httpx.post(gateway_url, json=payload, timeout=10.0)
             print(f"[batch] ✅ Gateway response: {response.status_code}")
-            if response.status_code != 200:
+            if response.status_code not in [200, 201]:
                 print(f"[batch] ⚠️ Gateway error: {response.text}")
             else:
                 print(f"[batch] ✅ Job enqueued successfully")
