@@ -10,6 +10,7 @@ from app.services.batch_service import create_batch
 from app.redis_client import redis_client
 import asyncio
 from sse_starlette.sse import EventSourceResponse
+from fastapi import Query
 
 router = APIRouter(prefix="/batches", tags=["Batches"])
 
@@ -17,6 +18,10 @@ GATEWAY_URL = os.getenv("GATEWAY_URL", "http://localhost:3000/api/v1")
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+def get_batch_owner(batch_id: str):
+    return redis_client.hget(f"batch:{batch_id}", "userId")
+
 
 
 async def cleanup_batch(batch_id: str):
@@ -115,7 +120,12 @@ async def upload_pdfs(files: List[UploadFile] = File(...),userId:str=Form(...)):
 
 
 @router.get("/{batch_id}")
-def get_batch_status(batch_id: str):
+def get_batch_status(batch_id: str,request: Request,userId:str = Query(...)):
+    
+    owner = get_batch_owner(batch_id)
+    if not owner or owner != userId:
+        raise HTTPException(403, "Forbidden: You do not own this batch")
+    
     if not redis_client:
         raise HTTPException(503, "Redis unavailable")
 
@@ -174,7 +184,10 @@ def get_batch_status(batch_id: str):
 # ...existing code...
 
 @router.get("/events/{batch_id}")
-async def batch_events(batch_id: str, request: Request):
+async def batch_events(batch_id: str, request: Request,userId):
+    owner = get_batch_owner(batch_id)
+    if not owner or owner != userId:
+        raise HTTPException(403, "Forbidden: You do not own this batch")   
     print(f"🔌 [SSE] Client connected for batch_id={batch_id}")
     
     async def event_generator():
@@ -231,7 +244,7 @@ async def batch_events(batch_id: str, request: Request):
                     await asyncio.sleep(0.5)
                     break
 
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(0.5)
                 
         except asyncio.CancelledError:
             print(f"🔌 [SSE] Connection cancelled for batch_id={batch_id}")

@@ -1,6 +1,8 @@
 from deepgram import DeepgramClient
 from ..shared.config import get_settings
 import httpx
+import re
+from typing import List
 
 settings = get_settings()
 
@@ -89,10 +91,57 @@ class DeepgramService:
             error_msg = f"Transcription failed: {str(e)}"
             print(f"[Deepgram Exception] {error_msg}")
             raise Exception(error_msg)
+        
+        
+    def split_text_into_chunks(self, text: str, max_chars: int = 200) -> List[str]:
+        """
+        Split text into chunks at sentence boundaries, respecting max_chars limit.
+        """
+        # Remove extra whitespace
+        text = " ".join(text.split())
+        
+        # If text is already short enough, return as-is
+        if len(text) <= max_chars:
+            return [text]
+        
+        # Split by sentence endings (., !, ?)
+        sentences = re.split(r'(?<=[.!?])\s+', text.strip())
+        
+        chunks = []
+        current_chunk = ""
+        
+        for sentence in sentences:
+            # If single sentence exceeds limit, split by words
+            if len(sentence) > max_chars:
+                words = sentence.split()
+                for word in words:
+                    if len(current_chunk) + len(word) + 1 <= max_chars:
+                        current_chunk += word + " "
+                    else:
+                        if current_chunk.strip():
+                            chunks.append(current_chunk.strip())
+                        current_chunk = word + " "
+            else:
+                # Try to add sentence to current chunk
+                test_chunk = current_chunk + sentence + " "
+                if len(test_chunk) <= max_chars:
+                    current_chunk = test_chunk
+                else:
+                    if current_chunk.strip():
+                        chunks.append(current_chunk.strip())
+                    current_chunk = sentence + " "
+        
+        # Add remaining chunk
+        if current_chunk.strip():
+            chunks.append(current_chunk.strip())
+        
+        return chunks if chunks else [text]
     
-    async def synthesize_speech(self, text: str) -> bytes:
+    async def _synthesize_single_chunk(self, text: str) -> bytes:
+        """
+        Synthesize a single chunk of text (≤200 chars).
+        """
         try:
-            # Use Deepgram REST API directly for TTS
             url = f"{self.base_url}/v1/speak"
             headers = {
                 "Authorization": f"Token {self.api_key}",
@@ -115,9 +164,59 @@ class DeepgramService:
                 response.raise_for_status()
                 return response.content
         except Exception as e:
+            print(f"[Deepgram TTS Error] Chunk failed: {str(e)}")
+            raise
+    
+    def _concatenate_wav_files(self, wav_files: List[bytes]) -> bytes:
+        """
+        Concatenate multiple WAV files into one.
+        Strips WAV headers from all files except the first.
+        """
+        if not wav_files:
+            return b""
+        
+        if len(wav_files) == 1:
+            return wav_files[0]
+        
+        # Start with first file (includes WAV header)
+        result = bytearray(wav_files[0])
+        
+        # Append subsequent files WITHOUT their WAV headers (44 bytes)
+        for wav_bytes in wav_files[1:]:
+            if len(wav_bytes) > 44:
+                result.extend(wav_bytes[44:])  # Skip WAV header
+        
+        return bytes(result)
+    
+    async def synthesize_speech(self, text: str) -> bytes:
+        """
+        Synthesize speech with automatic chunking for long text.
+        Returns concatenated audio bytes.
+        """
+        try:
+            # Split text into chunks
+            chunks = self.split_text_into_chunks(text, max_chars=200)
+            
+            print(f"[Deepgram TTS] Text length: {len(text)} chars")
+            print(f"[Deepgram TTS] Split into {len(chunks)} chunk(s)")
+            
+            # Generate audio for each chunk
+            audio_chunks = []
+            for i, chunk in enumerate(chunks, 1):
+                print(f"[Deepgram TTS] Processing chunk {i}/{len(chunks)}: '{chunk[:50]}...'")
+                audio_bytes = await self._synthesize_single_chunk(chunk)
+                audio_chunks.append(audio_bytes)
+                print(f"[Deepgram TTS] Chunk {i} generated: {len(audio_bytes)} bytes")
+            
+            # Concatenate all audio chunks
+            final_audio = self._concatenate_wav_files(audio_chunks)
+            print(f"[Deepgram TTS] Final audio: {len(final_audio)} bytes")
+            
+            return final_audio
+            
+        except Exception as e:
             print(f"[Deepgram TTS Error] {str(e)}")
             raise Exception(f"TTS generation failed: {str(e)}")
-
 
 # Global instance for DeepgramService
 _deepgram_service = None

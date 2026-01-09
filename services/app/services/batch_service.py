@@ -66,7 +66,8 @@ def create_batch(files_info: List[dict], user_id: str):
         f"batch:{batch_id}",
         mapping={
             "status": "queued",
-            "totalJobs": len(job_entries)
+            "totalJobs": len(job_entries),
+            "userId": user_id
         }
     )
 
