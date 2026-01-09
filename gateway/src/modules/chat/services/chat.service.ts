@@ -1641,6 +1641,28 @@ export class ChatService {
         this.logger.warn(`⚠️  RAG usage metadata not found in LLM response`);
       }
 
+      // Extract and log IMAGE metadata (internal tracking)
+      const imageMetaMatch = fullResponse.match(/\[IMAGE_RECEIVED:\s*(YES|NO)\](?:[^\[]*\[IMAGE_CONTENT:\s*([^\]]+)\])?(?:[^\[]*\[IMAGE_CONFIDENCE:\s*(HIGH|MEDIUM|LOW)\])?/is);
+      if (imageMetaMatch) {
+        const received = imageMetaMatch[1];
+        const content = imageMetaMatch[2]?.trim() || 'N/A';
+        const confidence = imageMetaMatch[3] || 'N/A';
+        this.logger.log(`\n${'='.repeat(60)}`);
+        this.logger.log(`📷 IMAGE ANALYSIS METADATA`);
+        this.logger.log(`   Session: ${sessionId}`);
+        this.logger.log(`   Image Received: ${received}`);
+        this.logger.log(`   Visual Content: ${content}`);
+        this.logger.log(`   Confidence: ${confidence}`);
+        this.logger.log(`${'='.repeat(60)}\n`);
+        // Strip all IMAGE metadata tags from response before storage
+        fullResponse = fullResponse.replace(/\[IMAGE_RECEIVED:\s*(?:YES|NO)\]/gi, '');
+        fullResponse = fullResponse.replace(/\[IMAGE_CONTENT:\s*[^\]]+\]/gi, '');
+        fullResponse = fullResponse.replace(/\[IMAGE_CONFIDENCE:\s*(?:HIGH|MEDIUM|LOW)\]/gi, '');
+        fullResponse = fullResponse.trim();
+      } else if (dto.images && dto.images.length > 0) {
+        this.logger.warn(`⚠️  IMAGE metadata not found despite images being provided`);
+      }
+
       // Stage 6: Store assistant response (with metadata stripped)
       const assistantMessage = await this.storeAssistantMessage(
         sessionId,
@@ -1706,23 +1728,49 @@ export class ChatService {
         if (dto.images && dto.images.length > 0) {
           for (const imageData of dto.images) {
             try {
-              // Upload image to Vercel Blob
-              const fileUrl =
-                await this.vercelBlobService.uploadBase64Image(imageData);
+              let fileUrl: string | undefined;
 
-              // Create attachment record
-              await tx.messageAttachment.create({
-                data: {
-                  messageId: userMessage.id,
-                  attachmentType: AttachmentType.image,
-                  fileUrl,
-                },
-              });
+              // If image is already a public URL, attach directly without re-upload
+              if (typeof imageData === 'string' && /^(https?:\/\/)/i.test(imageData)) {
+                fileUrl = imageData;
+              } else if (typeof imageData === 'string') {
+                // Data URL or base64 string
+                fileUrl = await this.vercelBlobService.uploadBase64Image(imageData);
+              } else if (imageData && typeof (imageData as any).base64 === 'string') {
+                // Object with base64 + optional mimeType
+                const { base64, mimeType } = imageData as any;
+                fileUrl = await this.vercelBlobService.uploadBase64Image(base64, mimeType);
+              }
+
+              if (fileUrl) {
+                // Create attachment record
+                await tx.messageAttachment.create({
+                  data: {
+                    messageId: userMessage.id,
+                    attachmentType: AttachmentType.image,
+                    fileUrl,
+                  },
+                });
+              } else {
+                this.logger.warn('Image data missing or invalid; skipping attachment');
+              }
             } catch (error) {
-              this.logger.warn(
-                `Failed to upload image, continuing without attachment: ${error.message}`,
-              );
-              // Continue without this image - non-critical failure
+              // Graceful fallback: if we received a public URL, still attach it
+              if (typeof imageData === 'string' && /^(https?:\/\/)/i.test(imageData)) {
+                await tx.messageAttachment.create({
+                  data: {
+                    messageId: userMessage.id,
+                    attachmentType: AttachmentType.image,
+                    fileUrl: imageData,
+                  },
+                });
+                this.logger.warn(`Blob upload failed; attached URL directly: ${error.message}`);
+              } else {
+                this.logger.warn(
+                  `Failed to process image, continuing without attachment: ${error.message}`,
+                );
+              }
+              // Continue without blocking pipeline
             }
           }
         }

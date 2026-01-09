@@ -96,8 +96,18 @@ export class OpenAILLMService {
       'You are IntelliMaint, a helpful maintenance assistant. Answer clearly and concisely. '
       + 'Do not mention internal systems, databases, or sources. '
       + 'If provided context includes relevant information, use it to ground your answer. '
-      + 'If information is insufficient, respond naturally using your knowledge, or ask clarifying questions. '
-      + 'Do not invent part numbers/specs; ask for more details when uncertain.'
+      + 'If information is insufficient, respond naturally using your knowledge. '
+      + 'Do not invent part numbers/specs unless clearly visible or provided.'
+    );
+
+    // Visual guidance for image-based queries
+    lines.push(
+      '\nWhen images are provided:'
+      + '\n- Analyze visible features (components, connectors, damage, labels)'
+      + '\n- Identify device type/category when possible (smartphone, laptop, tablet, appliance, etc.)'
+      + '\n- Reference what you observe: "I can see...", "Based on the visible..."'
+      + '\n- Provide guidance based on visual cues even if exact model is unknown'
+      + '\n- Only request specific model/brand if critical for the repair step and not visually determinable'
     );
 
     // Include brief conversation summary when available
@@ -124,6 +134,16 @@ export class OpenAILLMService {
       + '\n[SOURCE_USAGE: OWN_KNOWLEDGE] - if you primarily used your own training knowledge'
       + '\n[SOURCE_USAGE: BOTH] - if you used both context and your own knowledge'
       + '\nThis tag is for internal tracking and will not be shown to the user.'
+    );
+
+    // Image metadata tracking (internal only - will be stripped before storage)
+    lines.push(
+      '\n\nIf the user included an image, also add these tags:'
+      + '\n[IMAGE_RECEIVED: YES]'
+      + '\n[IMAGE_CONTENT: <brief 5-10 word description of what you see>]'
+      + '\n[IMAGE_CONFIDENCE: HIGH|MEDIUM|LOW] - your confidence in identifying/analyzing the device'
+      + '\nIf no image was provided: [IMAGE_RECEIVED: NO]'
+      + '\nThis metadata is for diagnostics only and will not be shown to the user.'
     );
 
     return lines.join('\n');
