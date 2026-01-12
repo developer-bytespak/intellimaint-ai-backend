@@ -211,11 +211,13 @@ async def batch_events(batch_id: str, request: Request, userId: str = Query(...)
     print(f"🔌 [SSE] Client connected for batch_id={batch_id}")
     
     async def event_generator():
+        import time as time_module
         last_snapshot = None
         iteration = 0
         no_change_count = 0
         batch_completed = False  # Track if batch finished normally
-        last_status_log = 0  # For logging every 5 seconds
+        last_ping_time = time_module.time()  # Track last ping for keep-alive
+        PING_INTERVAL = 15  # Send ping every 15 seconds to keep connection alive on Render
 
         try:
             while True:
@@ -225,7 +227,7 @@ async def batch_events(batch_id: str, request: Request, userId: str = Query(...)
                     break
                 
                 iteration += 1
-                now = __import__("time").time()
+                now = time_module.time()
                 
                 job_ids = redis_client.lrange(f"batch:{batch_id}:jobs", 0, -1)
                 
@@ -235,6 +237,10 @@ async def batch_events(batch_id: str, request: Request, userId: str = Query(...)
                     if no_change_count > 600:  # 600 * 0.2s = 120 seconds
                         print(f"⚠️ [SSE] No jobs found for 120s, closing")
                         break
+                    # 🆕 Send keep-alive ping even when no jobs
+                    if now - last_ping_time >= PING_INTERVAL:
+                        yield {"event": "ping", "data": "keep-alive"}
+                        last_ping_time = now
                     await asyncio.sleep(0.2)
                     continue
                 
@@ -256,7 +262,13 @@ async def batch_events(batch_id: str, request: Request, userId: str = Query(...)
                         "data": event_data
                     }
                     last_snapshot = snapshot
+                    last_ping_time = now  # Reset ping timer after sending data
                 else:
+                    # 🆕 CRITICAL: Send keep-alive ping to prevent Render from closing connection
+                    # Render has a 30s timeout on idle connections
+                    if now - last_ping_time >= PING_INTERVAL:
+                        yield {"event": "ping", "data": "keep-alive"}
+                        last_ping_time = now
                     # Log periodically even when no changes, to show we're still polling
                     if iteration % 50 == 0:  # Every 10 seconds (50 * 0.2s)
                         print(f"📋 [SSE] Still monitoring... {len(snapshot)} jobs, status: {[j.get('status') for j in snapshot]}")
@@ -278,21 +290,14 @@ async def batch_events(batch_id: str, request: Request, userId: str = Query(...)
         except asyncio.CancelledError:
             print(f"🔌 [SSE] Connection cancelled for batch_id={batch_id}")
         finally:
-            # 🆕 If batch didn't complete normally, cleanup everything
+            # ⚠️ IMPORTANT: Do NOT cleanup on SSE disconnect!
+            # The jobs should continue processing even if the frontend disconnects.
+            # The frontend can reconnect and see the updated status.
+            # Only cleanup if the user explicitly cancels the batch.
             if not batch_completed:
-                # Check current status before cleanup
-                job_ids = redis_client.lrange(f"batch:{batch_id}:jobs", 0, -1)
-                if job_ids:
-                    # Check if any job is still processing
-                    any_processing = False
-                    for job_id in job_ids:
-                        status = redis_client.hget(f"job:{job_id}", "status")
-                        if status in ["queued", "processing"]:
-                            any_processing = True
-                            break
-                    
-                    if any_processing:
-                        print(f"⚠️ [SSE] Client disconnected during processing! Cleaning up...")
-                        await cleanup_batch(batch_id)
+                print(f"📋 [SSE] Connection closed before batch completed for batch_id={batch_id}")
+                print(f"📋 [SSE] Jobs will continue processing in the background")
+                # Don't cleanup - let jobs continue!
+                # await cleanup_batch(batch_id)  # ❌ REMOVED
 
     return EventSourceResponse(event_generator())
