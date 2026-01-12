@@ -127,24 +127,7 @@ export class OpenAILLMService {
       '\nWhen useful, structure your response with a brief answer, then optional steps or troubleshooting guidance.'
     );
 
-    // Source usage tracking (internal only - will be stripped before storage)
-    lines.push(
-      '\n\nIMPORTANT: After your response, on a new line, add exactly one of these tags:'
-      + '\n[SOURCE_USAGE: CONTEXT_ONLY] - if you primarily used the provided reference materials'
-      + '\n[SOURCE_USAGE: OWN_KNOWLEDGE] - if you primarily used your own training knowledge'
-      + '\n[SOURCE_USAGE: BOTH] - if you used both context and your own knowledge'
-      + '\nThis tag is for internal tracking and will not be shown to the user.'
-    );
 
-    // Image metadata tracking (internal only - will be stripped before storage)
-    lines.push(
-      '\n\nIf the user included an image, also add these tags:'
-      + '\n[IMAGE_RECEIVED: YES]'
-      + '\n[IMAGE_CONTENT: <brief 5-10 word description of what you see>]'
-      + '\n[IMAGE_CONFIDENCE: HIGH|MEDIUM|LOW] - your confidence in identifying/analyzing the device'
-      + '\nIf no image was provided: [IMAGE_RECEIVED: NO]'
-      + '\nThis metadata is for diagnostics only and will not be shown to the user.'
-    );
 
     return lines.join('\n');
   }

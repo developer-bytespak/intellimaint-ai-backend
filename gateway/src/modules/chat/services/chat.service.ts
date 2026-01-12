@@ -1625,45 +1625,7 @@ export class ChatService {
       this.logger.debug(`LLM streaming completed, response length: ${fullResponse.length}`);
       this.logger.debug(`Token usage: ${JSON.stringify(tokenUsage)}`);
 
-      // Extract and log RAG usage metadata (internal tracking)
-      const sourceUsageMatch = fullResponse.match(/\[SOURCE_USAGE:\s*(CONTEXT_ONLY|OWN_KNOWLEDGE|BOTH)\]/i);
-      if (sourceUsageMatch) {
-        const usage = sourceUsageMatch[1];
-        this.logger.log(`\n${'='.repeat(60)}`);
-        this.logger.log(`🔍 RAG USAGE ANALYSIS`);
-        this.logger.log(`   Session: ${sessionId}`);
-        this.logger.log(`   Chunks Retrieved: ${chunks.length}`);
-        this.logger.log(`   LLM Source: ${usage}`);
-        this.logger.log(`${'='.repeat(60)}\n`);
-        // Strip metadata from response before storage
-        fullResponse = fullResponse.replace(/\[SOURCE_USAGE:\s*(CONTEXT_ONLY|OWN_KNOWLEDGE|BOTH)\]/i, '').trim();
-      } else {
-        this.logger.warn(`⚠️  RAG usage metadata not found in LLM response`);
-      }
-
-      // Extract and log IMAGE metadata (internal tracking)
-      const imageMetaMatch = fullResponse.match(/\[IMAGE_RECEIVED:\s*(YES|NO)\](?:[^\[]*\[IMAGE_CONTENT:\s*([^\]]+)\])?(?:[^\[]*\[IMAGE_CONFIDENCE:\s*(HIGH|MEDIUM|LOW)\])?/is);
-      if (imageMetaMatch) {
-        const received = imageMetaMatch[1];
-        const content = imageMetaMatch[2]?.trim() || 'N/A';
-        const confidence = imageMetaMatch[3] || 'N/A';
-        this.logger.log(`\n${'='.repeat(60)}`);
-        this.logger.log(`📷 IMAGE ANALYSIS METADATA`);
-        this.logger.log(`   Session: ${sessionId}`);
-        this.logger.log(`   Image Received: ${received}`);
-        this.logger.log(`   Visual Content: ${content}`);
-        this.logger.log(`   Confidence: ${confidence}`);
-        this.logger.log(`${'='.repeat(60)}\n`);
-        // Strip all IMAGE metadata tags from response before storage
-        fullResponse = fullResponse.replace(/\[IMAGE_RECEIVED:\s*(?:YES|NO)\]/gi, '');
-        fullResponse = fullResponse.replace(/\[IMAGE_CONTENT:\s*[^\]]+\]/gi, '');
-        fullResponse = fullResponse.replace(/\[IMAGE_CONFIDENCE:\s*(?:HIGH|MEDIUM|LOW)\]/gi, '');
-        fullResponse = fullResponse.trim();
-      } else if (dto.images && dto.images.length > 0) {
-        this.logger.warn(`⚠️  IMAGE metadata not found despite images being provided`);
-      }
-
-      // Stage 6: Store assistant response (with metadata stripped)
+      // Stage 6: Store assistant response
       const assistantMessage = await this.storeAssistantMessage(
         sessionId,
         fullResponse,
