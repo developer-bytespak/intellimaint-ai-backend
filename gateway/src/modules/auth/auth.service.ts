@@ -349,7 +349,7 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { email },
     });
-    console.log('user', user);
+    // console.log('user', user);
     if (!user) {
       return nestError(400, 'User not found')(res);
     }
@@ -363,6 +363,75 @@ export class AuthService {
     if (!isPasswordValid) {
       return nestError(400, 'Invalid password')(res);
     }
+    // console.log('user role:', user?.role);
+
+    if(user?.role === "admin"){
+      const accessToken = jwt.sign(
+        { userId: user.id },
+        appConfig.jwtSecret as string,
+        { expiresIn: '1h' },
+      );
+      const refreshToken = jwt.sign(
+        { userId: user.id },
+        appConfig.jwtSecret as string,
+        { expiresIn: '14d' },
+      );
+
+      res.cookie('local_accessToken', accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
+        path: '/',
+        maxAge: 1 * 60 * 60 * 1000,
+      });
+
+      res.cookie('local_refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
+        path: '/',
+        maxAge: 14 * 24 * 60 * 60 * 1000,
+      });
+
+      const existingSession = await this.prisma.session.findFirst({
+        where: { userId: user.id },
+      });
+
+      if (existingSession) {
+        await this.prisma.session.update({
+          where: { id: existingSession.id },
+          data: {
+            token: refreshToken,
+            expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+          },
+        });
+      } else {
+        await this.prisma.session.create({
+          data: {
+            userId: user.id,
+            token: refreshToken,
+            expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+          },
+        });
+      }
+
+      const userData = {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        company: user.company,
+        profileImageUrl: user.profileImageUrl,
+        accessToken,
+        refreshToken,
+        expiresIn: 3600,
+        // redirectUrl: `${process.env.FRONTEND_URL}/admin`,
+      };
+
+      return nestResponse(200, 'Admin login successful', userData)(res);
+    }
+
     const accessToken = jwt.sign(
       { userId: user.id },
       appConfig.jwtSecret as string,
