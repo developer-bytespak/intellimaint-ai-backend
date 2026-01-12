@@ -132,6 +132,7 @@ model KnowledgeChunk {
   createdAt  DateTime               @default(now()) @map("created_at") @db.Timestamp(6)
   source     KnowledgeSource        @relation(fields: [sourceId], references: [id], onDelete: Cascade)
 
+  @@index([embedding], map: "knowledge_chunks_embedding_cosine_idx")
   @@map("knowledge_chunks")
 }
 
@@ -250,6 +251,7 @@ enum UserRole {
   civilian
   military
   student
+  admin
 }
 
 enum UserStatus {

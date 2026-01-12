@@ -7,6 +7,12 @@ import { ChatSessionStatus, MessageRole, AttachmentType, ChatMessage } from '@pr
 import { OpenAIChatService } from './openai-chat.service';
 import { ImageUtilService } from './image-util.service';
 import { VercelBlobService } from './vercel-blob.service';
+import { PipelineMessageDto, PipelineChunk, TokenUsage } from '../dto/pipeline-message.dto';
+import { OpenAIVisionService } from './openai-vision.service';
+import { OpenAIEmbeddingService } from './openai-embedding.service';
+import { RagRetrievalService } from './rag-retrieval.service';
+import { ContextManagerService } from './context-manager.service';
+import { OpenAILLMService } from './openai-llm.service';
 
 @Injectable()
 export class ChatService {
@@ -19,7 +25,48 @@ export class ChatService {
     private openaiChatService: OpenAIChatService,
     private imageUtilService: ImageUtilService,
     private vercelBlobService: VercelBlobService,
+    private openaiVisionService: OpenAIVisionService,
+    private openaiEmbeddingService: OpenAIEmbeddingService,
+    private ragRetrievalService: RagRetrievalService,
+    private contextManagerService: ContextManagerService,
+    private openaiLLMService: OpenAILLMService,
   ) {}
+
+  /**
+   * Retry helper with exponential backoff
+   * Retries async function N times before throwing
+   * Used for transient database errors
+   *
+   * @param fn - Async function to retry
+   * @param maxRetries - Maximum number of attempts (default: 3)
+   * @param delayMs - Initial delay in ms, doubles each attempt (default: 100)
+   */
+  private async retryAsync<T>(
+    fn: () => Promise<T>,
+    maxRetries: number = 3,
+    delayMs: number = 100,
+  ): Promise<T> {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (attempt === maxRetries - 1) {
+          this.logger.error(
+            `❌ Retry failed after ${maxRetries} attempts:`,
+            error.message,
+          );
+          throw error;
+        }
+        const delay = delayMs * Math.pow(2, attempt);
+        this.logger.warn(
+          `⚠️ Attempt ${attempt + 1} failed, retrying in ${delay}ms:`,
+          error.message,
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+    throw new Error('Retry exhausted');
+  }
 
   /**
    * Register a new SSE request with an abort controller
@@ -1449,5 +1496,327 @@ export class ChatService {
       this.logger.error('Error cleaning up stopped messages:', error);
       return { deletedCount: 0, messageIds: [] };
     }
+  }
+
+  /**
+   * ============================================
+   * RAG CHAT PIPELINE - NEW METHODS
+   * ============================================
+   */
+
+  /**
+   * Main Pipeline Orchestrator
+   *
+   * Orchestrates the complete RAG chat pipeline:
+   * 1. Store user message
+   * 2. Analyze images (if any)
+   * 3. Generate embeddings for semantic search
+   * 4. Retrieve relevant knowledge chunks via pgvector
+   * 5. Prepare conversation context (with summarization)
+   * 6. Stream LLM response with context awareness
+   * 7. Store assistant response
+   * 8. Update context summary incrementally
+   *
+   * @param userId - Authenticated user ID
+   * @param sessionId - Chat session ID
+   * @param dto - Pipeline message request with content and images
+   * @returns Async generator yielding pipeline chunks for streaming
+   */
+  async *streamPipelineMessage(
+    userId: string,
+    sessionId: string,
+    dto: PipelineMessageDto,
+  ): AsyncGenerator<PipelineChunk> {
+    this.logger.debug(`Starting pipeline message for session ${sessionId}`);
+
+    try {
+      // Verify session ownership
+      const session = await this.prisma.chatSession.findUnique({
+        where: { id: sessionId },
+      });
+
+      if (!session || session.userId !== userId) {
+        throw new ForbiddenException('Not authorized to access this session');
+      }
+
+      // Stage 0: Store user message
+      const userMessage = await this.storeUserMessage(userId, sessionId, dto);
+      this.logger.debug(`User message stored: ${userMessage.id}`);
+
+      // Stage 1: Process images (if any)
+      let imageDescriptions = '';
+      if (dto.images?.length > 0) {
+        try {
+          const analyses = await this.openaiVisionService.analyzeAndStoreImages(
+            userMessage.id,
+            dto.images,
+          );
+          imageDescriptions = analyses.map((a) => a.description).join('\n');
+          yield {
+            stage: 'image-analysis',
+            metadata: { analyses },
+          };
+          this.logger.debug(`Analyzed ${analyses.length} images`);
+        } catch (error) {
+          this.logger.warn(`Image analysis failed, continuing without images: ${error}`);
+          // Continue pipeline without image descriptions on non-critical failure
+        }
+      }
+
+      // Stage 2: Generate embeddings
+      const promptWithImages = dto.content + '\n' + imageDescriptions;
+      const embedding = await this.openaiEmbeddingService.generate(promptWithImages);
+      yield { stage: 'embedding' };
+      this.logger.debug(`Embedding generated`);
+
+      // Stage 3: Retrieve knowledge chunks
+      const chunks = await this.ragRetrievalService.retrieveTopK(embedding, userId, 10);
+      yield {
+        stage: 'retrieval',
+        metadata: { chunkCount: chunks.length },
+      };
+      this.logger.debug(`Retrieved ${chunks.length} knowledge chunks`);
+
+      // Fetch session history for context
+      const messages = await this.fetchSessionHistory(sessionId);
+
+      // Stage 4: Prepare context (includes summary generation if needed)
+      const contextData = await this.contextManagerService.prepareContext(
+        sessionId,
+        messages,
+      );
+      this.logger.debug(
+        `Context prepared with ${contextData.recentMessages.length} recent messages`,
+      );
+
+      // Stage 5: Stream LLM response
+      let fullResponse = '';
+      let tokenUsage: TokenUsage = {
+        promptTokens: 0,
+        completionTokens: 0,
+        totalTokens: 0,
+      };
+
+      for await (const chunk of this.openaiLLMService.streamCompletion(
+        dto.content,
+        contextData.summary,
+        chunks,
+        dto.images || [],
+      )) {
+        // Handle token streaming
+        if (chunk.token) {
+          fullResponse += chunk.token;
+          yield {
+            stage: 'llm-generation',
+            token: chunk.token,
+          };
+        }
+        
+        // Capture usage data from final chunk
+        if (chunk.usage) {
+          tokenUsage = {
+            promptTokens: chunk.usage.prompt_tokens || 0,
+            completionTokens: chunk.usage.completion_tokens || 0,
+            totalTokens: chunk.usage.total_tokens || 0,
+            cachedTokens: chunk.usage.cached_tokens,
+          };
+        }
+      }
+      this.logger.debug(`LLM streaming completed, response length: ${fullResponse.length}`);
+      this.logger.debug(`Token usage: ${JSON.stringify(tokenUsage)}`);
+
+      // Stage 6: Store assistant response
+      const assistantMessage = await this.storeAssistantMessage(
+        sessionId,
+        fullResponse,
+        tokenUsage,
+      );
+      this.logger.debug(`Assistant message stored: ${assistantMessage.id}`);
+
+      // Stage 7: Update context summary if needed
+      await this.contextManagerService.updateContextSummary(
+        sessionId,
+        userMessage,
+        assistantMessage,
+      );
+      this.logger.debug(`Context summary updated`);
+
+      // Final: Complete signal
+      yield {
+        stage: 'complete',
+        messageId: assistantMessage.id,
+      };
+    } catch (error) {
+      this.logger.error(`Pipeline error: ${error.message}`, error.stack);
+      yield {
+        stage: 'error',
+        errorMessage: error.message,
+      };
+    }
+  }
+
+  /**
+   * Helper: Store user message in database
+   * Creates ChatMessage record with optional image attachments
+   *
+   * Uses Prisma transactions for atomicity + retry logic for transient DB errors
+   *
+   * @param userId - User ID
+   * @param sessionId - Chat session ID
+   * @param dto - Pipeline message with content and images
+   * @returns Created ChatMessage with attachments
+   */
+  private async storeUserMessage(
+    userId: string,
+    sessionId: string,
+    dto: PipelineMessageDto,
+  ): Promise<ChatMessage> {
+    this.logger.debug(
+      `Storing user message for session ${sessionId}, ${dto.images?.length || 0} images`,
+    );
+
+    return this.retryAsync(async () => {
+      return await this.prisma.$transaction(async (tx) => {
+        // Create user message
+        const userMessage = await tx.chatMessage.create({
+          data: {
+            sessionId,
+            role: MessageRole.user,
+            content: dto.content,
+          },
+        });
+
+        // Upload and attach images if present
+        if (dto.images && dto.images.length > 0) {
+          for (const imageData of dto.images) {
+            try {
+              let fileUrl: string | undefined;
+
+              // If image is already a public URL, attach directly without re-upload
+              if (typeof imageData === 'string' && /^(https?:\/\/)/i.test(imageData)) {
+                fileUrl = imageData;
+              } else if (typeof imageData === 'string') {
+                // Data URL or base64 string
+                fileUrl = await this.vercelBlobService.uploadBase64Image(imageData);
+              } else if (imageData && typeof (imageData as any).base64 === 'string') {
+                // Object with base64 + optional mimeType
+                const { base64, mimeType } = imageData as any;
+                fileUrl = await this.vercelBlobService.uploadBase64Image(base64, mimeType);
+              }
+
+              if (fileUrl) {
+                // Create attachment record
+                await tx.messageAttachment.create({
+                  data: {
+                    messageId: userMessage.id,
+                    attachmentType: AttachmentType.image,
+                    fileUrl,
+                  },
+                });
+              } else {
+                this.logger.warn('Image data missing or invalid; skipping attachment');
+              }
+            } catch (error) {
+              // Graceful fallback: if we received a public URL, still attach it
+              if (typeof imageData === 'string' && /^(https?:\/\/)/i.test(imageData)) {
+                await tx.messageAttachment.create({
+                  data: {
+                    messageId: userMessage.id,
+                    attachmentType: AttachmentType.image,
+                    fileUrl: imageData,
+                  },
+                });
+                this.logger.warn(`Blob upload failed; attached URL directly: ${error.message}`);
+              } else {
+                this.logger.warn(
+                  `Failed to process image, continuing without attachment: ${error.message}`,
+                );
+              }
+              // Continue without blocking pipeline
+            }
+          }
+        }
+
+        this.logger.debug(`✅ User message stored: ${userMessage.id}`);
+        return userMessage;
+      });
+    });
+  }
+
+  /**
+   * Helper: Fetch conversation history
+   * Retrieves all messages in a session in chronological order
+   *
+   * Wrapped in retry logic for transient DB errors
+   *
+   * @param sessionId - Chat session ID
+   * @returns Array of ChatMessage objects with attachments
+   */
+  private async fetchSessionHistory(
+    sessionId: string,
+  ): Promise<ChatMessage[]> {
+    this.logger.debug(`Fetching history for session ${sessionId}`);
+
+    return this.retryAsync(async () => {
+      const messages = await this.prisma.chatMessage.findMany({
+        where: { sessionId },
+        include: {
+          attachments: true,
+        },
+        orderBy: { createdAt: 'asc' },
+      });
+
+      this.logger.debug(`✅ Fetched ${messages.length} messages from history`);
+      return messages;
+    });
+  }
+
+  /**
+   * Helper: Store assistant response in database
+   * Creates ChatMessage record with token usage tracking
+   *
+   * Updates session timestamp and tracks token consumption for billing
+   *
+   * @param sessionId - Chat session ID
+   * @param content - LLM response text
+   * @param tokenUsage - Token usage statistics
+   * @returns Created ChatMessage with token data
+   */
+  private async storeAssistantMessage(
+    sessionId: string,
+    content: string,
+    tokenUsage: TokenUsage,
+  ): Promise<ChatMessage> {
+    this.logger.debug(
+      `Storing assistant message for session ${sessionId}, tokens: ${tokenUsage.totalTokens}`,
+    );
+
+    return this.retryAsync(async () => {
+      return await this.prisma.$transaction(async (tx) => {
+        // Create assistant message with token tracking
+        const assistantMessage = await tx.chatMessage.create({
+          data: {
+            sessionId,
+            role: MessageRole.assistant,
+            content,
+            promptTokens: tokenUsage.promptTokens,
+            completionTokens: tokenUsage.completionTokens,
+            totalTokens: tokenUsage.totalTokens,
+            cachedTokens: tokenUsage.cachedTokens || 0,
+          },
+        });
+
+        // Update session timestamp to mark last activity
+        await tx.chatSession.update({
+          where: { id: sessionId },
+          data: { updatedAt: new Date() },
+        });
+
+        this.logger.debug(
+          `✅ Assistant message stored: ${assistantMessage.id} (${tokenUsage.totalTokens} tokens)`,
+        );
+        return assistantMessage;
+      });
+    });
   }
 }
