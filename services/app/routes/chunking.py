@@ -41,6 +41,7 @@ async def process_chunk(req: ChunkRequest):
     """
     logger.info("chunk/process request received: %s dry_run=%s overwrite=%s", req.source_id, req.dry_run, req.overwrite)
     try:
+        print("Starting chunk processing for source_id:", req.source_id)
         # Run blocking chunker in a thread (sync processing)
         result = await asyncio.to_thread(process_source, req.source_id, req.dry_run, req.overwrite)
         

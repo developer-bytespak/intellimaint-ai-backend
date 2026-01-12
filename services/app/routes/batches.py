@@ -4,19 +4,31 @@ import os
 import json
 import httpx
 from typing import List
-from fastapi import APIRouter, UploadFile, File, HTTPException, Form, Request
+from fastapi import APIRouter, UploadFile, File, HTTPException, Form, Request, Query
 from fastapi.responses import JSONResponse
 from app.services.batch_service import create_batch
 from app.redis_client import redis_client
 import asyncio
 from sse_starlette.sse import EventSourceResponse
+from fastapi import Query
 
 router = APIRouter(prefix="/batches", tags=["Batches"])
 
 GATEWAY_URL = os.getenv("GATEWAY_URL", "http://localhost:3000/api/v1")
 
-UPLOAD_DIR = "uploads"
+# Use consistent upload directory path
+# Always relative to the project root (src/services)
+UPLOAD_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../uploads"))
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+print(f"[batches] UPLOAD_DIR initialized: {UPLOAD_DIR}")
+
+def get_batch_owner(batch_id: str):
+    owner = redis_client.hget(f"batch:{batch_id}", "userId")
+    # Redis returns bytes, decode if necessary
+    if isinstance(owner, bytes):
+        return owner.decode('utf-8')
+    return owner
+
 
 
 async def cleanup_batch(batch_id: str):
@@ -94,16 +106,29 @@ async def upload_pdfs(files: List[UploadFile] = File(...),userId:str=Form(...)):
             raise HTTPException(400, f"Invalid file type: {f.filename}")
         
         # Save file to disk
-        # file_path = os.path.join(UPLOAD_DIR, f.filename)
         safe_name = f"{uuid.uuid4()}.pdf"
-        file_path = os.path.join(UPLOAD_DIR, safe_name)
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(f.file, buffer)
+        absolute_file_path = os.path.join(UPLOAD_DIR, safe_name)
+        
+        try:
+            with open(absolute_file_path, "wb") as buffer:
+                shutil.copyfileobj(f.file, buffer)
             
-        file_info.append({
-            "name": f.filename,
-            "path": os.path.abspath(file_path)
-        })
+            # Verify file was written
+            if not os.path.exists(absolute_file_path):
+                raise FileNotFoundError(f"File was not saved: {absolute_file_path}")
+            
+            file_size = os.path.getsize(absolute_file_path)
+            print(f"[batches] 💾 File saved: {absolute_file_path}")
+            print(f"[batches] 📊 File size: {file_size} bytes")
+            print(f"[batches] ✅ File verified to exist")
+                
+            file_info.append({
+                "name": f.filename,
+                "path": absolute_file_path
+            })
+        except Exception as e:
+            print(f"[batches] ❌ Error saving file: {e}")
+            raise HTTPException(500, f"Failed to save file: {str(e)}")
 
     batch_id, jobs = create_batch(file_info,userId)
 
@@ -115,7 +140,12 @@ async def upload_pdfs(files: List[UploadFile] = File(...),userId:str=Form(...)):
 
 
 @router.get("/{batch_id}")
-def get_batch_status(batch_id: str):
+def get_batch_status(batch_id: str,request: Request,userId:str = Query(...)):
+    
+    owner = get_batch_owner(batch_id)
+    if not owner or owner != userId:
+        raise HTTPException(403, "Forbidden: You do not own this batch")
+    
     if not redis_client:
         raise HTTPException(503, "Redis unavailable")
 
@@ -174,14 +204,20 @@ def get_batch_status(batch_id: str):
 # ...existing code...
 
 @router.get("/events/{batch_id}")
-async def batch_events(batch_id: str, request: Request):
+async def batch_events(batch_id: str, request: Request, userId: str = Query(...)):
+    owner = get_batch_owner(batch_id)
+    if not owner or owner != userId:
+        raise HTTPException(403, "Forbidden: You do not own this batch")   
     print(f"🔌 [SSE] Client connected for batch_id={batch_id}")
     
     async def event_generator():
+        import time as time_module
         last_snapshot = None
         iteration = 0
         no_change_count = 0
         batch_completed = False  # Track if batch finished normally
+        last_ping_time = time_module.time()  # Track last ping for keep-alive
+        PING_INTERVAL = 15  # Send ping every 15 seconds to keep connection alive on Render
 
         try:
             while True:
@@ -191,14 +227,20 @@ async def batch_events(batch_id: str, request: Request):
                     break
                 
                 iteration += 1
+                now = time_module.time()
                 
                 job_ids = redis_client.lrange(f"batch:{batch_id}:jobs", 0, -1)
                 
                 if not job_ids:
                     no_change_count += 1
-                    if no_change_count > 50:
-                        print(f"⚠️ [SSE] No jobs found for 10s, closing")
+                    # Only close after 2 minutes of no jobs (extraction can take time)
+                    if no_change_count > 600:  # 600 * 0.2s = 120 seconds
+                        print(f"⚠️ [SSE] No jobs found for 120s, closing")
                         break
+                    # 🆕 Send keep-alive ping even when no jobs
+                    if now - last_ping_time >= PING_INTERVAL:
+                        yield {"event": "ping", "data": "keep-alive"}
+                        last_ping_time = now
                     await asyncio.sleep(0.2)
                     continue
                 
@@ -212,12 +254,24 @@ async def batch_events(batch_id: str, request: Request):
 
                 if snapshot != last_snapshot:
                     print(f"🚀 [SSE] DATA CHANGED! Sending to frontend...")
+                    for job in snapshot:
+                        print(f"   Job {job.get('jobId')}: status={job.get('status')}, progress={job.get('progress')}, error={job.get('error')}")
                     event_data = json.dumps(snapshot)
                     yield {
                         "event": "batch_update",
                         "data": event_data
                     }
                     last_snapshot = snapshot
+                    last_ping_time = now  # Reset ping timer after sending data
+                else:
+                    # 🆕 CRITICAL: Send keep-alive ping to prevent Render from closing connection
+                    # Render has a 30s timeout on idle connections
+                    if now - last_ping_time >= PING_INTERVAL:
+                        yield {"event": "ping", "data": "keep-alive"}
+                        last_ping_time = now
+                    # Log periodically even when no changes, to show we're still polling
+                    if iteration % 50 == 0:  # Every 10 seconds (50 * 0.2s)
+                        print(f"📋 [SSE] Still monitoring... {len(snapshot)} jobs, status: {[j.get('status') for j in snapshot]}")
 
                 # 🆕 Check if all jobs are done
                 all_done = all(
@@ -231,26 +285,19 @@ async def batch_events(batch_id: str, request: Request):
                     await asyncio.sleep(0.5)
                     break
 
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(0.5)
                 
         except asyncio.CancelledError:
             print(f"🔌 [SSE] Connection cancelled for batch_id={batch_id}")
         finally:
-            # 🆕 If batch didn't complete normally, cleanup everything
+            # ⚠️ IMPORTANT: Do NOT cleanup on SSE disconnect!
+            # The jobs should continue processing even if the frontend disconnects.
+            # The frontend can reconnect and see the updated status.
+            # Only cleanup if the user explicitly cancels the batch.
             if not batch_completed:
-                # Check current status before cleanup
-                job_ids = redis_client.lrange(f"batch:{batch_id}:jobs", 0, -1)
-                if job_ids:
-                    # Check if any job is still processing
-                    any_processing = False
-                    for job_id in job_ids:
-                        status = redis_client.hget(f"job:{job_id}", "status")
-                        if status in ["queued", "processing"]:
-                            any_processing = True
-                            break
-                    
-                    if any_processing:
-                        print(f"⚠️ [SSE] Client disconnected during processing! Cleaning up...")
-                        await cleanup_batch(batch_id)
+                print(f"📋 [SSE] Connection closed before batch completed for batch_id={batch_id}")
+                print(f"📋 [SSE] Jobs will continue processing in the background")
+                # Don't cleanup - let jobs continue!
+                # await cleanup_batch(batch_id)  # ❌ REMOVED
 
     return EventSourceResponse(event_generator())

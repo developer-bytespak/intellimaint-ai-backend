@@ -13,7 +13,8 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 # Add the chunking scripts to path for importing the universal chunker
-SCRIPTS_CHUNKING_PATH = Path(__file__).parent.parent.parent.parent / "scripts" / "chunking"
+# Path: /app/app/services/chunker.py -> /app/scripts/chunking (3 parents up)
+SCRIPTS_CHUNKING_PATH = Path(__file__).parent.parent.parent / "scripts" / "chunking"
 if str(SCRIPTS_CHUNKING_PATH) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_CHUNKING_PATH))
 

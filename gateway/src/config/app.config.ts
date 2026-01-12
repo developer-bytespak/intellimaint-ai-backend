@@ -6,12 +6,14 @@ export const appConfig = {
   redisUrl: process.env.REDIS_URL || 'redis://127.0.0.1:6379',
   redisPort: process.env.REDIS_PORT || 6379,
   redisPassword: process.env.REDIS_PASSWORD || '',
-  portalEmail: process.env.PORTAL_EMAIL,
-  portalPassword: process.env.PORTAL_PASSWORD,
+  sendgrid: {
+    apiKey: process.env.SENDGRID_API_KEY,
+    fromEmail: process.env.SENDGRID_FROM_EMAIL,
+  },
   token: process.env.BLOB_READ_WRITE_TOKEN,
   aiServicesUrl: process.env.AI_SERVICES_URL || 'http://localhost:8000',
-  gemini: {
-    apiKey: process.env.GEMINI_API_KEY || "d",
-    modelName: process.env.GEMINI_MODEL_NAME || 'gemini-2.5-flash',
+  openai: {
+    apiKey: process.env.OPENAI_API_KEY || '',
+    modelName: process.env.OPENAI_MODEL_NAME || 'gpt-4o',
   },
 };

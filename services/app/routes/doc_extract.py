@@ -10,14 +10,18 @@ from fastapi.responses import PlainTextResponse
 from ..services.doc_extract_service import DocumentService
 from ..services.knowledge_store_service import KnowledgeStoreService
 from ..redis_client import redis_client
+from ..services.embedding_service import process_embeddings_for_source
 
 router = APIRouter()
 
-UPLOAD_DIR = "uploads"
+# Use consistent upload directory path
+# Always relative to the project root (src/services)
+UPLOAD_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../uploads"))
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+print(f"[doc_extract] UPLOAD_DIR initialized: {UPLOAD_DIR}")
 
 
-def process_pdf_extraction(
+async def process_pdf_extraction(
     user: dict,
     file_path: str, 
     image_dir: str,
@@ -29,19 +33,29 @@ def process_pdf_extraction(
 ) -> str:
     
     print(f"Processing PDF extraction for file: {fileName}")
+    require_embeddings = bool(job_id and batch_id and redis_client)
 
-    def update_progress(p: int):
+    def update_progress(p: int, status: str = "processing", error: str | None = None):
         if job_id and redis_client and batch_id:
-            redis_client.hset(f"job:{job_id}", mapping={"progress": str(p), "status": "processing"})
-            print(f"Job {job_id} progress updated to {p}%")
-            # redis_client.rpush(f"batch:{batch_id}:jobs", job_id)
-            redis_client.publish(f"batch-events:{batch_id}", json.dumps({
-                "type": "job_updated",
-                "jobId": job_id,
-                "status": "processing",
-                "progress": p,
-                "timestamp": int(__import__('time').time() * 1000)
-            }))
+            mapping = {"progress": str(p), "status": status}
+            if error:
+                mapping["error"] = error
+
+            redis_client.hset(f"job:{job_id}", mapping=mapping)
+            print(f"Job {job_id} progress updated to {p}% ({status})")
+            redis_client.publish(
+                f"batch-events:{batch_id}",
+                json.dumps(
+                    {
+                        "type": "job_updated",
+                        "jobId": job_id,
+                        "status": status,
+                        "progress": p,
+                        "error": error or "",
+                        "timestamp": int(__import__("time").time() * 1000),
+                    }
+                ),
+            )
 
 
 
@@ -70,11 +84,13 @@ def process_pdf_extraction(
         text_with_urls = DocumentService.replace_placeholders_with_urls(text_with_placeholders, image_urls)
         unified_content = DocumentService.create_unified_content(text_with_urls, extracted_tables)
         update_progress(90)
+        store_result = None
 
-        # Background DB Storage
+        # Background DB Storage (required for embeddings, because chunks are read from DB)
         try:
+            update_progress(92, status="chunking")
             print("Attempting to log knowledge source to DB...", fileName)
-            KnowledgeStoreService.create_knowledge_source(
+            store_result = KnowledgeStoreService.create_knowledge_source(
                 title=fileName or "Untitled Document",
                 raw_content=unified_content,
                 source_type="pdf",
@@ -85,15 +101,40 @@ def process_pdf_extraction(
                 name=user.get("name")
             )
         except Exception as db_err:
+            if require_embeddings:
+                update_progress(92, status="failed", error=str(db_err))
+                raise
             print(f"DB Logging Error (Extraction still succeeds): {db_err}")
 
-        if job_id and redis_client:
+        # If this is a batch job, do NOT mark completed until embeddings are stored
+        if require_embeddings:
+            if not store_result or not store_result.get("id"):
+                update_progress(95, status="failed", error="Failed to store knowledge source")
+                raise HTTPException(status_code=500, detail="Failed to store knowledge source")
+
+            source_id = store_result["id"]
+            chunks = KnowledgeStoreService.get_chunks_by_source_id(source_id) or []
+            if not chunks:
+                update_progress(95, status="failed", error="No chunks created")
+                raise HTTPException(status_code=500, detail="No chunks created")
+
+            update_progress(96, status="embedding")
+            await process_embeddings_for_source(chunks)
+            update_progress(100, status="completed")
+
+        # Non-batch callers keep previous behavior (no waiting for embeddings)
+        elif job_id and redis_client:
             redis_client.hset(f"job:{job_id}", mapping={"progress": "100", "status": "completed"})
 
         return unified_content
 
     except Exception as e:
         print(f"Error processing PDF: {str(e)}")
+        if require_embeddings:
+            try:
+                update_progress(100, status="failed", error=str(e))
+            except Exception:
+                pass
         raise e
     finally:
         # Cleanup
@@ -143,7 +184,7 @@ async def extract_text_and_images(
 
     # Process PDF synchronously and return unified content
     try:
-        unified_content = process_pdf_extraction(
+        unified_content = await process_pdf_extraction(
             user=user,
             file_path=file_path,
             image_dir=image_dir,
@@ -179,7 +220,7 @@ async def extract_internal(payload: dict):
         image_dir = os.path.join("uploads", f"img_{uuid.uuid4()}")
         os.makedirs(image_dir, exist_ok=True)
 
-        result = process_pdf_extraction(
+        await process_pdf_extraction(
             user=user,
             file_path=file_path,
             image_dir=image_dir,

@@ -28,6 +28,19 @@ export class AuthService {
     return user;
   }
 
+  // Delete all sessions for a user (used during logout)
+  async deleteUserSessions(userId: string) {
+    try {
+      await this.prisma.session.deleteMany({
+        where: { userId },
+      });
+      console.log(`Sessions deleted for user: ${userId}`);
+    } catch (error) {
+      console.error(`Error deleting sessions for user ${userId}:`, error);
+      // Don't throw - logout should succeed even if session deletion fails
+    }
+  }
+
   // Google Login
   // This is the function that is called when the user clicks the Google Login button
 
@@ -111,7 +124,8 @@ export class AuthService {
           },
         });
         console.log('Existing session updated');
-        return res.redirect(`${process.env.FRONTEND_URL}/chat`);
+        // Include tokens in URL for cross-domain authentication
+        return res.redirect(`${process.env.FRONTEND_URL}/callback?accessToken=${encodeURIComponent(accessToken)}&refreshToken=${encodeURIComponent(refreshToken)}`);
       } else {
         await this.prisma.session.create({
           data: {
@@ -123,7 +137,8 @@ export class AuthService {
         });
       }
       console.log('New session created');
-      return res.redirect(`${process.env.FRONTEND_URL}/chat`);
+      // Include tokens in URL for cross-domain authentication
+      return res.redirect(`${process.env.FRONTEND_URL}/callback?accessToken=${encodeURIComponent(accessToken)}&refreshToken=${encodeURIComponent(refreshToken)}`);
     }
     const accessToken = jwt.sign(
         { userId: existingUser.id },
@@ -169,7 +184,8 @@ export class AuthService {
           },
         });
         console.log('Existing session updated');
-        return res.redirect(`${process.env.FRONTEND_URL}/chat`);
+        // Include tokens in URL for cross-domain authentication
+        return res.redirect(`${process.env.FRONTEND_URL}/callback?accessToken=${encodeURIComponent(accessToken)}&refreshToken=${encodeURIComponent(refreshToken)}`);
       } else {
         await this.prisma.session.create({
           data: {
@@ -180,7 +196,8 @@ export class AuthService {
           },
         });
         console.log('New session created');
-        return res.redirect(`${process.env.FRONTEND_URL}/chat`);
+        // Include tokens in URL for cross-domain authentication
+        return res.redirect(`${process.env.FRONTEND_URL}/callback?accessToken=${encodeURIComponent(accessToken)}&refreshToken=${encodeURIComponent(refreshToken)}`);
       }
 
   }
@@ -411,7 +428,9 @@ export class AuthService {
     //   return nestError(500, 'Failed to set user active', error)(res);
     // }
 
-    // Return user data along with success
+    // Return user data along with tokens for cross-domain authentication
+    // Tokens are included in response body so frontend can store in localStorage
+    // This is necessary when frontend and backend are on different domains
     const userData = {
       id: user.id,
       email: user.email,
@@ -420,6 +439,10 @@ export class AuthService {
       role: user.role,
       company: user.company,
       profileImageUrl: user.profileImageUrl,
+      // Include tokens for cross-domain authentication (localStorage approach)
+      accessToken,
+      refreshToken,
+      expiresIn: 3600, // 1 hour in seconds
     };
 
     return nestResponse(200, 'Login successful', userData)(res);
@@ -561,4 +584,18 @@ async refreshAccessToken(req: any, res: any) {
     return nestError(500, 'Internal Server Error')(res);
   }
 }
+
+  // Generate a short-lived token for WebSocket authentication
+  async generateWsToken(user: any): Promise<string> {
+    const wsToken = jwt.sign(
+      { 
+        userId: user.id, 
+        email: user.email,
+        type: 'ws_auth' 
+      },
+      appConfig.jwtSecret as string,
+      { expiresIn: '5m' } // Short-lived token for WebSocket connection
+    );
+    return wsToken;
+  }
 }

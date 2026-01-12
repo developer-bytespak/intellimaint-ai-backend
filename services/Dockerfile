@@ -15,6 +15,8 @@ RUN pip install --no-cache-dir -r requirements.txt --retries 5
 # Copy application code
 COPY . .
 
+# Note: scripts/chunking/pdf_universal_chunker.py is now included in services/
+
 # Expose port 8000
 EXPOSE 8000
 

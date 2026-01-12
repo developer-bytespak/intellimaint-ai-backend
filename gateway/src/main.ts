@@ -25,11 +25,16 @@ async function bootstrap() {
     .split(',')
     .map((origin) => origin.trim());
 
-  // Add production frontend if not already in the list
-  const productionFrontend = 'https://intellimaint-ai.vercel.app';
-  if (!allowedOrigins.includes(productionFrontend)) {
-    allowedOrigins.push(productionFrontend);
-  }
+  // Add production frontends if not already in the list
+  const productionFrontends = [
+    'https://intellimaint-ai.onrender.com',
+    'https://intellimaint-ai.vercel.app',
+  ];
+  productionFrontends.forEach((frontend) => {
+    if (!allowedOrigins.includes(frontend)) {
+      allowedOrigins.push(frontend);
+    }
+  });
 
   console.log('CORS enabled for origins:', allowedOrigins);
 

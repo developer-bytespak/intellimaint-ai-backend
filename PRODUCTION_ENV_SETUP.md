@@ -1,15 +1,23 @@
 # Production Environment Variables Setup
 
-## ⚙️ Railway (Services Backend)
+## ⚙️ Railway (Services Backend - Python)
 
 Set these environment variables in your Railway dashboard:
 
 ```env
 # CORS Configuration
-ALLOWED_ORIGINS=https://intellimaint-ai.vercel.app,http://localhost:3000,http://localhost:3001
+ALLOWED_ORIGINS=https://intellimaint-ai.vercel.app,https://intellimaint-ai.onrender.com,http://localhost:3000,http://localhost:3001
 
 # Database (if needed)
 DATABASE_URL=your_postgres_connection_string
+
+# Redis Configuration
+REDIS_URL=redis://your-redis-instance:6379
+REDIS_PASSWORD=your_redis_password
+
+# Gateway URL (for calling queue endpoints from services)
+# ⚠️ IMPORTANT: This must point to your Render Gateway service
+GATEWAY_URL=https://your-gateway.onrender.com/api/v1
 
 # AI Service API Keys
 DEEPGRAM_API_KEY=your_deepgram_key
@@ -28,13 +36,13 @@ PORT=8000
 
 ---
 
-## ⚙️ Render (Gateway Backend)
+## ⚙️ Render (Gateway Backend - NestJS)
 
 Set these environment variables in your Render dashboard:
 
 ```env
 # CORS Configuration
-FRONTEND_URL=https://intellimaint-ai.vercel.app,http://localhost:3000,http://localhost:3001
+FRONTEND_URL=https://intellimaint-ai.vercel.app,https://intellimaint-ai.onrender.com,http://localhost:3000,http://localhost:3001
 
 # Database
 DATABASE_URL=your_postgres_connection_string
@@ -44,11 +52,12 @@ JWT_SECRET=your_secret_key
 JWT_ACCESS_TOKEN_EXPIRY=15m
 JWT_REFRESH_TOKEN_EXPIRY=7d
 
-# AI Services Connection (Railway URL)
-AI_SERVICES_URL=https://intellimaint-ai-backend-production.up.railway.app
+# Python Services URL (for calling AI services from gateway worker)
+# ⚠️ IMPORTANT: This must point to your Railway services
+PYTHON_BASE_URL=https://your-railway-service.railway.app
 
-# Redis (if using)
-REDIS_URL=your_redis_url
+# Redis Configuration
+REDIS_URL=your_redis_connection_string
 REDIS_PORT=6379
 
 # AWS S3 (for media uploads)
@@ -75,6 +84,9 @@ SMTP_PASSWORD=your_app_password
 # Gemini AI
 GEMINI_API_KEY=your_gemini_key
 GEMINI_MODEL_NAME=gemini-2.5-flash
+
+# Vercel Blob Storage (for documents)
+BLOB_READ_WRITE_TOKEN=your_vercel_blob_token
 ```
 
 ---
@@ -88,14 +100,35 @@ Set these environment variables in your Vercel project settings:
 NEXT_PUBLIC_NEST_URL=https://your-gateway.onrender.com
 
 # Services on Railway
-NEXT_PUBLIC_API_URL=https://intellimaint-ai-backend-production.up.railway.app
+NEXT_PUBLIC_API_URL=https://your-railway-service.railway.app
 
 # WebSocket on Railway
-NEXT_PUBLIC_WEBSOCKET_URL=wss://intellimaint-ai-backend-production.up.railway.app/api/v1/stream
+NEXT_PUBLIC_WEBSOCKET_URL=wss://your-railway-service.railway.app/api/v1/stream
 
 # Blob storage (if using)
 BLOB_READ_WRITE_TOKEN=your_vercel_blob_token
 ```
+
+---
+
+## 🔗 Critical Environment Variables for Document Processing Pipeline
+
+### The Issue
+The document processing pipeline (extract → chunk → embed) requires communication between services:
+
+1. **Frontend** → **Gateway** (authentication, document upload)
+2. **Gateway** → **Services** (extract, chunk, embed)
+3. **Services** → **Gateway** (enqueue jobs to BullMQ)
+
+### The Fix
+You MUST set these environment variables correctly:
+
+| Service | Variable | Should Point To | Example |
+|---------|----------|-----------------|---------|
+| **Gateway (Render)** | `PYTHON_BASE_URL` | Railway Services | `https://your-railway-service.railway.app` |
+| **Services (Railway)** | `GATEWAY_URL` | Render Gateway | `https://your-gateway.onrender.com/api/v1` |
+
+**Without these, document processing will fail after 1-2 seconds!**
 
 ---
 

@@ -24,38 +24,18 @@ export class AuthController {
   // Google Login
   @Get('google')
   googleAuth(@Req() req: Request, @Res() res: Response) {
-    const googleToken = req.cookies?.google_accessToken;
-    const localToken = req.cookies?.local_accessToken;
     const role = (req as any).query.role as string;
     const company = (req as any).query.company as string;
 
-    // If user already has a valid token, redirect to chat
-    if (googleToken || localToken) {
-      try {
-        return res.redirect(`${process.env.FRONTEND_URL}/chat`);
-      } catch (e) {
-        // Clear cookies if there's an error
-        res.clearCookie('google_accessToken', {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
-        });
-        res.clearCookie('local_accessToken', {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
-        });
-      }
-    }
+    // Always proceed with OAuth flow to allow re-authentication
+    // The frontend handles the "already logged in" case via useUser hook
     const passportInstance =
       (req as any)._passport?.instance || require('passport');
 
     return passportInstance.authenticate('google', {
       scope: ['email', 'profile'],
-      prompt: 'consent',
       accessType: 'offline',
+      prompt: 'select_account',
       state: JSON.stringify({ role, company }),
     } as any)(req, res);
   }
@@ -112,13 +92,10 @@ export class AuthController {
         company,
         res as any,
       );
-      const { accessToken, isNewUser, user } = authResult as {
-        accessToken: string;
-        isNewUser: boolean;
-        user: any;
-      };
-
-      return res.redirect(`${process.env.FRONTEND_URL}/chat`);
+      
+      // authResult is already a redirect response from googleLogin service
+      // Don't override it - just return it
+      return authResult;
     } catch (error) {
       if (error.status === 400) {
         return res.redirect(
@@ -155,28 +132,22 @@ export class AuthController {
     if (!userId) {
       return nestError(400, 'User not found')(res);
     }
-    // await redisDeleteKey(`user_active:${userId}`);
 
-    res.clearCookie('local_accessToken', {
+    // Delete session from database to invalidate refresh token
+    await this.authService.deleteUserSessions(userId);
+
+    const clearCookieOptions = {
       httpOnly: true,
-      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production' || process.env.FORCE_SECURE_COOKIES === 'true',
+      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
       path: '/',
-    });
-    res.clearCookie('google_accessToken', {
-      httpOnly: true,
-      sameSite: 'lax',
-      path: '/',
-    });
-    res.clearCookie('local_refreshToken', {
-      httpOnly: true,
-      sameSite: 'lax',
-      path: '/',
-    });
-    res.clearCookie('google_refreshToken', {
-      httpOnly: true,
-      sameSite: 'lax',
-      path: '/',
-    });
+    };
+
+    res.clearCookie('local_accessToken', clearCookieOptions);
+    res.clearCookie('google_accessToken', clearCookieOptions);
+    res.clearCookie('local_refreshToken', clearCookieOptions);
+    res.clearCookie('google_refreshToken', clearCookieOptions);
+    
     return nestResponse(200, 'Logged out successfully')(res);
   }
 
@@ -271,6 +242,30 @@ export class AuthController {
     @Res() res: Response,
   ) {
     return this.authService.resetPassword(body, res as any);
+  }
+
+  // WebSocket Authentication - generates a temporary token for WebSocket connections
+  @UseGuards(JwtAuthGuard)
+  @Get('ws-auth')
+  async wsAuth(@Req() req: Request, @Res() res: Response) {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return nestError(401, 'Unauthorized')(res);
+      }
+
+      // Generate a short-lived token for WebSocket authentication
+      const wsToken = await this.authService.generateWsToken(user);
+      
+      return nestResponse(200, 'WebSocket auth token generated', { 
+        token: wsToken,
+        userId: user.id,
+        expiresIn: 300 // 5 minutes
+      })(res);
+    } catch (error) {
+      console.error('WS Auth error:', error);
+      return nestError(500, 'Failed to generate WebSocket auth token')(res);
+    }
   }
 }
 

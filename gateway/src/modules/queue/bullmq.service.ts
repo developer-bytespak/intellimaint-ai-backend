@@ -10,6 +10,9 @@ export const pdfQueue = new Queue(PDF_QUEUE_NAME, {
     backoff: { type: "exponential", delay: 2000 },
     removeOnComplete: true,
     removeOnFail: false,
+    // Note: BullMQ's DefaultJobOptions does not support `timeout`.
+    // Long-running behavior is controlled via Worker options (lockDuration, lockRenewTime)
+    // and per-request timeouts within the worker (e.g., Axios).
   },
 });
 
