@@ -37,6 +37,13 @@ export class AdminController {
       return this.adminService.getDashboardStats(res, y);
     }
 
+    @Get('/dashboard/trends')
+    async getPlatformTrends(@Res() res: Response , @Req() req:any) {
+      // Accept year and month from query params
+      const y = req.query.year ? parseInt(req.query.year) : undefined;
+      return this.adminService.getDashboardTrends(res, y);
+    }
+
   // @Put('users/:id/role')
   // async updateUserRole(@Param('id') id: string, @Body() roleDto: any) {
   //   return this.adminService.updateUserRole(id, roleDto);

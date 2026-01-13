@@ -268,6 +268,85 @@ export class AdminService {
 
     return nestResponse(200, "Dashboard stats fetched successfully!", stats)(res as any);
   }
+  
+  async getDashboardTrends(res: Response, year?: number, month?: number) {
 
+    // Helper to get start/end dates
+    function getDateRange(year?: number, month?: number) {
+      if (year && month) {
+        // Specific month in year
+        const start = new Date(year, month - 1, 1);
+        const end = new Date(year, month, 1);
+        return { start, end };
+      } else if (year) {
+        // Whole year
+        const start = new Date(year, 0, 1);
+        const end = new Date(year + 1, 0, 1);
+        return { start, end };
+      }
+      // All time
+      return { start: undefined, end: undefined };
+    }
+
+    // Get date range for filtering
+    const { start, end } = getDateRange(year, month);
+
+    // Time series aggregation helpers
+    async function getMonthlyCounts(model, dateField = 'createdAt', filter = {}) {
+      const where = { ...filter };
+      if (start && end) {
+        where[dateField] = { gte: start, lt: end };
+      } else if (start) {
+        where[dateField] = { gte: start };
+      }
+      const records = await model.findMany({ where });
+      // Group by month
+      const counts = {};
+      records.forEach(r => {
+        const d = new Date(r[dateField]);
+        const key = `${d.getFullYear()}-${('0' + (d.getMonth() + 1)).slice(-2)}`;
+        counts[key] = (counts[key] || 0) + 1;
+      });
+      // Convert to array of { date, value }
+      return Object.entries(counts).map(([date, value]) => ({ date, value }));
+    }
+
+    async function getYearlyCounts(model, dateField = 'createdAt', filter = {}) {
+      const where = { ...filter };
+      if (start && end) {
+        where[dateField] = { gte: start, lt: end };
+      } else if (start) {
+        where[dateField] = { gte: start };
+      }
+      const records = await model.findMany({ where });
+      // Group by year
+      const counts = {};
+      records.forEach(r => {
+        const d = new Date(r[dateField]);
+        const key = `${d.getFullYear()}`;
+        counts[key] = (counts[key] || 0) + 1;
+      });
+      // Convert to array of { date, value }
+      return Object.entries(counts).map(([date, value]) => ({ date, value }));
+    }
+  // Sirf trends data fetch karo
+  let userTrends, uploadTrends, sessionTrends;
+  
+  if (year) {
+    userTrends = await getMonthlyCounts(this.prisma.user);
+    uploadTrends = await getMonthlyCounts(this.prisma.repository);
+    sessionTrends = await getMonthlyCounts(this.prisma.chatSession);
+  } else {
+    userTrends = await getYearlyCounts(this.prisma.user);
+    uploadTrends = await getYearlyCounts(this.prisma.repository);
+    sessionTrends = await getYearlyCounts(this.prisma.chatSession);
+  }
+  
+  return nestResponse(200, "Trends fetched!", {
+    userGrowth: userTrends,
+    uploadTrends,
+    sessionTrends,
+  })(res as any);
+}
 
 }
