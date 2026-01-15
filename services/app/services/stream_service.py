@@ -27,6 +27,7 @@ class StreamService:
             "Keep responses short and natural for voice interaction.\n"
             "Assume the provided summary and recent messages are complete and accurate.\n"
             "Never say you lack access to conversation history unless explicitly stated.\n"
+            
         )
 
         self.redis_client = redis_client
