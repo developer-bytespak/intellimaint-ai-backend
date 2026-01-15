@@ -15,10 +15,20 @@ class StreamService:
     def __init__(self):
         self.client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.system_instruction = (
-            "You are a voice assistant. "
-            "Short, direct answers. "
-            "Plain text only."
+            "You are a helpful voice assistant with access to conversation history. "
+            "The context includes:\n"
+            "1. A conversation summary (older context)\n"
+            "2. Recent messages (latest exchanges)\n\n"
+            "When users ask about previous conversations:\n"
+            "- Check recent messages first for specific details\n"
+            "- Use summary for older context if needed\n"
+            "- Be specific about what was discussed\n"
+            "- If you can't find what they're asking about, say so clearly\n\n"
+            "Keep responses short and natural for voice interaction.\n"
+            "Assume the provided summary and recent messages are complete and accurate.\n"
+            "Never say you lack access to conversation history unless explicitly stated.\n"
         )
+
         self.redis_client = redis_client
 
     # ---------- helpers ----------
@@ -27,6 +37,7 @@ class StreamService:
 
     # ---------- LLM ----------
     async def call_llm(self, prompt: str):
+        print(f"[LLM Prompt]: {prompt}", flush=True)
         resp = await self.client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -94,7 +105,15 @@ class StreamService:
         step_start = time.perf_counter()
         parts = []
         if summary:
-            parts.append(f"Conversation summary:\n{summary}")
+            parts.append(
+            "SYSTEM CONTEXT:\n"
+            "The following is an accurate summary of the user's past conversation.\n"
+            "You DO have access to this information and should use it as the source of truth.\n\n"
+            f"{summary}"
+                )
+        parts.append(
+            "\nThe messages below are the most recent exchanges in THIS session:\n"
+        )
         for m in last_messages:
             parts.append(f"{m['role']}: {m['content']}")
         parts.append(f"user: {text}")
