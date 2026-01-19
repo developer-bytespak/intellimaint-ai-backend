@@ -98,12 +98,26 @@ export class RepositoryService {
       console.error('Error deleting from blob storage:', error);
     }
 
-    // Delete from database
+    // Delete associated KnowledgeSource and its chunks (cascade delete)
+    // KnowledgeChunks will be automatically deleted due to onDelete: Cascade in schema
+    if (document.knowledgeSourceId) {
+      try {
+        await this.prisma.knowledgeSource.delete({
+          where: { id: document.knowledgeSourceId },
+        });
+        console.log(`Deleted KnowledgeSource ${document.knowledgeSourceId} and its chunks`);
+      } catch (error) {
+        console.error('Error deleting knowledge source:', error);
+        // Continue with repository deletion even if knowledge source deletion fails
+      }
+    }
+
+    // Delete from repository table
     await this.prisma.repository.delete({
       where: { id },
     });
 
-    return { success: true, message: 'Document deleted successfully' };
+    return { success: true, message: 'Document and associated data deleted successfully' };
   }
 }
 
