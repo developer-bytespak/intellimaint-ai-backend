@@ -1,35 +1,23 @@
-
+from pyexpat.errors import messages
+from app.redis_client import redis_client
+import json
 
 import os
-import psycopg2
 from psycopg2.extras import RealDictCursor
-from psycopg2.pool import ThreadedConnectionPool
+from app.services.shared_db_pool import SharedDBPool
 
 
 class ChatMessageService:
     DB_URL = os.getenv("DATABASE_URL")
 
-    # 🔹 Create ONE pool per process
-    _pool: ThreadedConnectionPool | None = None
-
-    @classmethod
-    def _get_pool(cls) -> ThreadedConnectionPool:
-        if cls._pool is None:
-            cls._pool = ThreadedConnectionPool(
-                minconn=1,
-                maxconn=10,          # adjust if needed
-                dsn=cls.DB_URL,
-            )
-        return cls._pool
-
+    # ✅ Use shared pool instead of separate pool
     @classmethod
     def _get_conn(cls):
-        return cls._get_pool().getconn()
+        return SharedDBPool.get_connection()
 
     @classmethod
     def _put_conn(cls, conn):
-        cls._get_pool().putconn(conn)
-
+        SharedDBPool.return_connection(conn)
 
     # -----------------------------
     # WRITE: create chat session
@@ -39,13 +27,12 @@ class ChatMessageService:
         if not session_id or not user_id:
             return
 
-        pool = ChatMessageService._get_pool()
-        conn = pool.getconn()
+        conn = ChatMessageService._get_conn()
         try:
             cur = conn.cursor()
             cur.execute(
                 """
-                INSERT INTO chat_sessions (id, user_id, status, created_at, updated_at,title)
+                INSERT INTO chat_sessions (id, user_id, status, created_at, updated_at, title)
                 VALUES (%s, %s, %s, now(), now(), %s)
                 ON CONFLICT (id) DO NOTHING;
                 """,
@@ -54,7 +41,7 @@ class ChatMessageService:
             conn.commit()
             cur.close()
         finally:
-            pool.putconn(conn)
+            ChatMessageService._put_conn(conn)
 
     # -----------------------------
     # READ: last messages
@@ -63,9 +50,14 @@ class ChatMessageService:
     def get_last_messages(session_id, limit=5):
         if not session_id:
             return []
+        
+        cache_key = f"last_msgs:{session_id}:{limit}"
 
-        pool = ChatMessageService._get_pool()
-        conn = pool.getconn()
+        cached = redis_client.get(cache_key)
+        if cached:
+            return json.loads(cached)
+
+        conn = ChatMessageService._get_conn()
         try:
             cur = conn.cursor(cursor_factory=RealDictCursor)
             cur.execute("""
@@ -77,9 +69,20 @@ class ChatMessageService:
             """, (session_id, limit))
             rows = cur.fetchall()
             cur.close()
-            return list(reversed(rows))
+            messages = list(reversed(rows))
+
+            redis_client.setex(
+                cache_key,
+                10,  # 🔥 short TTL (10 sec is perfect for voice)
+                json.dumps(messages)
+            )
+
+            return messages
+        except Exception as e:
+            print(f"[ChatMessageService] ❌ get_last_messages failed: {e}", flush=True)
+            return []
         finally:
-            pool.putconn(conn)
+            ChatMessageService._put_conn(conn)
 
     # -----------------------------
     # READ: summary
@@ -88,9 +91,14 @@ class ChatMessageService:
     def get_summary(session_id):
         if not session_id:
             return None
+        
+        cache_key = f"summary:{session_id}:10"
+        
+        cached = redis_client.get(cache_key)
+        if cached:
+            return cached.encode("utf-8")
 
-        pool = ChatMessageService._get_pool()
-        conn = pool.getconn()
+        conn = ChatMessageService._get_conn()
         try:
             cur = conn.cursor()
             cur.execute("""
@@ -100,9 +108,20 @@ class ChatMessageService:
             """, (session_id,))
             row = cur.fetchone()
             cur.close()
-            return row[0] if row else None
+            summary =  row[0] if row else None
+            if summary:
+                redis_client.setex(
+                    cache_key,
+                    1800,  # 🔥 30 minutes (summary rarely changes)
+                    summary
+                )
+
+            return summary
+        except Exception as e:
+            print(f"[ChatMessageService] ❌ get_summary failed: {e}", flush=True)
+            return None
         finally:
-            pool.putconn(conn)
+            ChatMessageService._put_conn(conn)
 
     # -----------------------------
     # WRITE: save message
@@ -117,8 +136,7 @@ class ChatMessageService:
         completion_tokens=None,
         total_tokens=None,
     ):
-        pool = ChatMessageService._get_pool()
-        conn = pool.getconn()
+        conn = ChatMessageService._get_conn()
         try:
             cur = conn.cursor()
             cur.execute("""
@@ -137,16 +155,19 @@ class ChatMessageService:
             ))
             conn.commit()
             cur.close()
+            # after DB insert
+            redis_client.delete(f"last_msgs:{session_id}:5")
+            redis_client.delete(f"last_msgs:{session_id}:10")
+
         finally:
-            pool.putconn(conn)
+            ChatMessageService._put_conn(conn)
 
     # -----------------------------
     # WRITE: update summary
     # -----------------------------
     @staticmethod
     def update_summary(session_id, summary):
-        pool = ChatMessageService._get_pool()
-        conn = pool.getconn()
+        conn = ChatMessageService._get_conn()
         try:
             cur = conn.cursor()
             cur.execute("""
@@ -156,6 +177,11 @@ class ChatMessageService:
             """, (summary, session_id))
             conn.commit()
             cur.close()
+                    # 🔥 REDIS SYNC
+            redis_client.setex(
+                f"summary:{session_id}",
+                1800,
+                summary
+            )
         finally:
-            pool.putconn(conn)
-
+            ChatMessageService._put_conn(conn)
