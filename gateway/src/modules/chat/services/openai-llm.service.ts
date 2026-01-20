@@ -151,17 +151,40 @@ export class OpenAILLMService {
 
   /**
    * Helper: Format chunks into readable context
+   * Chunks are sorted by sourceId and chunkIndex to maintain document coherence
+   * when adjacent chunks are included for context expansion
+   * 
+   * Note: Chunks can be up to 600 tokens (~2400 chars), so we use a higher limit
+   * to ensure important information at the end of chunks isn't truncated.
    */
   private formatChunksForPrompt(chunks: KnowledgeChunkData[]): string {
-    const MAX_PER_CHUNK_CHARS = 600;
+    // Allow up to 3000 chars per chunk to match chunking config (max 600 tokens ≈ 2400 chars)
+    // Adding buffer for safety
+    const MAX_PER_CHUNK_CHARS = 3000;
     const parts: string[] = [];
-    chunks.forEach((c, idx) => {
-      const title = c.heading?.trim() || `Chunk ${idx + 1}`;
-      const source = c.sourceId ? ` (source: ${c.sourceId})` : '';
-      const text = (c.content || '').replace(/\s+/g, ' ').trim();
-      const snippet = text.length > MAX_PER_CHUNK_CHARS ? text.slice(0, MAX_PER_CHUNK_CHARS) + '…' : text;
-      parts.push(`[${title}]${source}: ${snippet}`);
-    });
+    
+    // Group chunks by sourceId for better context presentation
+    const chunksBySource = new Map<string, KnowledgeChunkData[]>();
+    for (const chunk of chunks) {
+      const sourceChunks = chunksBySource.get(chunk.sourceId) || [];
+      sourceChunks.push(chunk);
+      chunksBySource.set(chunk.sourceId, sourceChunks);
+    }
+    
+    // Sort chunks within each source by chunkIndex for coherent reading order
+    for (const [sourceId, sourceChunks] of chunksBySource) {
+      sourceChunks.sort((a, b) => (a.chunkIndex ?? 0) - (b.chunkIndex ?? 0));
+      
+      sourceChunks.forEach((c) => {
+        const chunkLabel = c.chunkIndex !== undefined ? `Chunk ${c.chunkIndex}` : '';
+        const title = c.heading?.trim() || chunkLabel || 'Content';
+        const sourceInfo = ` (source: ${sourceId}${chunkLabel ? `, ${chunkLabel}` : ''})`;
+        const text = (c.content || '').replace(/\s+/g, ' ').trim();
+        const snippet = text.length > MAX_PER_CHUNK_CHARS ? text.slice(0, MAX_PER_CHUNK_CHARS) + '…' : text;
+        parts.push(`[${title}]${sourceInfo}: ${snippet}`);
+      });
+    }
+    
     return parts.join('\n');
   }
 

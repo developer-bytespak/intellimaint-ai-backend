@@ -19,6 +19,13 @@ if str(SCRIPTS_CHUNKING_PATH) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_CHUNKING_PATH))
 
 try:
+    from improved_manual_chunker import ImprovedChunkingPipeline
+    HAS_IMPROVED_CHUNKER = True
+except ImportError as e:
+    logger.warning(f"Could not import ImprovedChunkingPipeline: {e}")
+    HAS_IMPROVED_CHUNKER = False
+
+try:
     from pdf_universal_chunker import UniversalChunkingPipeline
     HAS_UNIVERSAL_CHUNKER = True
 except ImportError as e:
@@ -416,11 +423,15 @@ def _process_source_internal(source_id: str, dry_run: bool, overwrite: bool, dsn
             if raw is None:
                 raise ValueError("raw_content is empty")
 
-        # Use the universal chunker with overlap (preferred) or fall back to iFixit-style
-        if HAS_UNIVERSAL_CHUNKER:
+        # Use the improved chunker (preferred), then universal, then iFixit-style fallback
+        if HAS_IMPROVED_CHUNKER:
+            logger.info(f"Using improved chunker for source {source_id}")
+            chunks = _process_with_improved_chunker(raw, source_id)
+        elif HAS_UNIVERSAL_CHUNKER:
+            logger.info(f"Using universal chunker for source {source_id}")
             chunks = _process_with_universal_chunker(raw, source_id)
         else:
-            logger.warning("Universal chunker not available, falling back to iFixit-style chunking")
+            logger.warning("No advanced chunker available, falling back to iFixit-style chunking")
             chunks = _process_with_ifixit_chunker(raw, source_id)
 
         if dry_run:
@@ -462,6 +473,34 @@ def _process_source_internal(source_id: str, dry_run: bool, overwrite: bool, dsn
 
     finally:
         conn.close()
+
+
+def _process_with_improved_chunker(raw_content: str, source_id: str) -> List[Dict[str, Any]]:
+    """
+    Process raw content using the improved manual chunker.
+    Better heading detection, less aggressive filtering, sentence-aware splitting.
+    """
+    pipeline = ImprovedChunkingPipeline(
+        min_tokens=80,
+        max_tokens=600,
+        target_tokens=350,
+        overlap_tokens=40
+    )
+    chunk_objects = pipeline.process(raw_content, source_id=source_id)
+    
+    chunks = []
+    for chunk in chunk_objects:
+        chunk_data = {
+            "chunk_index": chunk.chunk_index,
+            "heading": chunk.heading,
+            "content": chunk.content,
+            "token_count": chunk.token_count,
+            "metadata": chunk.metadata,
+        }
+        chunks.append(chunk_data)
+    
+    logger.info(f"Improved chunker created {len(chunks)} chunks for source {source_id}")
+    return chunks
 
 
 def _process_with_universal_chunker(raw_content: str, source_id: str) -> List[Dict[str, Any]]:
