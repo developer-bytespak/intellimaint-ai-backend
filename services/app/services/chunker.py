@@ -527,8 +527,8 @@ def _process_source_internal(source_id: str, dry_run: bool, overwrite: bool, dsn
             logger.info(f"Using universal chunker for source {source_id}")
             chunks = _process_with_universal_chunker(raw, source_id, document_identifier)
         else:
-            logger.warning("Universal chunker not available, falling back to iFixit-style chunking")
-            chunks = _process_with_ifixit_chunker(raw, source_id)
+            logger.warning("No advanced chunker available, falling back to iFixit-style chunking")
+            chunks = _process_with_ifixit_chunker(raw, source_id, document_identifier)
 
         if dry_run:
             return {"source_id": source_id, "num_chunks": len(chunks), "chunks": chunks}
