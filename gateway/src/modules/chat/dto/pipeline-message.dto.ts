@@ -59,6 +59,7 @@ export interface KnowledgeChunkData {
   metadata?: Record<string, unknown>;
   tokenCount?: number;
   sourceId: string;
+  chunkIndex?: number;
 }
 
 /**

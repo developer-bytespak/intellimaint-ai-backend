@@ -19,6 +19,13 @@ if str(SCRIPTS_CHUNKING_PATH) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_CHUNKING_PATH))
 
 try:
+    from improved_manual_chunker import ImprovedChunkingPipeline
+    HAS_IMPROVED_CHUNKER = True
+except ImportError as e:
+    logger.warning(f"Could not import ImprovedChunkingPipeline: {e}")
+    HAS_IMPROVED_CHUNKER = False
+
+try:
     from pdf_universal_chunker import UniversalChunkingPipeline
     HAS_UNIVERSAL_CHUNKER = True
 except ImportError as e:
@@ -617,7 +624,12 @@ def _process_with_universal_chunker(raw_content: str, source_id: str, document_t
     
     Each chunk is prefixed with the document title and enriched metadata for better RAG retrieval.
     """
-    pipeline = UniversalChunkingPipeline()
+    pipeline = ImprovedChunkingPipeline(
+        min_tokens=80,
+        max_tokens=600,
+        target_tokens=350,
+        overlap_tokens=40
+    )
     chunk_objects = pipeline.process(raw_content, source_id=source_id)
     
     chunks = []

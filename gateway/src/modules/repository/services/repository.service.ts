@@ -98,12 +98,52 @@ export class RepositoryService {
       console.error('Error deleting from blob storage:', error);
     }
 
-    // Delete from database
+    // Delete associated KnowledgeSource and its chunks (cascade delete)
+    // KnowledgeChunks will be automatically deleted due to onDelete: Cascade in schema
+    
+    // First try using knowledgeSourceId if it exists
+    if (document.knowledgeSourceId) {
+      try {
+        await this.prisma.knowledgeSource.delete({
+          where: { id: document.knowledgeSourceId },
+        });
+        console.log(`Deleted KnowledgeSource by ID: ${document.knowledgeSourceId}`);
+      } catch (error) {
+        console.error('Error deleting knowledge source by ID:', error);
+      }
+    } else {
+      // Fallback: Find and delete by matching title (fileName) and userId
+      // This handles cases where knowledgeSourceId was never linked
+      try {
+        const knowledgeSources = await this.prisma.knowledgeSource.findMany({
+          where: {
+            userId: userId,
+            title: document.fileName,
+            sourceType: 'pdf',
+          },
+        });
+
+        if (knowledgeSources.length > 0) {
+          for (const ks of knowledgeSources) {
+            await this.prisma.knowledgeSource.delete({
+              where: { id: ks.id },
+            });
+            console.log(`Deleted KnowledgeSource by title match: ${ks.id} (${ks.title})`);
+          }
+        } else {
+          console.log(`No KnowledgeSource found for fileName: ${document.fileName}`);
+        }
+      } catch (error) {
+        console.error('Error deleting knowledge source by title:', error);
+      }
+    }
+
+    // Delete from repository table
     await this.prisma.repository.delete({
       where: { id },
     });
 
-    return { success: true, message: 'Document deleted successfully' };
+    return { success: true, message: 'Document and associated data deleted successfully' };
   }
 }
 
