@@ -812,9 +812,23 @@ class DocumentService:
     # Merge text and tables
     # ------------------------------------
     @staticmethod
-    def create_unified_content(text: str, tables: List[Dict]) -> str:
-        """Build final output with tables at correct positions."""
-        final: List[str] = ["# Extracted PDF Content", ""]
+    def create_unified_content(text: str, tables: List[Dict], document_title: str = None) -> str:
+        """Build final output with tables at correct positions.
+        
+        Args:
+            text: Extracted text content
+            tables: List of extracted tables
+            document_title: Optional document title (e.g., filename) to use as header
+        """
+        # Use meaningful document title if provided, otherwise no generic header
+        if document_title:
+            # Clean up the title (remove .pdf extension if present)
+            clean_title = document_title
+            if clean_title.lower().endswith('.pdf'):
+                clean_title = clean_title[:-4]
+            final: List[str] = [f"# {clean_title}", ""]
+        else:
+            final: List[str] = []
 
         pages = text.split("# Page ")
 

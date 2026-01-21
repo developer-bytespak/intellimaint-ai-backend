@@ -13,6 +13,7 @@ import { OpenAIEmbeddingService } from './openai-embedding.service';
 import { RagRetrievalService } from './rag-retrieval.service';
 import { ContextManagerService } from './context-manager.service';
 import { OpenAILLMService } from './openai-llm.service';
+import { ChatTitleService } from './chat-title.service';
 
 @Injectable()
 export class ChatService {
@@ -30,6 +31,7 @@ export class ChatService {
     private ragRetrievalService: RagRetrievalService,
     private contextManagerService: ContextManagerService,
     private openaiLLMService: OpenAILLMService,
+    private chatTitleService: ChatTitleService,
   ) {}
 
   /**
@@ -430,20 +432,6 @@ export class ChatService {
       );
     }
 
-    // Update session's updatedAt timestamp
-    await this.prisma.chatSession.update({
-      where: { id: sessionId },
-      data: {
-        updatedAt: new Date(),
-        // Auto-generate title from first message if title is null
-        ...(session.title === null && {
-          title: dto.content && dto.content.length > 50 
-            ? dto.content.substring(0, 50) + '...' 
-            : (dto.content || 'New chat'),
-        }),
-      },
-    });
-
     // Return both messages
     return {
       userMessage,
@@ -461,11 +449,27 @@ export class ChatService {
       throw new BadRequestException('Message must have either content or images');
     }
 
+    // Pre-generate title before creating session (to avoid title updates during streaming)
+    let initialTitle = 'New Chat';
+    try {
+      initialTitle = await this.chatTitleService.generateTitle(
+        dto.content || '',
+        dto.images?.length || 0,
+      );
+      this.logger.debug(`Pre-generated title for createMessageWithSession: "${initialTitle}"`);
+    } catch (error) {
+      this.logger.warn(`Failed to pre-generate title, using fallback: ${error.message}`);
+      // Fallback to truncated message
+      initialTitle = dto.content && dto.content.length > 50 
+        ? dto.content.substring(0, 50) + '...' 
+        : (dto.content || 'New chat');
+    }
+
     // Create session first if it doesn't exist
     const session = await this.prisma.chatSession.create({
       data: {
         userId,
-        title: null, // Will be set from first message
+        title: initialTitle, // Set title upfront, no need to update later
         equipmentContext: [],
         status: ChatSessionStatus.active,
       },
@@ -582,14 +586,9 @@ export class ChatService {
       );
     }
 
-      // Update session's updatedAt timestamp and set title from first message
-      const titleText = dto.content?.trim() || (uploadedImageUrls.length > 0 ? 'Image analysis' : 'New chat');
-      const updatedSession = await this.prisma.chatSession.update({
+      // Fetch the updated session with all messages
+      const updatedSession = await this.prisma.chatSession.findUnique({
         where: { id: session.id },
-        data: {
-          updatedAt: new Date(),
-          title: titleText.length > 50 ? titleText.substring(0, 50) + '...' : titleText,
-        },
       include: {
         messages: {
           orderBy: {
@@ -673,6 +672,25 @@ export class ChatService {
         attachments: true,
       },
     });
+
+    // Auto-generate title for first message if session title is null
+    if (session.title === null) {
+      try {
+        const generatedTitle = await this.chatTitleService.generateTitle(
+          dto.content || '',
+          uploadedImageUrls.length,
+        );
+        this.logger.debug(`Generated title for session ${sessionId}: "${generatedTitle}"`);
+        
+        await this.prisma.chatSession.update({
+          where: { id: sessionId },
+          data: { title: generatedTitle },
+        });
+      } catch (error) {
+        this.logger.warn(`Failed to generate title: ${error.message}`);
+        // Fallback silently - title will remain null or be set in update below
+      }
+    }
 
     // Get full session with all messages for context
     const fullSession = await this.prisma.chatSession.findUnique({
@@ -814,11 +832,6 @@ export class ChatService {
               },
             })).id;
 
-            // Update session updatedAt
-            await this.prisma.chatSession.update({
-              where: { id: sessionId },
-              data: { updatedAt: new Date() },
-            });
 
             // Yield final chunk
             yield {
@@ -917,12 +930,28 @@ export class ChatService {
       }
     }
 
-    // Create new session
+    // Pre-generate title before creating session (to avoid title updates during streaming)
+    let initialTitle = 'New Chat';
+    try {
+      initialTitle = await this.chatTitleService.generateTitle(
+        dto.content || '',
+        uploadedImageUrls.length,
+      );
+      this.logger.debug(`Pre-generated title: "${initialTitle}"`);
+    } catch (error) {
+      this.logger.warn(`Failed to pre-generate title, using fallback: ${error.message}`);
+      // Fallback to truncated message
+      initialTitle = dto.content && dto.content.length > 50 
+        ? dto.content.substring(0, 50) + '...' 
+        : (dto.content || 'New Chat');
+    }
+
+    // Create new session with the pre-generated title
     const session = await this.prisma.chatSession.create({
       data: {
         userId,
         status: ChatSessionStatus.active,
-        title: dto.content?.substring(0, 100) || 'New Chat',
+        title: initialTitle, // Set title upfront, no need to update later
       },
     });
 
@@ -1070,7 +1099,6 @@ export class ChatService {
             token: chunk.token,
             done: false,
             fullText: chunk.fullText,
-            sessionId: session.id,
           };
         }
       }
@@ -1269,7 +1297,6 @@ export class ChatService {
       });
 
       // Update session timestamp
-      await tx.chatSession.update({ where: { id: sessionId }, data: { updatedAt: new Date() } });
 
       return {
         editedMessage: updatedMessage,
@@ -1542,6 +1569,33 @@ export class ChatService {
       // Stage 0: Store user message
       const userMessage = await this.storeUserMessage(userId, sessionId, dto);
       this.logger.debug(`User message stored: ${userMessage.id}`);
+
+      // Auto-generate title for first message if session title is null
+      if (session.title === null) {
+        try {
+          const generatedTitle = await this.chatTitleService.generateTitle(
+            dto.content || '',
+            dto.images?.length || 0,
+          );
+          this.logger.debug(`Generated title for session ${sessionId}: "${generatedTitle}"`);
+          
+          await this.prisma.chatSession.update({
+            where: { id: sessionId },
+            data: { title: generatedTitle },
+          });
+        } catch (error) {
+          this.logger.warn(`Failed to generate title, using fallback: ${error.message}`);
+          // Fallback to truncated message
+          const fallbackTitle = dto.content && dto.content.length > 50
+            ? dto.content.substring(0, 50) + '...'
+            : (dto.content || 'New chat');
+          
+          await this.prisma.chatSession.update({
+            where: { id: sessionId },
+            data: { title: fallbackTitle },
+          });
+        }
+      }
 
       // Stage 1: Process images (if any)
       let imageDescriptions = '';

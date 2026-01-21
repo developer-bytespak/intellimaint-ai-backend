@@ -10,6 +10,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { ChatService } from '../services/chat.service';
+import { ChatTitleService } from '../services/chat-title.service';
 import { PrismaService } from 'prisma/prisma.service';
 
 interface StreamMessagePayload {
@@ -45,7 +46,7 @@ export class SocketChatGateway implements OnGatewayConnection, OnGatewayDisconne
     startTime: number;
   }>();
 
-  constructor(private chatService: ChatService, private prisma: PrismaService) {}
+  constructor(private chatService: ChatService, private chatTitleService: ChatTitleService, private prisma: PrismaService) {}
 
   handleConnection(client: Socket) {
     this.logger.log(`✅ Client connected: ${client.id} from ${client.handshake.address}`);
@@ -574,12 +575,24 @@ export class SocketChatGateway implements OnGatewayConnection, OnGatewayDisconne
       this.logger.log(`🚀 Creating new session and starting pipeline`);
       this.chatService.registerRequest(requestId, abortController);
 
-      // Create new chat session (title derived from content)
-      const title = content?.substring(0, 100) || 'New Chat';
+      // Pre-generate title before creating session (to avoid title updates during streaming)
+      let initialTitle = 'New Chat';
+      try {
+        initialTitle = await this.chatTitleService.generateTitle(content || '', images?.length || 0);
+        this.logger.debug(`Pre-generated title for pipeline: "${initialTitle}"`);
+      } catch (error) {
+        this.logger.warn(`Failed to pre-generate pipeline title, using fallback: ${error.message}`);
+        // Fallback to truncated message
+        initialTitle = content && content.length > 50 
+          ? content.substring(0, 50) + '...' 
+          : (content || 'New Chat');
+      }
+
+      // Create new chat session with pre-generated title
       const session = await this.prisma.chatSession.create({
         data: {
           userId,
-          title,
+          title: initialTitle, // Set title upfront, no need to update later
         },
       });
 

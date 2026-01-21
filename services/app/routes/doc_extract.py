@@ -82,7 +82,7 @@ async def process_pdf_extraction(
 
         # STEP 4: Unified Content
         text_with_urls = DocumentService.replace_placeholders_with_urls(text_with_placeholders, image_urls)
-        unified_content = DocumentService.create_unified_content(text_with_urls, extracted_tables)
+        unified_content = DocumentService.create_unified_content(text_with_urls, extracted_tables, document_title=fileName)
         update_progress(90)
         store_result = None
 
