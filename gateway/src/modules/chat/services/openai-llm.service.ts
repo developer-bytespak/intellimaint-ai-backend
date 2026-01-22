@@ -95,10 +95,24 @@ export class OpenAILLMService {
     lines.push(
       'You are IntelliMaint, a helpful maintenance assistant. Answer clearly and concisely. '
       + 'Do not mention internal systems, databases, or sources. '
-      + 'If provided context includes relevant information, use it to ground your answer. '
-      + 'If information is insufficient, respond naturally using your knowledge. '
-      + 'Do not invent part numbers/specs unless clearly visible or provided.'
     );
+
+    // Adaptive behavior based on context availability
+    if (chunks && chunks.length > 0) {
+      lines.push(
+        'If provided context includes relevant information, use it to ground your answer. '
+        + 'If information is insufficient, respond naturally using your knowledge. '
+        + 'Do not invent part numbers/specs unless clearly visible or provided.'
+      );
+    } else {
+      lines.push(
+        'No specific reference materials are available for this query. '
+        + 'Respond naturally using your general knowledge. '
+        + 'For generic greetings or chitchat, keep responses brief and friendly. '
+        + 'For technical questions, provide helpful guidance based on common maintenance practices, '
+        + 'but acknowledge when specific documentation would be needed for detailed repair steps.'
+      );
+    }
 
     // Visual guidance for image-based queries
     lines.push(
@@ -117,6 +131,7 @@ export class OpenAILLMService {
     }
 
     // Knowledge chunks formatted for internal grounding (not shown to user)
+    // Only include this section if chunks exist
     if (chunks && chunks.length > 0) {
       lines.push('\nInternal reference materials:');
       lines.push(this.formatChunksForPrompt(chunks));
