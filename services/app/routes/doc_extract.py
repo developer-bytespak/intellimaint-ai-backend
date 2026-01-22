@@ -3,6 +3,7 @@ import uuid
 import shutil
 import fitz
 import json
+import gc
 
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.responses import PlainTextResponse
@@ -137,11 +138,27 @@ async def process_pdf_extraction(
                 pass
         raise e
     finally:
-        # Cleanup
+        # FIX: Aggressive cleanup
+        print(f"[doc_extract] 🧹 Cleaning up resources for job {job_id}...")
+        
+        # Remove temporary files
         if os.path.exists(file_path):
-            os.remove(file_path)
+            try:
+                os.remove(file_path)
+                print(f"[doc_extract] ✅ Removed: {file_path}")
+            except Exception as e:
+                print(f"[doc_extract] ⚠️ Could not remove file: {e}")
+        
         if os.path.exists(image_dir):
-            shutil.rmtree(image_dir)
+            try:
+                shutil.rmtree(image_dir)
+                print(f"[doc_extract] ✅ Removed: {image_dir}")
+            except Exception as e:
+                print(f"[doc_extract] ⚠️ Could not remove directory: {e}")
+        
+        # Force memory cleanup
+        gc.collect()
+        print(f"[doc_extract] ✅ Garbage collection completed")
 
 
 @router.post("/extract/full")

@@ -14,6 +14,9 @@ from fastapi import Query
 
 router = APIRouter(prefix="/batches", tags=["Batches"])
 
+# FIX: Reject files larger than this to prevent memory crash on Render
+MAX_FILE_SIZE_MB = 50
+
 GATEWAY_URL = os.getenv("GATEWAY_URL", "http://localhost:3000/api/v1")
 
 # Use consistent upload directory path
@@ -104,6 +107,22 @@ async def upload_pdfs(files: List[UploadFile] = File(...),userId:str=Form(...)):
     for f in files:
         if not f.filename.lower().endswith(".pdf"):
             raise HTTPException(400, f"Invalid file type: {f.filename}")
+        
+        # FIX: Check file size BEFORE processing
+        current_pos = f.file.tell()
+        f.file.seek(0, 2)  # Seek to end
+        file_size = f.file.tell()
+        f.file.seek(current_pos)  # Reset position
+        
+        file_size_mb = file_size / (1024 * 1024)
+        print(f"[batches] 📊 File: {f.filename}, Size: {file_size_mb:.1f}MB")
+        
+        if file_size_mb > MAX_FILE_SIZE_MB:
+            print(f"[batches] ❌ File rejected (too large): {f.filename}")
+            raise HTTPException(
+                413,
+                f"File '{f.filename}' is {file_size_mb:.1f}MB. Maximum allowed: {MAX_FILE_SIZE_MB}MB"
+            )
         
         # Save file to disk
         safe_name = f"{uuid.uuid4()}.pdf"
