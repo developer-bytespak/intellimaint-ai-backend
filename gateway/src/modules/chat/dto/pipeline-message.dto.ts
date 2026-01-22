@@ -93,4 +93,6 @@ export interface PipelineChunk {
 export interface ContextData {
   summary: string;
   recentMessages: any[];
+  imageSummaries?: string[];
+  imageSummariesNote?: string;
 }

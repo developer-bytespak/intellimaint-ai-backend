@@ -58,13 +58,15 @@ export class OpenAILLMService {
     contextSummary: string,
     chunks: KnowledgeChunkData[],
     images: string[],
+    imageSummaries: string[] = [],
+    imageSummariesNote?: string,
   ): AsyncGenerator<{ token?: string; usage?: any }> {
     this.logger.debug(
       `Starting LLM stream with ${chunks.length} chunks and ${images.length} images`,
     );
 
     // Build prompts
-    const systemPrompt = this.buildSystemPrompt(contextSummary, chunks);
+    const systemPrompt = this.buildSystemPrompt(contextSummary, chunks, imageSummaries, imageSummariesNote);
     const userMessage = this.buildUserMessage(userPrompt, images);
 
     // Call OpenAI streaming API and yield tokens
@@ -87,7 +89,7 @@ export class OpenAILLMService {
    * - Retrieved knowledge chunks formatted for reference
    * - Fallback instructions (when to use knowledge vs. own knowledge)
    */
-  private buildSystemPrompt(contextSummary: string, chunks: KnowledgeChunkData[]): string {
+  private buildSystemPrompt(contextSummary: string, chunks: KnowledgeChunkData[], imageSummaries: string[] = [], imageSummariesNote?: string): string {
     this.logger.debug(`Building system prompt with ${chunks.length} chunks`);
     const lines: string[] = [];
 
@@ -128,6 +130,21 @@ export class OpenAILLMService {
     if (contextSummary && contextSummary.trim().length > 0) {
       lines.push('\nConversation summary (for context):');
       lines.push(contextSummary.trim());
+    }
+
+    // Include prior image summaries (stored vision outputs) if available
+    if (imageSummaries && imageSummaries.length > 0) {
+      lines.push('\nPrior images (summaries from past uploads):');
+      imageSummaries.forEach((desc, idx) => {
+        lines.push(`- Image #${idx + 1} (most recent first): ${desc}`);
+      });
+      if (imageSummariesNote) {
+        lines.push(`Note: ${imageSummariesNote}`);
+      }
+      lines.push(
+        'If the user refers to an image, use the closest summary above. '
+        + 'If the request needs visual details not present in these summaries (e.g., serial numbers, fine print), ask the user to resend the image.'
+      );
     }
 
     // Knowledge chunks formatted for internal grounding (not shown to user)

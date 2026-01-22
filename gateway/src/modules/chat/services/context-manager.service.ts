@@ -55,6 +55,7 @@ export class ContextManagerService {
   private readonly SUMMARY_RETRIES = 3;
   private readonly RETRY_BASE_DELAY_MS = 500;
   private readonly SUMMARIZATION_MODEL = 'gpt-4o-mini';
+  private readonly IMAGE_SUMMARY_BUDGET_BYTES = 5 * 1024; // ~5 KB cap for prior image descriptions
   private readonly openai: OpenAI;
 
   constructor(private prisma: PrismaService) {
@@ -85,12 +86,13 @@ export class ContextManagerService {
     const filtered = (messages || []).filter((m) => !m.isStopped);
 
     if (filtered.length === 0) {
-      return { summary: '', recentMessages: [] };
+      return { summary: '', recentMessages: [], imageSummaries: [] };
     }
 
     // If ≤ window size: return all and empty summary
     if (filtered.length <= this.CONTEXT_WINDOW_SIZE) {
-      return { summary: '', recentMessages: filtered };
+      const imageData = await this.buildImageSummaries(sessionId);
+      return { summary: '', recentMessages: filtered, ...imageData };
     }
 
     // Fetch existing summary from DB
@@ -104,7 +106,75 @@ export class ContextManagerService {
     let lastN = filtered.slice(Math.max(0, filtered.length - this.CONTEXT_WINDOW_SIZE));
     lastN = this.enforceAssistantEndedEvenWindow(lastN);
 
-    return { summary, recentMessages: lastN };
+    const imageData = await this.buildImageSummaries(sessionId);
+    return { summary, recentMessages: lastN, ...imageData };
+  }
+
+  /**
+   * Build image summaries for all prior images in the session, capped by a byte budget.
+   * Uses stored vision outputs (sceneDescription.description) to avoid re-sending images.
+   */
+  private async buildImageSummaries(sessionId: string): Promise<{ imageSummaries: string[]; imageSummariesNote?: string }> {
+    // Fetch analyses with attachment + message metadata for ordering
+    const analyses = await this.prisma.imageAnalysis.findMany({
+      where: {
+        attachment: {
+          message: {
+            sessionId,
+            isStopped: false,
+          },
+        },
+      },
+      select: {
+        sceneDescription: true,
+        attachment: {
+          select: {
+            createdAt: true,
+            message: { select: { createdAt: true } },
+          },
+        },
+        createdAt: true,
+      },
+    });
+
+    // Order by message createdAt desc, then attachment createdAt desc, then analysis createdAt desc
+    const sorted = analyses.sort((a, b) => {
+      const aMsg = a.attachment?.message?.createdAt?.getTime?.() ?? 0;
+      const bMsg = b.attachment?.message?.createdAt?.getTime?.() ?? 0;
+      if (aMsg !== bMsg) return bMsg - aMsg;
+      const aAtt = a.attachment?.createdAt?.getTime?.() ?? 0;
+      const bAtt = b.attachment?.createdAt?.getTime?.() ?? 0;
+      if (aAtt !== bAtt) return bAtt - aAtt;
+      const aSelf = a.createdAt?.getTime?.() ?? 0;
+      const bSelf = b.createdAt?.getTime?.() ?? 0;
+      return bSelf - aSelf;
+    });
+
+    const imageSummaries: string[] = [];
+    let runningBytes = 0;
+    for (const entry of sorted) {
+      const desc = (entry.sceneDescription as any)?.description as string | undefined;
+      if (!desc || typeof desc !== 'string') continue;
+      const trimmed = desc.trim();
+      if (!trimmed) continue;
+
+      // Deduplicate identical descriptions to avoid noise
+      if (imageSummaries.includes(trimmed)) continue;
+
+      const bytes = Buffer.byteLength(trimmed, 'utf8');
+      if (runningBytes + bytes > this.IMAGE_SUMMARY_BUDGET_BYTES) {
+        // stop adding more to respect budget
+        break;
+      }
+      imageSummaries.push(trimmed);
+      runningBytes += bytes;
+    }
+
+    const note = sorted.length > imageSummaries.length
+      ? 'Older image summaries omitted for brevity; ask user to resend if more detail is needed.'
+      : undefined;
+
+    return { imageSummaries, imageSummariesNote: note };
   }
 
   /**
