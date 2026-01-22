@@ -43,6 +43,14 @@ const MIN_TOP_K = 1;
 const EMBEDDING_DIMENSION = 1536;
 
 /**
+ * Similarity threshold for chunk filtering (cosine distance)
+ * Lower values = stricter filtering (only very similar chunks)
+ * Typical range: 0.3-0.5 for pgvector cosine distance (<=>)
+ * Can be overridden via RAG_SIMILARITY_THRESHOLD env variable
+ */
+const DEFAULT_SIMILARITY_THRESHOLD = 0.4;
+
+/**
  * Number of adjacent chunks to fetch before and after each retrieved chunk
  * This helps provide context when important information is split across chunks
  * (e.g., person's name in chunk 0, their CGPA in chunk 1)
@@ -66,8 +74,27 @@ interface KnowledgeChunkRow {
 @Injectable()
 export class RagRetrievalService {
   private readonly logger = new Logger(RagRetrievalService.name);
+  private readonly similarityThreshold: number;
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) {
+    // Load similarity threshold from env or use default
+    const envThreshold = process.env.RAG_SIMILARITY_THRESHOLD;
+    this.similarityThreshold = envThreshold 
+      ? parseFloat(envThreshold) 
+      : DEFAULT_SIMILARITY_THRESHOLD;
+    
+    // Validate threshold is in reasonable range
+    if (this.similarityThreshold < 0 || this.similarityThreshold > 2) {
+      this.logger.warn(
+        `⚠️ Invalid RAG_SIMILARITY_THRESHOLD=${envThreshold}, using default ${DEFAULT_SIMILARITY_THRESHOLD}`
+      );
+      this.similarityThreshold = DEFAULT_SIMILARITY_THRESHOLD;
+    }
+    
+    this.logger.log(
+      `✅ RAG similarity threshold: ${this.similarityThreshold} (cosine distance max)`
+    );
+  }
 
   /**
    * Retrieve top K most relevant knowledge chunks using pgvector cosine similarity
@@ -342,6 +369,7 @@ export class RagRetrievalService {
       JOIN "knowledge_sources" ks ON kc.source_id = ks.id
       WHERE kc.embedding IS NOT NULL
         AND (ks.user_id IS NULL OR ks.user_id = ${userId}::uuid)
+        AND kc.embedding <=> ${vectorLiteral}::vector < ${this.similarityThreshold}
       ORDER BY kc.embedding <=> ${vectorLiteral}::vector ASC
       LIMIT ${topK}
     `;
@@ -489,13 +517,21 @@ export class RagRetrievalService {
       ? ` (${originalCount} matched + ${resultCount - originalCount} adjacent)`
       : '';
 
+    // Warn about no chunks passing threshold
+    if (resultCount === 0) {
+      this.logger.warn(
+        `⚠️ No chunks passed similarity threshold (${this.similarityThreshold}) in ${durationMs}ms – query may be too generic or threshold too strict`,
+      );
+      return;
+    }
+
     if (durationMs > 100) {
       this.logger.warn(
-        `⚠️ Slow retrieval: ${resultCount}/${topKRequested} chunks${adjacentInfo} in ${durationMs}ms – consider index reanalysis`,
+        `⚠️ Slow retrieval: ${resultCount}/${topKRequested} chunks${adjacentInfo} in ${durationMs}ms (threshold=${this.similarityThreshold}) – consider index reanalysis`,
       );
     } else {
       this.logger.debug(
-        `✅ Retrieved ${resultCount}/${topKRequested} chunks${adjacentInfo} in ${durationMs}ms`,
+        `✅ Retrieved ${resultCount}/${topKRequested} chunks${adjacentInfo} in ${durationMs}ms (threshold=${this.similarityThreshold})`,
       );
     }
   }

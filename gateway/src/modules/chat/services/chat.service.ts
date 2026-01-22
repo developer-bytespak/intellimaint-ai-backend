@@ -1656,6 +1656,8 @@ export class ChatService {
         contextData.summary,
         chunks,
         dto.images || [],
+        contextData.imageSummaries || [],
+        contextData.imageSummariesNote,
       )) {
         // Handle token streaming
         if (chunk.token) {

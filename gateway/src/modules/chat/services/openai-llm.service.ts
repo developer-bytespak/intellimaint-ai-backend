@@ -58,13 +58,15 @@ export class OpenAILLMService {
     contextSummary: string,
     chunks: KnowledgeChunkData[],
     images: string[],
+    imageSummaries: string[] = [],
+    imageSummariesNote?: string,
   ): AsyncGenerator<{ token?: string; usage?: any }> {
     this.logger.debug(
       `Starting LLM stream with ${chunks.length} chunks and ${images.length} images`,
     );
 
     // Build prompts
-    const systemPrompt = this.buildSystemPrompt(contextSummary, chunks);
+    const systemPrompt = this.buildSystemPrompt(contextSummary, chunks, imageSummaries, imageSummariesNote);
     const userMessage = this.buildUserMessage(userPrompt, images);
 
     // Call OpenAI streaming API and yield tokens
@@ -87,7 +89,7 @@ export class OpenAILLMService {
    * - Retrieved knowledge chunks formatted for reference
    * - Fallback instructions (when to use knowledge vs. own knowledge)
    */
-  private buildSystemPrompt(contextSummary: string, chunks: KnowledgeChunkData[]): string {
+  private buildSystemPrompt(contextSummary: string, chunks: KnowledgeChunkData[], imageSummaries: string[] = [], imageSummariesNote?: string): string {
     this.logger.debug(`Building system prompt with ${chunks.length} chunks`);
     const lines: string[] = [];
 
@@ -95,10 +97,24 @@ export class OpenAILLMService {
     lines.push(
       'You are IntelliMaint, a helpful maintenance assistant. Answer clearly and concisely. '
       + 'Do not mention internal systems, databases, or sources. '
-      + 'If provided context includes relevant information, use it to ground your answer. '
-      + 'If information is insufficient, respond naturally using your knowledge. '
-      + 'Do not invent part numbers/specs unless clearly visible or provided.'
     );
+
+    // Adaptive behavior based on context availability
+    if (chunks && chunks.length > 0) {
+      lines.push(
+        'If provided context includes relevant information, use it to ground your answer. '
+        + 'If information is insufficient, respond naturally using your knowledge. '
+        + 'Do not invent part numbers/specs unless clearly visible or provided.'
+      );
+    } else {
+      lines.push(
+        'No specific reference materials are available for this query. '
+        + 'Respond naturally using your general knowledge. '
+        + 'For generic greetings or chitchat, keep responses brief and friendly. '
+        + 'For technical questions, provide helpful guidance based on common maintenance practices, '
+        + 'but acknowledge when specific documentation would be needed for detailed repair steps.'
+      );
+    }
 
     // Visual guidance for image-based queries
     lines.push(
@@ -116,7 +132,23 @@ export class OpenAILLMService {
       lines.push(contextSummary.trim());
     }
 
+    // Include prior image summaries (stored vision outputs) if available
+    if (imageSummaries && imageSummaries.length > 0) {
+      lines.push('\nPrior images (summaries from past uploads):');
+      imageSummaries.forEach((desc, idx) => {
+        lines.push(`- Image #${idx + 1} (most recent first): ${desc}`);
+      });
+      if (imageSummariesNote) {
+        lines.push(`Note: ${imageSummariesNote}`);
+      }
+      lines.push(
+        'If the user refers to an image, use the closest summary above. '
+        + 'If the request needs visual details not present in these summaries (e.g., serial numbers, fine print), ask the user to resend the image.'
+      );
+    }
+
     // Knowledge chunks formatted for internal grounding (not shown to user)
+    // Only include this section if chunks exist
     if (chunks && chunks.length > 0) {
       lines.push('\nInternal reference materials:');
       lines.push(this.formatChunksForPrompt(chunks));
