@@ -17,7 +17,7 @@ if __name__ == "__main__":
         print("⚠️  WARNING: DEEPGRAM_API_KEY not found in environment")
     
     print("⚠️  MEMORY OPTIMIZATION: Running in single-worker mode")
-    print("⚠️  Concurrent requests will be queued (1 at a time)\n")
+    print("⚠️  Concurrency limited to 3 requests (allows upload + chat + buffer)\n")
     
     uvicorn.run(
         "app.main:app",
@@ -25,7 +25,7 @@ if __name__ == "__main__":
         port=8000,
         reload=True,
         workers=1,
-        limit_concurrency=1,
+        limit_concurrency=3,
         timeout_keep_alive=5
     )
 

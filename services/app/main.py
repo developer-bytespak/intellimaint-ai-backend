@@ -97,7 +97,8 @@ class MemoryLimiterMiddleware(BaseHTTPMiddleware):
         # If still critical, reject request
         if memory_mb > 450:
             print(f"🚨 CRITICAL memory ({memory_mb:.0f}MB), rejecting request")
-            return JSONResponse(
+            origin = request.headers.get("origin", "*")
+            response = JSONResponse(
                 {
                     "error": "Server is out of memory",
                     "memory_mb": round(memory_mb, 1),
@@ -105,6 +106,10 @@ class MemoryLimiterMiddleware(BaseHTTPMiddleware):
                 },
                 status_code=503
             )
+            # Add CORS headers to 503 response
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            return response
         
         # Process request normally
         try:
