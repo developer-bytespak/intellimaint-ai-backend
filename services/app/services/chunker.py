@@ -19,6 +19,13 @@ if str(SCRIPTS_CHUNKING_PATH) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_CHUNKING_PATH))
 
 try:
+    from improved_manual_chunker import ImprovedChunkingPipeline
+    HAS_IMPROVED_CHUNKER = True
+except ImportError as e:
+    logger.warning(f"Could not import ImprovedChunkingPipeline: {e}")
+    HAS_IMPROVED_CHUNKER = False
+
+try:
     from pdf_universal_chunker import UniversalChunkingPipeline
     HAS_UNIVERSAL_CHUNKER = True
 except ImportError as e:
@@ -400,6 +407,105 @@ def process_source(source_id: str, dry_run: bool = False, overwrite: bool = Fals
     raise last_error
 
 
+def _extract_document_identifier(raw_content: str, file_title: str) -> str:
+    """
+    Extract a meaningful document identifier for the chunk prefix.
+    
+    This identifier is prepended to every chunk to improve RAG retrieval.
+    It helps connect related information across chunks (e.g., product name + specifications).
+    
+    Priority:
+    1. First markdown H1 heading (# Title) - usually contains the main subject
+       Examples: "Toyota Forklift Model 8FGU25", "Safety Guidelines", "John Smith"
+    2. First H2 heading (## Title) if no H1 found
+    3. First significant title-like line (capitalized, short, no punctuation mid-line)
+    4. Fall back to file title
+    
+    Works for:
+    - Machine manuals: "# CAT 320D Excavator Service Manual" → "CAT 320D Excavator Service Manual"
+    - Technical docs: "# Hydraulic System Maintenance" → "Hydraulic System Maintenance"
+    - General documents: Extracts the main title/subject
+    """
+    # Generic/useless headers to skip
+    SKIP_HEADERS = {
+        'extracted pdf content',
+        'untitled',
+        'untitled document',
+        'document',
+        'content',
+        'text',
+        'pdf',
+    }
+    
+    if not raw_content:
+        return file_title
+    
+    lines = raw_content.split('\n')
+    
+    # 1. Try to find first H1 heading (# Title)
+    for line in lines[:30]:  # Check first 30 lines
+        stripped = line.strip()
+        if stripped.startswith('# ') and len(stripped) > 2:
+            extracted = stripped[2:].strip()
+            # Skip generic headers
+            if extracted and len(extracted) >= 3 and extracted.lower() not in SKIP_HEADERS:
+                logger.debug(f"Extracted identifier from H1: {extracted}")
+                return extracted
+    
+    # 2. Try to find first H2 heading (## Title)
+    for line in lines[:30]:
+        stripped = line.strip()
+        if stripped.startswith('## ') and len(stripped) > 3:
+            extracted = stripped[3:].strip()
+            if extracted and len(extracted) >= 3 and extracted.lower() not in SKIP_HEADERS:
+                logger.debug(f"Extracted identifier from H2: {extracted}")
+                return extracted
+    
+    # 3. Try to find a title-like line (capitalized, reasonable length, looks like a title)
+    for line in lines[:20]:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        
+        # Skip obvious non-titles
+        if stripped.startswith(('http', 'www', '•', '-', '*', '>', '|', '[', '#')):
+            continue
+        if len(stripped) < 3 or len(stripped) > 80:
+            continue
+        if stripped.lower() in SKIP_HEADERS:
+            continue
+        
+        # Check if it looks like a title:
+        # - Starts with capital letter or number
+        # - Doesn't have periods in the middle (not a sentence)
+        # - Has at least 2 words OR is all caps
+        words = stripped.split()
+        has_mid_period = '. ' in stripped and not stripped.endswith('.')
+        
+        if has_mid_period:
+            continue
+            
+        is_title_case = stripped[0].isupper() or stripped[0].isdigit()
+        is_all_caps = stripped.isupper() and len(stripped) >= 3
+        has_enough_words = len(words) >= 2
+        
+        if is_title_case and (has_enough_words or is_all_caps):
+            # Avoid lines that look like content (too many lowercase words in a row)
+            lowercase_words = sum(1 for w in words if w.islower() and len(w) > 3)
+            if lowercase_words <= len(words) // 2:  # At most half are lowercase
+                logger.debug(f"Extracted identifier from title-like line: {stripped}")
+                return stripped
+    
+    # 4. Fall back to file title (but clean it up)
+    clean_title = file_title
+    if clean_title.lower().endswith('.pdf'):
+        clean_title = clean_title[:-4]
+    if clean_title.lower() not in SKIP_HEADERS:
+        return clean_title
+    
+    return file_title
+
+
 def _process_source_internal(source_id: str, dry_run: bool, overwrite: bool, dsn: str) -> Dict[str, Any]:
     """Internal processing function (called by process_source with retry logic)."""
     
@@ -412,16 +518,24 @@ def _process_source_internal(source_id: str, dry_run: bool, overwrite: bool, dsn
             if not row:
                 raise ValueError(f"knowledge_source not found: {source_id}")
             raw = row.get("raw_content")
-            title = row.get("title", "Untitled")
+            file_title = row.get("title", "Untitled")
             if raw is None:
                 raise ValueError("raw_content is empty")
+        
+        # Extract meaningful document identifier (e.g., person's name from resume)
+        document_identifier = _extract_document_identifier(raw, file_title)
+        logger.info(f"Document identifier: '{document_identifier}' (file: '{file_title}')")
 
-        # Use the universal chunker with overlap (preferred) or fall back to iFixit-style
-        if HAS_UNIVERSAL_CHUNKER:
-            chunks = _process_with_universal_chunker(raw, source_id)
+        # Use the improved chunker (preferred), then universal, then iFixit-style fallback
+        if HAS_IMPROVED_CHUNKER:
+            logger.info(f"Using improved chunker for source {source_id}")
+            chunks = _process_with_improved_chunker(raw, source_id, document_identifier)
+        elif HAS_UNIVERSAL_CHUNKER:
+            logger.info(f"Using universal chunker for source {source_id}")
+            chunks = _process_with_universal_chunker(raw, source_id, document_identifier)
         else:
-            logger.warning("Universal chunker not available, falling back to iFixit-style chunking")
-            chunks = _process_with_ifixit_chunker(raw, source_id)
+            logger.warning("No advanced chunker available, falling back to iFixit-style chunking")
+            chunks = _process_with_ifixit_chunker(raw, source_id, document_identifier)
 
         if dry_run:
             return {"source_id": source_id, "num_chunks": len(chunks), "chunks": chunks}
@@ -464,31 +578,88 @@ def _process_source_internal(source_id: str, dry_run: bool, overwrite: bool, dsn
         conn.close()
 
 
-def _process_with_universal_chunker(raw_content: str, source_id: str) -> List[Dict[str, Any]]:
+def _process_with_improved_chunker(raw_content: str, source_id: str, document_title: str = "Untitled") -> List[Dict[str, Any]]:
     """
-    Process raw content using the universal PDF chunker.
-    Includes English-only filtering and 15% overlap.
+    Process raw content using the improved manual chunker.
+    Better heading detection, less aggressive filtering, sentence-aware splitting.
+    
+    Each chunk is prefixed with the document title and enriched metadata for better RAG retrieval.
     """
-    pipeline = UniversalChunkingPipeline()
+    pipeline = ImprovedChunkingPipeline(
+        min_tokens=80,
+        max_tokens=600,
+        target_tokens=350,
+        overlap_tokens=40
+    )
     chunk_objects = pipeline.process(raw_content, source_id=source_id)
     
     chunks = []
     for chunk in chunk_objects:
+        # Prepend document title to content for better semantic search
+        # This ensures queries like "Umair's CGPA" match even if name and CGPA are in different sections
+        prefixed_content = f"[Document: {document_title}]\n\n{chunk.content}"
+        
+        # Enrich metadata with document-level info
+        enriched_metadata = chunk.metadata.copy() if chunk.metadata else {}
+        enriched_metadata["document_title"] = document_title
+        enriched_metadata["source_id"] = source_id
+        
         chunk_data = {
             "chunk_index": chunk.chunk_index,
             "heading": chunk.heading,
-            "content": chunk.content,
-            "token_count": chunk.token_count,
-            "metadata": chunk.metadata,
+            "content": prefixed_content,
+            "token_count": chunk.token_count,  # Note: token count will be slightly higher due to prefix
+            "metadata": enriched_metadata,
         }
         chunks.append(chunk_data)
     
+    logger.info(f"Improved chunker created {len(chunks)} chunks for source {source_id} (title: {document_title})")
     return chunks
 
 
-def _process_with_ifixit_chunker(raw_content: str, source_id: str) -> List[Dict[str, Any]]:
+def _process_with_universal_chunker(raw_content: str, source_id: str, document_title: str = "Untitled") -> List[Dict[str, Any]]:
+    """
+    Process raw content using the universal PDF chunker.
+    Includes English-only filtering and 15% overlap.
+    
+    Each chunk is prefixed with the document title and enriched metadata for better RAG retrieval.
+    """
+    pipeline = ImprovedChunkingPipeline(
+        min_tokens=80,
+        max_tokens=600,
+        target_tokens=350,
+        overlap_tokens=40
+    )
+    chunk_objects = pipeline.process(raw_content, source_id=source_id)
+    
+    chunks = []
+    for chunk in chunk_objects:
+        # Prepend document title to content for better semantic search
+        prefixed_content = f"[Document: {document_title}]\n\n{chunk.content}"
+        
+        # Enrich metadata with document-level info
+        enriched_metadata = chunk.metadata.copy() if chunk.metadata else {}
+        enriched_metadata["document_title"] = document_title
+        enriched_metadata["source_id"] = source_id
+        
+        chunk_data = {
+            "chunk_index": chunk.chunk_index,
+            "heading": chunk.heading,
+            "content": prefixed_content,
+            "token_count": chunk.token_count,
+            "metadata": enriched_metadata,
+        }
+        chunks.append(chunk_data)
+    
+    logger.info(f"Universal chunker created {len(chunks)} chunks for source {source_id} (title: {document_title})")
+    return chunks
+
+
+def _process_with_ifixit_chunker(raw_content: str, source_id: str, document_title: str = "Untitled") -> List[Dict[str, Any]]:
     """
     Fallback: Process using the iFixit-style chunker (legacy).
+    
+    Each chunk is prefixed with the document title and enriched metadata for better RAG retrieval.
     """
     counter = TokenCounter()
     
@@ -504,10 +675,14 @@ def _process_with_ifixit_chunker(raw_content: str, source_id: str) -> List[Dict[
     chunks: List[Dict[str, Any]] = []
     for c in raw_chunks:
         content = c.get("content", "")
+        
+        # Prepend document title to content for better semantic search
+        prefixed_content = f"[Document: {document_title}]\n\n{content}"
+        
         step_indices = c.get("step_indices", [])
         headings = c.get("headings", [])
         heading = headings[0] if headings else None
-        token_count = counter.count(content)
+        token_count = counter.count(prefixed_content)
 
         # collect images belonging to this chunk's steps
         chunk_images: List[Dict[str, Any]] = []
@@ -523,17 +698,22 @@ def _process_with_ifixit_chunker(raw_content: str, source_id: str) -> List[Dict[
         metadata = {
             "step_indices": step_indices,
             "images": chunk_images,
-            "char_count": len(content),
-            "word_count": len(content.split()),
+            "char_count": len(prefixed_content),
+            "word_count": len(prefixed_content.split()),
             "chunker_version": "v1_ifixit",
+            "document_title": document_title,
+            "source_id": source_id,
         }
 
         chunks.append({
             "chunk_index": c.get("chunk_index", 0),
             "heading": heading,
-            "content": content,
+            "content": prefixed_content,
             "token_count": token_count,
             "metadata": metadata,
         })
+
+    logger.info(f"iFixit chunker created {len(chunks)} chunks for source {source_id} (title: {document_title})")
+    return chunks
 
     return chunks

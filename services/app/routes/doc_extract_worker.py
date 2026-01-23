@@ -27,10 +27,14 @@
 #         print("[python-worker] failed", str(e))
 #         raise HTTPException(500, str(e))
 import os
+import gc
 from fastapi import APIRouter, HTTPException
 from ..routes.doc_extract import process_pdf_extraction
 
 router = APIRouter()
+
+# FIX: Reject files larger than this
+MAX_FILE_SIZE_MB = 50
 
 @router.post("/run")
 async def extract_from_worker(payload: dict):
@@ -56,6 +60,11 @@ async def extract_from_worker(payload: dict):
         if file_exists:
             file_size = os.path.getsize(file_path)
             print(f"[python-worker] File size: {file_size} bytes")
+            file_size_mb = file_size / (1024 * 1024)
+            
+            # FIX: Reject large files
+            if file_size_mb > MAX_FILE_SIZE_MB:
+                raise ValueError(f"File too large: {file_size_mb:.1f}MB (max: {MAX_FILE_SIZE_MB}MB)")
         else:
             # Try to provide helpful debugging info
             dir_path = os.path.dirname(file_path)
@@ -118,3 +127,26 @@ async def extract_from_worker(payload: dict):
         import traceback
         traceback.print_exc()
         raise HTTPException(500, f"{type(e).__name__}: {str(e)}")
+    finally:
+        # FIX: Aggressive cleanup
+        print(f"[python-worker] 🧹 Cleaning up resources...")
+        
+        # Remove temporary files
+        if file_path and os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+                print(f"[python-worker] ✅ Removed PDF: {file_path}")
+            except Exception as e:
+                print(f"[python-worker] ⚠️ Could not remove PDF: {e}")
+        
+        if 'image_dir' in locals() and image_dir and os.path.exists(image_dir):
+            try:
+                import shutil
+                shutil.rmtree(image_dir)
+                print(f"[python-worker] ✅ Removed images: {image_dir}")
+            except Exception as e:
+                print(f"[python-worker] ⚠️ Could not remove images: {e}")
+        
+        # Force memory cleanup
+        gc.collect()
+        print(f"[python-worker] ✅ Memory cleanup completed")

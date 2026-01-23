@@ -43,6 +43,21 @@ const MIN_TOP_K = 1;
 const EMBEDDING_DIMENSION = 1536;
 
 /**
+ * Similarity threshold for chunk filtering (cosine distance)
+ * Lower values = stricter filtering (only very similar chunks)
+ * Typical range: 0.3-0.5 for pgvector cosine distance (<=>)
+ * Can be overridden via RAG_SIMILARITY_THRESHOLD env variable
+ */
+const DEFAULT_SIMILARITY_THRESHOLD = 0.4;
+
+/**
+ * Number of adjacent chunks to fetch before and after each retrieved chunk
+ * This helps provide context when important information is split across chunks
+ * (e.g., person's name in chunk 0, their CGPA in chunk 1)
+ */
+const ADJACENT_CHUNKS_COUNT: number = 1;
+
+/**
  * Raw database row shape from knowledge_chunks query
  * Maps to KnowledgeChunkData DTO after retrieval
  */
@@ -53,13 +68,33 @@ interface KnowledgeChunkRow {
   metadata: Record<string, unknown> | null;
   token_count: number | null;
   source_id: string;
+  chunk_index: number;
 }
 
 @Injectable()
 export class RagRetrievalService {
   private readonly logger = new Logger(RagRetrievalService.name);
+  private readonly similarityThreshold: number;
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) {
+    // Load similarity threshold from env or use default
+    const envThreshold = process.env.RAG_SIMILARITY_THRESHOLD;
+    this.similarityThreshold = envThreshold 
+      ? parseFloat(envThreshold) 
+      : DEFAULT_SIMILARITY_THRESHOLD;
+    
+    // Validate threshold is in reasonable range
+    if (this.similarityThreshold < 0 || this.similarityThreshold > 2) {
+      this.logger.warn(
+        `⚠️ Invalid RAG_SIMILARITY_THRESHOLD=${envThreshold}, using default ${DEFAULT_SIMILARITY_THRESHOLD}`
+      );
+      this.similarityThreshold = DEFAULT_SIMILARITY_THRESHOLD;
+    }
+    
+    this.logger.log(
+      `✅ RAG similarity threshold: ${this.similarityThreshold} (cosine distance max)`
+    );
+  }
 
   /**
    * Retrieve top K most relevant knowledge chunks using pgvector cosine similarity
@@ -120,14 +155,19 @@ export class RagRetrievalService {
         sourceId,
       );
 
+      // Fetch adjacent chunks to provide better context
+      // This helps when important information is split across chunks
+      // (e.g., person's name in chunk 0, their details in chunk 1)
+      const chunksWithAdjacent = await this.fetchAdjacentChunks(chunks, userId);
+
       // Map DB rows to DTO
-      const result: KnowledgeChunkData[] = chunks.map((row: KnowledgeChunkRow) =>
+      const result: KnowledgeChunkData[] = chunksWithAdjacent.map((row: KnowledgeChunkRow) =>
         this.mapRowToDto(row),
       );
 
       // Log metrics
       const durationMs = Date.now() - startTime;
-      this.logRetrievalMetrics(clampedK, result.length, durationMs);
+      this.logRetrievalMetrics(clampedK, result.length, durationMs, chunks.length);
 
       return result;
     } catch (error) {
@@ -138,6 +178,133 @@ export class RagRetrievalService {
       );
       throw error;
     }
+  }
+
+  /**
+   * Fetch adjacent chunks (before and after) for each retrieved chunk
+   * 
+   * This ensures that when information is split across chunk boundaries
+   * (like a person's name in one chunk and their details in the next),
+   * the full context is available to the LLM.
+   * 
+   * @param chunks - Retrieved chunks from vector search
+   * @param userId - User ID for access control
+   * @returns Expanded array including adjacent chunks, deduplicated and sorted
+   */
+  private async fetchAdjacentChunks(
+    chunks: KnowledgeChunkRow[],
+    userId: string,
+  ): Promise<KnowledgeChunkRow[]> {
+    if (chunks.length === 0 || ADJACENT_CHUNKS_COUNT === 0) {
+      return chunks;
+    }
+
+    // Build a set of (sourceId, chunkIndex) pairs to fetch
+    const chunkKeysToFetch = new Set<string>();
+    const existingChunkKeys = new Set<string>();
+
+    // Track existing chunks and their adjacents
+    for (const chunk of chunks) {
+      const sourceId = chunk.source_id;
+      const chunkIndex = chunk.chunk_index;
+      
+      existingChunkKeys.add(`${sourceId}:${chunkIndex}`);
+
+      // Add adjacent chunk indices (before and after)
+      for (let offset = -ADJACENT_CHUNKS_COUNT; offset <= ADJACENT_CHUNKS_COUNT; offset++) {
+        if (offset === 0) continue; // Skip the current chunk
+        const adjacentIndex = chunkIndex + offset;
+        if (adjacentIndex >= 0) { // chunk_index can't be negative
+          const key = `${sourceId}:${adjacentIndex}`;
+          if (!existingChunkKeys.has(key)) {
+            chunkKeysToFetch.add(key);
+          }
+        }
+      }
+    }
+
+    // Remove keys that are already in our chunks
+    for (const existingKey of existingChunkKeys) {
+      chunkKeysToFetch.delete(existingKey);
+    }
+
+    if (chunkKeysToFetch.size === 0) {
+      return chunks;
+    }
+
+    // Parse the keys into source/index pairs for the query
+    const adjacentPairs: { sourceId: string; chunkIndex: number }[] = [];
+    for (const key of chunkKeysToFetch) {
+      const [sourceId, chunkIndexStr] = key.split(':');
+      adjacentPairs.push({ sourceId, chunkIndex: parseInt(chunkIndexStr, 10) });
+    }
+
+    this.logger.debug(
+      `Fetching ${adjacentPairs.length} adjacent chunks for context expansion`,
+    );
+
+    // Fetch adjacent chunks from database
+    const adjacentChunks = await this.fetchChunksBySourceAndIndex(adjacentPairs, userId);
+
+    // Combine original chunks with adjacent chunks
+    const allChunks = [...chunks, ...adjacentChunks];
+
+    // Deduplicate by id and sort by sourceId + chunkIndex for coherent ordering
+    const uniqueChunksMap = new Map<string, KnowledgeChunkRow>();
+    for (const chunk of allChunks) {
+      if (!uniqueChunksMap.has(chunk.id)) {
+        uniqueChunksMap.set(chunk.id, chunk);
+      }
+    }
+
+    // Sort by source_id and chunk_index for logical ordering
+    const sortedChunks = Array.from(uniqueChunksMap.values()).sort((a, b) => {
+      if (a.source_id !== b.source_id) {
+        return a.source_id.localeCompare(b.source_id);
+      }
+      return a.chunk_index - b.chunk_index;
+    });
+
+    return sortedChunks;
+  }
+
+  /**
+   * Fetch specific chunks by their sourceId and chunkIndex
+   * 
+   * @param pairs - Array of {sourceId, chunkIndex} pairs to fetch
+   * @param userId - User ID for access control
+   * @returns Array of matching KnowledgeChunkRow objects
+   */
+  private async fetchChunksBySourceAndIndex(
+    pairs: { sourceId: string; chunkIndex: number }[],
+    userId: string,
+  ): Promise<KnowledgeChunkRow[]> {
+    if (pairs.length === 0) {
+      return [];
+    }
+
+    // Build OR conditions for each (sourceId, chunkIndex) pair
+    // Using a single query with multiple conditions is more efficient than N queries
+    const conditions = pairs
+      .map(p => `(kc.source_id = '${p.sourceId}'::uuid AND kc.chunk_index = ${p.chunkIndex})`)
+      .join(' OR ');
+
+    const query = `
+      SELECT 
+        kc.id, 
+        kc.content, 
+        kc.heading, 
+        kc.metadata, 
+        kc.token_count, 
+        kc.source_id,
+        kc.chunk_index
+      FROM "knowledge_chunks" kc
+      JOIN "knowledge_sources" ks ON kc.source_id = ks.id
+      WHERE (${conditions})
+        AND (ks.user_id IS NULL OR ks.user_id = '${userId}'::uuid)
+    `;
+
+    return this.prisma.$queryRawUnsafe<KnowledgeChunkRow[]>(query);
   }
 
   /**
@@ -176,7 +343,8 @@ export class RagRetrievalService {
           kc.heading, 
           kc.metadata, 
           kc.token_count, 
-          kc.source_id
+          kc.source_id,
+          kc.chunk_index
         FROM "knowledge_chunks" kc
         JOIN "knowledge_sources" ks ON kc.source_id = ks.id
         WHERE kc.embedding IS NOT NULL 
@@ -195,11 +363,13 @@ export class RagRetrievalService {
         kc.heading, 
         kc.metadata, 
         kc.token_count, 
-        kc.source_id
+        kc.source_id,
+        kc.chunk_index
       FROM "knowledge_chunks" kc
       JOIN "knowledge_sources" ks ON kc.source_id = ks.id
       WHERE kc.embedding IS NOT NULL
         AND (ks.user_id IS NULL OR ks.user_id = ${userId}::uuid)
+        AND kc.embedding <=> ${vectorLiteral}::vector < ${this.similarityThreshold}
       ORDER BY kc.embedding <=> ${vectorLiteral}::vector ASC
       LIMIT ${topK}
     `;
@@ -320,6 +490,7 @@ export class RagRetrievalService {
       metadata: row.metadata || undefined,
       tokenCount: row.token_count || undefined,
       sourceId: row.source_id,
+      chunkIndex: row.chunk_index,
     };
   }
 
@@ -330,29 +501,37 @@ export class RagRetrievalService {
    * Useful for detecting slow queries, index effectiveness, etc.
    *
    * @param topKRequested - Original K value requested (before clamping)
-   * @param resultCount - Actual number of chunks returned
+   * @param resultCount - Actual number of chunks returned (including adjacent)
    * @param durationMs - Query execution time in milliseconds
+   * @param originalCount - Number of chunks from vector search (before adjacent expansion)
    *
-   * Logs format: "✅ Retrieved N/K chunks in Xms (Y% recall)"
-   * - N = actual results returned
-   * - K = requested top-K
-   * - X = query duration
-   * - Y = recall percentage (N/K * 100)
+   * Logs format: "✅ Retrieved N/K chunks (M with adjacents) in Xms"
    */
   private logRetrievalMetrics(
     topKRequested: number,
     resultCount: number,
     durationMs: number,
+    originalCount?: number,
   ): void {
-    const recall = ((resultCount / topKRequested) * 100).toFixed(1);
+    const adjacentInfo = originalCount !== undefined && originalCount !== resultCount
+      ? ` (${originalCount} matched + ${resultCount - originalCount} adjacent)`
+      : '';
+
+    // Warn about no chunks passing threshold
+    if (resultCount === 0) {
+      this.logger.warn(
+        `⚠️ No chunks passed similarity threshold (${this.similarityThreshold}) in ${durationMs}ms – query may be too generic or threshold too strict`,
+      );
+      return;
+    }
 
     if (durationMs > 100) {
       this.logger.warn(
-        `⚠️ Slow retrieval: ${resultCount}/${topKRequested} chunks in ${durationMs}ms (${recall}% recall) – consider index reanalysis`,
+        `⚠️ Slow retrieval: ${resultCount}/${topKRequested} chunks${adjacentInfo} in ${durationMs}ms (threshold=${this.similarityThreshold}) – consider index reanalysis`,
       );
     } else {
       this.logger.debug(
-        `✅ Retrieved ${resultCount}/${topKRequested} chunks in ${durationMs}ms (${recall}% recall)`,
+        `✅ Retrieved ${resultCount}/${topKRequested} chunks${adjacentInfo} in ${durationMs}ms (threshold=${this.similarityThreshold})`,
       );
     }
   }

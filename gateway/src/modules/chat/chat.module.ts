@@ -12,6 +12,7 @@ import { OpenAIEmbeddingService } from './services/openai-embedding.service';
 import { RagRetrievalService } from './services/rag-retrieval.service';
 import { ContextManagerService } from './services/context-manager.service';
 import { OpenAILLMService } from './services/openai-llm.service';
+import { ChatTitleService } from './services/chat-title.service';
 
 @Module({
   controllers: [ChatController],
@@ -28,6 +29,7 @@ import { OpenAILLMService } from './services/openai-llm.service';
     RagRetrievalService,
     ContextManagerService,
     OpenAILLMService,
+    ChatTitleService,
   ],
   exports: [ChatService],
 })

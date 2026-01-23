@@ -2,9 +2,11 @@
 
 from pprint import pp
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
-
+import gc
+import asyncio
 
 from .routes import orchestrator, vision, rag, asr_tts, doc_extract, stream, chunking, batches, doc_extract_worker , embedding_routes
 
@@ -54,6 +56,72 @@ class SimpleCORSMiddleware(BaseHTTPMiddleware):
         return response
 
 
+class MemoryLimiterMiddleware(BaseHTTPMiddleware):
+    """FIX P1: Monitors memory and rejects requests if memory is critical"""
+    
+    def __init__(self, app):
+        super().__init__(app)
+        try:
+            import psutil
+            self.process = psutil.Process()
+            self.psutil_available = True
+        except ImportError:
+            print("⚠️  psutil not installed, memory limiting disabled")
+            self.psutil_available = False
+        self.request_count = 0
+    
+    async def dispatch(self, request: Request, call_next):
+        if not self.psutil_available:
+            return await call_next(request)
+        
+        path = request.url.path
+        self.request_count += 1
+        
+        # Skip health checks
+        if path in ["/health", "/", "/api/v1/health"]:
+            return await call_next(request)
+        
+        # Check current memory
+        memory_mb = self.process.memory_info().rss / 1024 / 1024
+        
+        # Log every 50 requests
+        if self.request_count % 50 == 0:
+            print(f"📊 [MEMORY] Current: {memory_mb:.0f}MB / 512MB | Requests: {self.request_count}")
+        
+        # If very high, try garbage collection first
+        if memory_mb > 400:
+            print(f"⚠️ High memory ({memory_mb:.0f}MB), running GC...")
+            gc.collect()
+            memory_mb = self.process.memory_info().rss / 1024 / 1024
+        
+        # If still critical, reject request
+        if memory_mb > 450:
+            print(f"🚨 CRITICAL memory ({memory_mb:.0f}MB), rejecting request")
+            origin = request.headers.get("origin", "*")
+            response = JSONResponse(
+                {
+                    "error": "Server is out of memory",
+                    "memory_mb": round(memory_mb, 1),
+                    "message": "Please try again in a moment"
+                },
+                status_code=503
+            )
+            # Add CORS headers to 503 response
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            return response
+        
+        # Process request normally
+        try:
+            response = await call_next(request)
+            return response
+        finally:
+            # After request, check if we should warn
+            final_memory = self.process.memory_info().rss / 1024 / 1024
+            if final_memory > 400:
+                print(f"⚠️ Memory still high after request: {final_memory:.0f}MB")
+
+
 # Create the FastAPI app
 app = FastAPI(
     title="IntelliMaint AI Service",
@@ -61,8 +129,9 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Use simple CORS middleware - BaseHTTPMiddleware doesn't affect WebSocket
+# Use memory limiter FIRST, then CORS
 app.add_middleware(SimpleCORSMiddleware)
+app.add_middleware(MemoryLimiterMiddleware)
 
 # Include all routers with appropriate prefixes
 app.include_router(
@@ -119,3 +188,25 @@ async def root():
 async def health():
     """Health check endpoint"""
     return {"status": "healthy"}
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Log memory status periodically"""
+    async def log_memory():
+        while True:
+            try:
+                import psutil
+                mem_mb = psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024
+                if mem_mb > 450:
+                    print(f"🔴 [MEMORY] CRITICAL: {mem_mb:.0f}MB")
+                elif mem_mb > 400:
+                    print(f"🟠 [MEMORY] HIGH: {mem_mb:.0f}MB")
+                else:
+                    print(f"🟢 [MEMORY] OK: {mem_mb:.0f}MB")
+                await asyncio.sleep(60)
+            except Exception as e:
+                print(f"Memory logging error: {e}")
+                await asyncio.sleep(60)
+    
+    asyncio.create_task(log_memory())
