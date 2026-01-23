@@ -1,179 +1,159 @@
 import json
 import os
-import asyncio
 import time
 import uuid
+import asyncio
 from openai import AsyncOpenAI
-from app.services.asr_tts_service import synthesize_speech
-from app.services.chat_message_service import ChatMessageService
-from app.services.summary_service import SummaryService
-from app.redis_client import redis_client
-import uuid
 
 
 class StreamService:
+
     def __init__(self):
-        self.client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        self.system_instruction = (
-            "You are a voice assistant. "
-            "Short, direct answers. "
-            "Plain text only."
+
+        self.client = AsyncOpenAI(
+            api_key=os.getenv("OPENAI_API_KEY")
         )
-        self.redis_client = redis_client
 
-    # ---------- helpers ----------
-    def _ms(self, start): 
-        return (time.perf_counter() - start) * 1000
+        self.system_instruction = """
+You are a helpful technical assistant.
+Speak clearly.
+Use short sentences.
+"""
 
-    # ---------- LLM ----------
-    async def call_llm(self, prompt: str):
-        resp = await self.client.chat.completions.create(
+
+    # ---------------- MAIN ----------------
+
+    async def process_stream(
+        self,
+        user_text: str,
+        websocket,
+        session_id: str | None = None,
+    ):
+
+        if not user_text:
+            return
+
+
+        # Create session if missing
+        if not session_id:
+            session_id = str(uuid.uuid4())
+
+            await websocket.send_text(json.dumps({
+                "type": "session",
+                "sessionId": session_id
+            }))
+
+
+        print("🎯 Session:", session_id, flush=True)
+
+
+        # ---------------- LLM STREAM ----------------
+
+        stream = await self.client.chat.completions.create(
             model="gpt-4o-mini",
+            stream=True,
             messages=[
-                {"role": "system", "content": self.system_instruction},
-                {"role": "user", "content": prompt},
+                {
+                    "role": "system",
+                    "content": self.system_instruction
+                },
+                {
+                    "role": "user",
+                    "content": user_text
+                }
             ],
             temperature=0.3,
         )
-        return resp.choices[0].message.content, resp.usage
 
-    async def text_to_audio(self, text: str) -> bytes:
-        return await synthesize_speech(text)
 
-    async def _safe_error_reply(self):
-        try:
-            return await self.text_to_audio("Sorry, I'm having trouble right now.")
-        except Exception:
-            return "Sorry, I'm having trouble right now."
+        buffer = ""
 
-    # ---------- BACKGROUND ----------
-    def _schedule_background(
+
+        async for event in stream:
+
+            delta = event.choices[0].delta.content
+
+            if not delta:
+                continue
+
+
+            buffer += delta
+
+
+            # Sentence flush rule
+            if self._should_flush(buffer):
+
+                sentence = buffer.strip()
+                buffer = ""
+
+                if sentence:
+
+                    await websocket.send_text(json.dumps({
+                        "type": "text",
+                        "content": sentence
+                    }))
+
+
+        # Flush remaining
+        if buffer.strip():
+
+            await websocket.send_text(json.dumps({
+                "type": "text",
+                "content": buffer.strip()
+            }))
+
+
+        # Done signal
+        await websocket.send_text(json.dumps({
+            "type": "done"
+        }))
+
+
+        print("✅ LLM stream done", flush=True)
+
+
+
+    # ---------------- HELPERS ----------------
+
+    def _should_flush(self, buf: str) -> bool:
+
+        MAX_WORDS = 8
+        MAX_CHARS = 120
+
+        if any(buf.endswith(x) for x in (".", "?", "!", "\n")):
+            return True
+
+        if len(buf.split()) >= MAX_WORDS:
+            return True
+
+        if len(buf) >= MAX_CHARS:
+            return True
+
+        return False
+
+
+
+    # ---------------- WS ENTRY ----------------
+
+    async def handle_stream(
         self,
-        *,
-        session_id,
-        user_text,
-        assistant_text,
-        model,
-        usage,
-        fakeSessionId,
-        user_id,
+        data: dict,
+        websocket,
     ):
-        asyncio.create_task(
-            asyncio.to_thread(
-                SummaryService.persist_messages_and_update_summary,
-                session_id=session_id,
-                user_text=user_text,
-                assistant_text=assistant_text,
-                model=model,
-                prompt_tokens=usage.prompt_tokens if usage else None,
-                completion_tokens=usage.completion_tokens if usage else None,
-                total_tokens=usage.total_tokens if usage else None,
-                user_id=user_id,
-                fakeSessionId=fakeSessionId,
-            )
-        )
 
-    # For Create new Session + new ChatMessage records
+        payload = json.loads(data["text"])
 
-    
+        # Stop / interrupt
+        if payload.get("type") in ("stop", "interrupt"):
+            return
 
-    # ---------- REALTIME ----------
-    async def process_text(self, text, session_id, user_id, fakeSessionId):
-        t0 = time.perf_counter()
-        if not text:
-            return None
-        
 
-        # 1️⃣ Context read (fast)
-        step_start = time.perf_counter()
-        last_messages = ChatMessageService.get_last_messages(session_id, 5)
-        summary = ChatMessageService.get_summary(session_id)
-        print(f"[TIMING] db_context_read: {self._ms(step_start):.2f} ms", flush=True)
-
-        # 2️⃣ Prompt build
-        step_start = time.perf_counter()
-        parts = []
-        if summary:
-            parts.append(f"Conversation summary:\n{summary}")
-        for m in last_messages:
-            parts.append(f"{m['role']}: {m['content']}")
-        parts.append(f"user: {text}")
-        prompt = "\n".join(parts)
-        print(f"[TIMING] prompt_build: {self._ms(step_start):.2f} ms", flush=True)
-
-        # 3️⃣ LLM
-        try:
-            step_start = time.perf_counter()
-            reply, usage = await self.call_llm(prompt)
-            print(f"[TIMING] llm_call: {self._ms(step_start):.2f} ms", flush=True)
-            print(f"[LLM Reply]: {reply}", flush=True)
-        except Exception:
-            return await self._safe_error_reply()
-
-        # 4️⃣ TTS
-        try:
-            step_start = time.perf_counter()
-            audio = await self.text_to_audio(reply)
-            print(f"[TIMING] tts_call: {self._ms(step_start):.2f} ms", flush=True)
-        except Exception:
-            return await self._safe_error_reply()
-
-        # 5️⃣ BACKGROUND DB + SUMMARY (NON-BLOCKING)
-        step_start = time.perf_counter()
-        self._schedule_background(
-            session_id=session_id,
-            user_text=text,
-            assistant_text=reply,
-            model="gpt-4o-mini",
-            usage=usage,
-            fakeSessionId=fakeSessionId,
-            user_id=user_id,
-        )
-        print(
-            f"[TIMING] background_task_scheduling: {self._ms(step_start):.2f} ms",
-            flush=True,
-        )
-
-        print(f"[TIMING] process_text_total: {self._ms(t0):.2f} ms", flush=True)
-        return audio
-
-    async def handle_stream(self, data: dict, user_id: str | None):
-        msg = data
-
-        print(f"[stream_service] handle_stream: received message: {msg}", flush=True)
-
-        if "text" not in msg or not msg["text"]:
-            return await self._safe_error_reply() 
-    
-        if "text" in msg and msg["text"]:
-            payload = json.loads(msg["text"])   # 👈 important
-            if payload.get("type") == "stop":
-                print("[stream_service] handle_stream: received 'stop' message, returning.", flush=True)
-                return False
-                        # ✅ Handle interrupt message - just return False, no fake_session_id needed
-            if payload.get("type") == "interrupt":
-                print("[stream_service] handle_stream: received 'interrupt' message, returning.", flush=True)
-                return False
+        user_text = payload.get("text")
         session_id = payload.get("sessionId")
-        fake_session_id = None
-        if not session_id:
-            fake_session_id = str(uuid.uuid4())
 
-        print(f"[stream_service] handle_stream: session_id={session_id}", flush=True)
-        print(f"fake_session_id={fake_session_id}", flush=True)
 
-        # return False
-
-        result = await self.process_text(
-            payload.get("text", ""),
-            session_id,
-            user_id,
-            fake_session_id
+        await self.process_stream(
+            user_text=user_text,
+            websocket=websocket,
+            session_id=session_id,
         )
-        # If a fake session was generated, return it separately
-        if fake_session_id:
-            # Return both the result and fake_session_id as a tuple
-            return (result, fake_session_id)
-        
-        return result
-       

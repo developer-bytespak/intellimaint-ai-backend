@@ -15,6 +15,35 @@ class DeepgramService:
         self.api_key = settings.deepgram_api_key
         self.client = DeepgramClient(api_key=self.api_key)
         self.base_url = "https://api.deepgram.com"
+        DEEPGRAM_URL = "https://api.deepgram.com/v1/speak"
+        MODEL = "aura-2-thalia-en"
+        
+    
+    async def stream_tts(self,text: str):
+        headers = {
+            "Authorization": f"Token {settings.deepgram_api_key}",
+            "Content-Type": "application/json"
+        }
+
+        params = {
+            "model": "aura-2-thalia-en",
+            "encoding": "linear16",
+            "sample_rate": 16000,
+            "container": "wav"
+        }
+
+        async with httpx.AsyncClient(timeout=None) as client:
+            async with client.stream(
+                "POST",
+                "https://api.deepgram.com/v1/speak",
+                headers=headers,
+                params=params,
+                json={"text": text},
+            ) as response:
+
+                async for chunk in response.aiter_bytes():
+                    if chunk:
+                        yield chunk   # 🔥 AUDIO CHUNK
     
     async def transcribe_audio(self, audio_data: bytes, mimetype: str = "audio/wav", sample_rate: int = None) -> str:
         try:
@@ -241,3 +270,7 @@ async def synthesize_speech(text: str) -> bytes:
     """Synthesize speech using Deepgram"""
     service = get_deepgram_service()
     return await service.synthesize_speech(text)
+
+
+
+
