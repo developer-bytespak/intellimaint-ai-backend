@@ -37,6 +37,7 @@ pytz>=2024.1
 
 # Database
 psycopg2-binary>=2.9.0
+pgvector>=0.2.0
 
 # Environment variables
 python-dotenv>=1.0.0
