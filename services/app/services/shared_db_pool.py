@@ -10,6 +10,7 @@ class SharedDBPool:
     """Singleton connection pool shared across all services"""
     _instance = None
     _pool = None
+    
 
     def __new__(cls):
         if cls._instance is None:

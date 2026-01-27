@@ -55,6 +55,7 @@ class ChatMessageService:
 
         cached = redis_client.get(cache_key)
         if cached:
+            print(f"[ChatMessageService] 🔥 Cache hit for last_messages {cache_key}", flush=True)
             return json.loads(cached)
 
         conn = ChatMessageService._get_conn()
