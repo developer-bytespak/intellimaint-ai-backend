@@ -314,7 +314,7 @@ class StreamService:
             summary = results[1]
             task_duration = self._ms(task_start)
             print(f"{self.logger_prefix}    [Task 1] Context loaded in {task_duration:.2f}ms", flush=True)
-            return 
+            return (last_messages, summary)
         
         # Define Task 2: Generate embedding and retrieve RAG chunks
         async def rag_retrieval():
