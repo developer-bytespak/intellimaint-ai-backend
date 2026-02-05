@@ -38,7 +38,8 @@ export class RepositoryController {
     try {
       // console.log("req ==>", req);
       const userId = req.user.id;
-      // console.log("body ==>", body);
+      console.log("body ==>", body );
+      console.log("userId ==>", userId );
       const createDto = plainToInstance(CreateDocumentsRequestDto, body);
       console.log("createDto ==>", createDto);
       // return

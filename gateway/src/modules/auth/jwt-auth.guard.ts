@@ -31,26 +31,26 @@ export class JwtAuthGuard implements CanActivate {
     // ==============================
     // CASE 0: BEARER TOKEN (Authorization header) - for cross-domain auth
     // ==============================
-    // if (bearerToken) {
-    //   try {
-    //     const data = jwt.verify(bearerToken, appConfig.jwtSecret as string) as any;
+    if (bearerToken) {
+      try {
+        const data = jwt.verify(bearerToken, appConfig.jwtSecret as string) as any;
 
-    //     const user = await this.prisma.user.findUnique({
-    //       where: { id: data.userId },
-    //     });
+        const user = await this.prisma.user.findUnique({
+          where: { id: data.userId },
+        });
 
-    //     if (!user) throw new Error("User not found");
+        if (!user) throw new Error("User not found");
 
-    //     req.user = user;
-    //     return true;
-    //   } catch (e) {
-    //     console.log("Bearer token invalid or expired");
-    //     if (isApiRequest) {
-    //       throw new UnauthorizedException('Invalid or expired token');
-    //     }
-    //     return false;
-    //   }
-    // }
+        req.user = user;
+        return true;
+      } catch (e) {
+        console.log("Bearer token invalid or expired");
+        if (isApiRequest) {
+          throw new UnauthorizedException('Invalid or expired token');
+        }
+        return false;
+      }
+    }
 
     // ==============================
     // CASE 1: LOCAL TOKEN (cookie)
